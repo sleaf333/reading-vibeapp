@@ -1281,9 +1281,9 @@ No markdown, no explanation, only the JSON array.`;
 }
 
 function verifyDnArticle(a) {
-  // Force sentence case regardless of what the API returned
+  // Force sentence case: lowercase everything, then capitalize after . ! ?
   a.text = (a.text || '')
-    .replace(/\b[A-Z]{2,}\b/g, w => w.toLowerCase())
+    .toLowerCase()
     .replace(/(^|[.!?]\s+)(\w)/g, (_, p, c) => p + c.toUpperCase());
   const full = a.text.toLowerCase();
   const freq = {};

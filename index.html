@@ -580,13 +580,14 @@ Return ONLY valid JSON, no markdown, no code fences:
 }
 Rules: story must be engaging and age-appropriate. All 3 questions must be about the story. "answer" is the 0-based index of the correct choice. Keep choices short (2-5 words). Return raw JSON only.`;
 
-  const endpoint = S.proxyUrl || 'https://api.anthropic.com/v1/messages';
+  const onVercel = window.location.hostname.endsWith('.vercel.app');
+  const endpoint = S.proxyUrl || (onVercel ? '/api/proxy' : 'https://api.anthropic.com/v1/messages');
   const headers = {
     'Content-Type': 'application/json',
     'x-api-key': S.apiKey,
     'anthropic-version': '2023-06-01',
   };
-  if (!S.proxyUrl) headers['anthropic-dangerous-allow-browser'] = 'true';
+  if (!S.proxyUrl && !onVercel) headers['anthropic-dangerous-allow-browser'] = 'true';
 
   const res = await fetch(endpoint, {
     method: 'POST',

@@ -391,9 +391,9 @@
   <div id="pc-sessions"></div>
 
   <div class="divider"></div>
-  <div class="section-title">API key</div>
-  <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Required for story generation. Get yours at console.anthropic.com</div>
-  <input type="password" class="text-input" id="api-key-input" placeholder="sk-ant-…" oninput="saveApiKey(this.value)">
+  <div class="section-title">Gemini API key</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Free — get yours at aistudio.google.com → Get API key (no credit card needed)</div>
+  <input type="password" class="text-input" id="api-key-input" placeholder="AIza…" oninput="saveApiKey(this.value)">
 
   <div class="divider"></div>
   <div class="section-title">Change PIN</div>
@@ -537,7 +537,7 @@ function refreshHome() {
 
 async function pickTopic(topicId) {
   if (!S.apiKey) {
-    showToast('Add your API key in Parent Corner first');
+    showToast('Add your Gemini API key in Parent Corner first');
     return;
   }
   S.topic = TOPICS.find(t => t.id === topicId);
@@ -574,27 +574,25 @@ Return ONLY valid JSON, no markdown, no code fences:
 }
 Rules: story must be engaging and age-appropriate. All 3 questions must be about the story. "answer" is the 0-based index of the correct choice. Keep choices short (2-5 words). Return raw JSON only.`;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': S.apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-allow-browser': 'true',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${S.apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 1024 },
+      }),
+    }
+  );
 
   if (!res.ok) {
     const e = await res.json().catch(() => ({}));
     throw new Error(e.error?.message || `HTTP ${res.status}`);
   }
   const body = await res.json();
-  const raw  = body.content[0].text.trim().replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'');
+  const raw  = body.candidates[0].content.parts[0].text.trim()
+    .replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'');
   return JSON.parse(raw);
 }
 

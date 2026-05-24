@@ -1255,7 +1255,7 @@ async function fetchDnArticles() {
   ][Math.min(S.level, 5)];
   const prompt = `Create 5 short fictional fun news articles for a ${levelDesc} child aged 6. Topics: animals, magic, food, adventures, space, sports, inventions.
 Return ONLY a JSON array with exactly 5 objects. Each object must have:
-- "headline": a fun short headline in ALL CAPS (5-8 words)
+- "headline": a fun short headline in normal sentence case (5-8 words, capitalize only the first word and proper nouns)
 - "body": exactly 2 short fun sentences for the reading level
 - "l1": a single lowercase letter appearing 2-5 times in headline+body combined
 - "l2": a DIFFERENT single lowercase letter also appearing 2-5 times in headline+body
@@ -1365,7 +1365,10 @@ function renderDnRound() {
 
   const card = document.getElementById('dn-article-card');
   if (S.dnStep === 0) {
-    document.getElementById('dn-article-text').textContent = r.headline + ' ' + r.body;
+    const hl = r.headline === r.headline.toUpperCase()
+      ? r.headline.charAt(0).toUpperCase() + r.headline.slice(1).toLowerCase()
+      : r.headline;
+    document.getElementById('dn-article-text').textContent = hl + ' ' + r.body;
     card.style.display = '';
     card.style.animation = 'none';
     card.offsetWidth;

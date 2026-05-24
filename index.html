@@ -264,19 +264,17 @@
   <div id="quiz-btn-wrap" style="padding:16px 0 8px;text-align:right">
     <button class="btn btn-primary" onclick="goToQuiz()">Take quiz →</button>
   </div>
-</div>
 
-<!-- ═══ QUIZ ═══ -->
-<div id="screen-quiz" class="screen">
-  <div class="back-row">
-    <button class="btn-icon" onclick="showScreen('screen-reading')">←</button>
-    <span class="screen-label">Quiz time!</span>
+  <!-- Quiz appears inline below the story -->
+  <div id="quiz-section" style="display:none">
+    <div class="divider"></div>
+    <div style="font-size:20px;font-weight:700;margin-bottom:12px">Quiz time! 🎯</div>
+    <div class="quiz-meta">
+      <span class="quiz-prog" id="quiz-prog">1 / 3</span>
+    </div>
+    <div class="quiz-q" id="quiz-question"></div>
+    <div id="quiz-choices"></div>
   </div>
-  <div class="quiz-meta">
-    <span class="quiz-prog" id="quiz-prog">1 / 3</span>
-  </div>
-  <div class="quiz-q" id="quiz-question"></div>
-  <div id="quiz-choices"></div>
 </div>
 
 <!-- ═══ RESULT ═══ -->
@@ -618,8 +616,9 @@ function renderReading() {
     const saved = clean && S.journal.includes(clean);
     return `<span class="word${saved?' saved':''}" data-i="${i}" data-w="${clean}" onclick="tapWord(this)">${w} </span>`;
   }).join('');
-  document.getElementById('read-bar').style.display  = 'none';
+  document.getElementById('read-bar').style.display = 'none';
   document.getElementById('quiz-btn-wrap').style.display = '';
+  document.getElementById('quiz-section').style.display = 'none';
   document.getElementById('btn-read-aloud').textContent = '🔊';
   stopSpeech();
 }
@@ -690,8 +689,11 @@ function advanceRead() {
 function goToQuiz() {
   stopSpeech();
   S.quizIdx = 0; S.quizScore = 0; S.quizAnswered = false;
+  document.getElementById('quiz-btn-wrap').style.display = 'none';
+  document.getElementById('read-bar').style.display = 'none';
+  document.getElementById('quiz-section').style.display = '';
   renderQuizQ();
-  showScreen('screen-quiz');
+  setTimeout(() => document.getElementById('quiz-section').scrollIntoView({ behavior: 'smooth' }), 50);
 }
 
 function renderQuizQ() {

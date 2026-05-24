@@ -319,9 +319,18 @@
 
 <!-- ═══ LOADING ═══ -->
 <div id="screen-loading" class="screen">
-  <div class="loading-bounce">📚</div>
-  <div class="loading-label" id="loading-label">Getting your story…</div>
-  <div class="loading-sub">Just a moment!</div>
+  <div id="loading-normal">
+    <div class="loading-bounce">📚</div>
+    <div class="loading-label" id="loading-label">Getting your story…</div>
+    <div class="loading-sub">Just a moment!</div>
+  </div>
+  <div id="loading-error" style="display:none;text-align:center;max-width:300px;width:100%">
+    <div style="font-size:62px;margin-bottom:16px" id="loading-err-emoji">😕</div>
+    <div style="font-size:20px;font-weight:800;margin-bottom:10px" id="loading-err-title">Couldn't load your story</div>
+    <div style="font-size:15px;color:var(--muted);font-weight:600;margin-bottom:28px" id="loading-err-sub">Something went wrong. Want to try again?</div>
+    <button class="btn btn-primary btn-full" id="loading-retry-btn" onclick="retryStory()">Try again ↺</button>
+    <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Go home</button>
+  </div>
 </div>
 
 <!-- ═══ READING ═══ -->
@@ -341,8 +350,8 @@
       <button class="btn btn-primary" onclick="goToQuiz()">Quiz →</button>
     </div>
   </div>
-  <div id="quiz-btn-wrap" style="padding:16px 0 8px;text-align:right">
-    <button class="btn btn-primary" onclick="goToQuiz()">Take quiz →</button>
+  <div id="quiz-btn-wrap" style="padding:20px 0 8px">
+    <button class="btn btn-primary btn-full" onclick="goToQuiz()" style="min-height:58px;font-size:18px">I'm ready for the quiz! 🌟</button>
   </div>
 
   <!-- Quiz appears inline below the story -->
@@ -361,7 +370,8 @@
 <!-- ═══ RESULT ═══ -->
 <div id="screen-result" class="screen">
   <div class="back-row">
-    <span style="font-size:20px;font-weight:700;padding-top:20px">Great reading!</span>
+    <button class="btn-icon" onclick="showScreen('screen-home')">🏠</button>
+    <span class="screen-label">Great reading! 🎉</span>
   </div>
   <div class="result-center">
     <div class="stars-row" id="result-stars">⭐⭐⭐</div>
@@ -377,7 +387,7 @@
 <div id="screen-badges" class="screen">
   <div class="back-row">
     <button class="btn-icon" onclick="showScreen('screen-home')">←</button>
-    <span class="screen-label">Badges</span>
+    <span class="screen-label">Badges &amp; Awards</span>
   </div>
   <div class="badge-grid" id="badge-grid"></div>
 </div>
@@ -466,7 +476,7 @@
   <input type="password" class="text-input" id="api-key-input" placeholder="sk-ant-…" oninput="saveApiKey(this.value)">
 
   <div class="section-title" style="margin-top:8px">Proxy URL</div>
-  <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Required to use away from home. Deploy a free Cloudflare Worker — see instructions in the README.</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Leave blank — the built-in proxy works automatically on Cloudflare Pages. Only needed if self-hosting elsewhere.</div>
   <input type="text" class="text-input" id="proxy-url-input" placeholder="https://my-proxy.username.workers.dev" oninput="saveProxyUrl(this.value)">
 
   <div class="divider"></div>
@@ -600,12 +610,42 @@ function refreshHome() {
 
 // ─── STORY FETCH ─────────────────────────────────────────────────────────────
 
+let _loadingBusy = false;
+
+function showLoadingState(mode, opts) {
+  document.getElementById('loading-normal').style.display = mode === 'normal' ? '' : 'none';
+  document.getElementById('loading-error').style.display  = mode === 'error'  ? '' : 'none';
+  if (mode === 'error') {
+    document.getElementById('loading-err-emoji').textContent = opts.emoji || '😕';
+    document.getElementById('loading-err-title').textContent = opts.title || 'Something went wrong';
+    document.getElementById('loading-err-sub').textContent   = opts.sub   || '';
+    document.getElementById('loading-retry-btn').style.display = opts.retry ? '' : 'none';
+  }
+}
+
+function retryStory() {
+  if (S.topic) pickTopic(S.topic.id);
+  else showScreen('screen-home');
+}
+
 async function pickTopic(topicId) {
+  if (_loadingBusy) return;
+  S.topic = TOPICS.find(t => t.id === topicId);
+
   if (!S.apiKey) {
-    showToast('Add your Anthropic API key in Parent Corner first');
+    showLoadingState('normal');
+    showScreen('screen-loading');
+    showLoadingState('error', {
+      emoji: '🔒',
+      title: 'Ask a grown-up!',
+      sub: 'A parent needs to add the API key. Go home and tap 🔒 Parent.',
+      retry: false,
+    });
     return;
   }
-  S.topic = TOPICS.find(t => t.id === topicId);
+
+  _loadingBusy = true;
+  showLoadingState('normal');
   document.getElementById('loading-label').textContent = `Loading ${S.topic.name}…`;
   showScreen('screen-loading');
   updateStreak();
@@ -619,8 +659,14 @@ async function pickTopic(topicId) {
     showScreen('screen-reading');
   } catch (err) {
     console.error(err);
-    showToast(err.message || 'Could not load story — check your API key');
-    showScreen('screen-home');
+    showLoadingState('error', {
+      emoji: '😕',
+      title: "Couldn't load your story",
+      sub: 'Something went wrong. Want to try again?',
+      retry: true,
+    });
+  } finally {
+    _loadingBusy = false;
   }
 }
 
@@ -676,6 +722,9 @@ function renderReading() {
     const clean = w.replace(/[^a-zA-Z']/g, '').toLowerCase();
     return `<span class="word" data-i="${i}" data-w="${clean}" onclick="tapWord(this)">${w} </span>`;
   }).join('');
+  const st = document.getElementById('story-text');
+  st.style.fontSize   = S.level <= 2 ? '21px' : '19px';
+  st.style.lineHeight = S.level <= 2 ? '2.4'  : '2.2';
   document.getElementById('read-bar').style.display = 'none';
   document.getElementById('quiz-btn-wrap').style.display = '';
   document.getElementById('quiz-section').style.display = 'none';
@@ -777,7 +826,7 @@ function answerQuiz(chosen) {
   setTimeout(() => {
     S.quizIdx++;
     S.quizIdx < S.quiz.length ? renderQuizQ() : showResult();
-  }, 1100);
+  }, 1500);
 }
 
 function burstReward(anchorEl) {
@@ -1094,6 +1143,11 @@ function spawnConfetti() {
 }
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────
+
+// Unlock Web Speech API on first touch — iOS requires a prior user gesture
+document.addEventListener('touchstart', () => {
+  if (window.speechSynthesis) { speechSynthesis.cancel(); }
+}, { once: true });
 
 refreshHome();
 </script>

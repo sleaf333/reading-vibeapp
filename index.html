@@ -395,6 +395,10 @@
   <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Get yours at console.anthropic.com → API Keys</div>
   <input type="password" class="text-input" id="api-key-input" placeholder="sk-ant-…" oninput="saveApiKey(this.value)">
 
+  <div class="section-title" style="margin-top:8px">Proxy URL</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Required to use away from home. Deploy a free Cloudflare Worker — see instructions in the README.</div>
+  <input type="text" class="text-input" id="proxy-url-input" placeholder="https://my-proxy.username.workers.dev" oninput="saveProxyUrl(this.value)">
+
   <div class="divider"></div>
   <div class="section-title">Change PIN</div>
   <input type="text" class="text-input" id="new-pin-input" placeholder="New 4-digit PIN" maxlength="4" inputmode="numeric">
@@ -475,6 +479,7 @@ const S = {
   topics:   lsJson('rl_topics', []),
   pin:      lsGet('rl_pin','1234'),
   apiKey:   lsGet('rl_apikey',''),
+  proxyUrl: lsGet('rl_proxy',''),
   // transient
   topic: null, title: '', story: '', words: [], quiz: [],
   quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
@@ -498,6 +503,7 @@ function persist() {
   lsSet('rl_topics',   S.topics);
   lsSet('rl_pin',      S.pin);
   lsSet('rl_apikey',   S.apiKey);
+  lsSet('rl_proxy',    S.proxyUrl);
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
@@ -574,14 +580,17 @@ Return ONLY valid JSON, no markdown, no code fences:
 }
 Rules: story must be engaging and age-appropriate. All 3 questions must be about the story. "answer" is the 0-based index of the correct choice. Keep choices short (2-5 words). Return raw JSON only.`;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const endpoint = S.proxyUrl || 'https://api.anthropic.com/v1/messages';
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-api-key': S.apiKey,
+    'anthropic-version': '2023-06-01',
+  };
+  if (!S.proxyUrl) headers['anthropic-dangerous-allow-browser'] = 'true';
+
+  const res = await fetch(endpoint, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': S.apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-allow-browser': 'true',
-    },
+    headers,
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
@@ -924,6 +933,7 @@ function renderParentCorner() {
   document.getElementById('pc-words').textContent   = S.journal.length;
   document.getElementById('pc-streak').textContent  = `${S.streak} day${S.streak !== 1 ? 's' : ''}`;
   document.getElementById('api-key-input').value    = S.apiKey;
+  document.getElementById('proxy-url-input').value  = S.proxyUrl;
 
   const sessEl = document.getElementById('pc-sessions');
   if (!S.sessions.length) {
@@ -940,6 +950,11 @@ function renderParentCorner() {
 function saveApiKey(v) {
   S.apiKey = v.trim();
   lsSet('rl_apikey', S.apiKey);
+}
+
+function saveProxyUrl(v) {
+  S.proxyUrl = v.trim();
+  lsSet('rl_proxy', S.proxyUrl);
 }
 
 function changePIN() {

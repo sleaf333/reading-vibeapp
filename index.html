@@ -620,7 +620,7 @@ function renderReading() {
   }).join('');
   document.getElementById('read-bar').style.display  = 'none';
   document.getElementById('quiz-btn-wrap').style.display = '';
-  document.getElementById('btn-read-aloud').querySelector('i').className = 'ti ti-volume';
+  document.getElementById('btn-read-aloud').textContent = '🔊';
   stopSpeech();
 }
 

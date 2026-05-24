@@ -1452,11 +1452,10 @@ function answerDn(num) {
     fb.textContent = 'Not quite — try again!';
     fb.className = 'dn-feedback wrong';
     setTimeout(() => {
-      if (chosen) chosen.classList.remove('dn-wrong');
       fb.textContent = '';
       fb.className = 'dn-feedback';
-      btns.forEach(b => { b.disabled = false; });
       S.dnAnswered = false;
+      renderDnNumpad();
     }, 900);
   }
 }

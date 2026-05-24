@@ -1368,7 +1368,9 @@ function renderDnRound() {
 
   const card = document.getElementById('dn-article-card');
   if (S.dnStep === 0) {
-    document.getElementById('dn-article-text').textContent = r.text;
+    const rawText = r.text || ((r.headline || '') + ' ' + (r.body || '')).trim();
+    const clean = rawText.toLowerCase().replace(/(^|[.!?]\s+)(\w)/g, (_, p, c) => p + c.toUpperCase());
+    document.getElementById('dn-article-text').textContent = clean;
     card.style.display = '';
     card.style.animation = 'none';
     card.offsetWidth;

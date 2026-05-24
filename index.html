@@ -58,7 +58,7 @@
     /* ── HOME HEADER ── */
     .home-header { display: flex; align-items: flex-start; justify-content: space-between; padding-top: 24px; margin-bottom: 4px; gap: 12px; }
     .header-pills { display: flex; gap: 8px; align-items: center; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
-    .lock-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px; padding: 4px 2px; line-height: 1; }
+    .lock-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--pr); cursor: pointer; color: var(--text); font-size: 13px; font-weight: 600; padding: 5px 13px; line-height: 1; white-space: nowrap; }
 
     /* ── TOPIC CARDS ── */
     .topic-card {
@@ -212,7 +212,7 @@
     <div class="header-pills">
       <span class="pill pill-green" id="home-level-pill"><i class="ti ti-star"></i> Level 2</span>
       <span class="pill pill-amber" id="home-streak-pill"><i class="ti ti-flame"></i> 1 day streak</span>
-      <button class="lock-btn" onclick="showScreen('screen-parent-entry')" aria-label="Parent corner"><i class="ti ti-lock"></i></button>
+      <button class="lock-btn" onclick="showScreen('screen-parent-entry')">🔒 Parent</button>
     </div>
   </div>
 
@@ -247,10 +247,10 @@
 <!-- ═══ READING ═══ -->
 <div id="screen-reading" class="screen">
   <div class="back-row">
-    <button class="btn-icon" onclick="goHomeFromReading()"><i class="ti ti-arrow-left"></i></button>
+    <button class="btn-icon" onclick="goHomeFromReading()">←</button>
     <span class="screen-label" id="reading-title">Story</span>
     <div class="reading-actions">
-      <button class="btn-icon" id="btn-read-aloud" onclick="toggleReadAloud()" title="Read aloud"><i class="ti ti-volume"></i></button>
+      <button class="btn-icon" id="btn-read-aloud" onclick="toggleReadAloud()" title="Read aloud">🔊</button>
     </div>
   </div>
   <div class="story-text" id="story-text"></div>
@@ -258,18 +258,18 @@
     <div class="prog-wrap"><div class="prog-fill" id="prog-fill"></div></div>
     <div class="read-controls">
       <button class="btn btn-secondary" onclick="stopReadAloud()">Stop</button>
-      <button class="btn btn-primary" onclick="goToQuiz()">Quiz <i class="ti ti-chevron-right"></i></button>
+      <button class="btn btn-primary" onclick="goToQuiz()">Quiz →</button>
     </div>
   </div>
   <div id="quiz-btn-wrap" style="padding:16px 0 8px;text-align:right">
-    <button class="btn btn-primary" onclick="goToQuiz()">Take quiz <i class="ti ti-chevron-right"></i></button>
+    <button class="btn btn-primary" onclick="goToQuiz()">Take quiz →</button>
   </div>
 </div>
 
 <!-- ═══ QUIZ ═══ -->
 <div id="screen-quiz" class="screen">
   <div class="back-row">
-    <button class="btn-icon" onclick="showScreen('screen-reading')"><i class="ti ti-arrow-left"></i></button>
+    <button class="btn-icon" onclick="showScreen('screen-reading')">←</button>
     <span class="screen-label">Quiz time!</span>
   </div>
   <div class="quiz-meta">
@@ -297,7 +297,7 @@
 <!-- ═══ WORD JAR ═══ -->
 <div id="screen-wordjar" class="screen">
   <div class="back-row">
-    <button class="btn-icon" onclick="showScreen('screen-home')"><i class="ti ti-arrow-left"></i></button>
+    <button class="btn-icon" onclick="showScreen('screen-home')">←</button>
     <span class="screen-label">Word jar</span>
     <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="clearWordJar()">Clear all</button>
   </div>
@@ -307,7 +307,7 @@
 <!-- ═══ BADGES ═══ -->
 <div id="screen-badges" class="screen">
   <div class="back-row">
-    <button class="btn-icon" onclick="showScreen('screen-home')"><i class="ti ti-arrow-left"></i></button>
+    <button class="btn-icon" onclick="showScreen('screen-home')">←</button>
     <span class="screen-label">Badges</span>
   </div>
   <div class="badge-grid" id="badge-grid"></div>
@@ -316,13 +316,13 @@
 <!-- ═══ SIGHT WORD GAME ═══ -->
 <div id="screen-swgame" class="screen">
   <div class="sw-header">
-    <button class="btn-icon" onclick="showScreen('screen-home')"><i class="ti ti-x"></i></button>
+    <button class="btn-icon" onclick="showScreen('screen-home')">✕</button>
     <span class="sw-prog-text" id="sw-prog">1 / 10</span>
     <span class="pill pill-green" id="sw-score-pill">0 correct</span>
   </div>
   <div class="sw-center">
     <div class="sw-word" id="sw-word">---</div>
-    <button class="sw-speak-btn" onclick="speakSwWord()"><i class="ti ti-volume"></i> Hear it again</button>
+    <button class="sw-speak-btn" onclick="speakSwWord()">🔊 Hear it again</button>
   </div>
   <div class="sw-grid" id="sw-choices"></div>
 </div>
@@ -345,7 +345,7 @@
 <!-- ═══ PARENT ENTRY ═══ -->
 <div id="screen-parent-entry" class="screen">
   <div class="back-row">
-    <button class="btn-icon" onclick="showScreen('screen-home')"><i class="ti ti-arrow-left"></i></button>
+    <button class="btn-icon" onclick="showScreen('screen-home')">←</button>
   </div>
   <div class="pin-title">Parent Corner</div>
   <div class="pin-sub">Enter your 4-digit PIN</div>
@@ -366,7 +366,7 @@
     <button class="pin-key" onclick="pinInput('7')">7</button>
     <button class="pin-key" onclick="pinInput('8')">8</button>
     <button class="pin-key" onclick="pinInput('9')">9</button>
-    <button class="pin-key" onclick="pinDel()"><i class="ti ti-backspace" style="font-size:18px"></i></button>
+    <button class="pin-key" onclick="pinDel()">⌫</button>
     <button class="pin-key" onclick="pinInput('0')">0</button>
     <button class="pin-key" style="visibility:hidden"></button>
   </div>
@@ -375,7 +375,7 @@
 <!-- ═══ PARENT CORNER ═══ -->
 <div id="screen-parent-corner" class="screen">
   <div class="back-row">
-    <button class="btn-icon" onclick="showScreen('screen-home')"><i class="ti ti-arrow-left"></i></button>
+    <button class="btn-icon" onclick="showScreen('screen-home')">←</button>
     <span class="screen-label">Parent corner</span>
   </div>
 
@@ -643,7 +643,7 @@ function startReadAloud() {
   S.readIdx = 0;
   document.getElementById('read-bar').style.display  = '';
   document.getElementById('quiz-btn-wrap').style.display = 'none';
-  document.getElementById('btn-read-aloud').querySelector('i').className = 'ti ti-volume-off';
+  document.getElementById('btn-read-aloud').textContent = '🔇';
   advanceRead();
 }
 
@@ -653,7 +653,7 @@ function stopReadAloud() {
   document.querySelectorAll('#story-text .word.highlight').forEach(el => el.classList.remove('highlight'));
   document.getElementById('read-bar').style.display  = 'none';
   document.getElementById('quiz-btn-wrap').style.display = '';
-  document.getElementById('btn-read-aloud').querySelector('i').className = 'ti ti-volume';
+  document.getElementById('btn-read-aloud').textContent = '🔊';
   document.getElementById('prog-fill').style.width = '0';
 }
 
@@ -736,7 +736,7 @@ function showResult() {
 
   const pill = document.getElementById('level-change-pill');
   if (S.level > prevLevel)
-    pill.innerHTML = `<span class="level-pill pill-up"><i class="ti ti-trending-up"></i> Level up! Now Level ${S.level}</span>`;
+    pill.innerHTML = `<span class="level-pill pill-up">↑ Level up! Now Level ${S.level}</span>`;
   else if (S.level < prevLevel)
     pill.innerHTML = `<span class="level-pill pill-down">Keeping it at Level ${S.level}</span>`;
   else

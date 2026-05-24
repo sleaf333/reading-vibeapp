@@ -219,11 +219,6 @@
   <div style="margin-top:20px" id="topic-list"></div>
 
   <div class="shortcuts">
-    <div class="sc-card" onclick="showScreen('screen-wordjar')">
-      <div class="sc-icon"><i class="ti ti-books"></i></div>
-      <div class="sc-label">Word jar</div>
-      <div class="sc-sub" id="sc-words-count">0 saved</div>
-    </div>
     <div class="sc-card" onclick="showScreen('screen-badges')">
       <div class="sc-icon"><i class="ti ti-award"></i></div>
       <div class="sc-label">Badges</div>
@@ -290,16 +285,6 @@
   </div>
   <div id="new-badges-list"></div>
   <button class="btn btn-primary btn-full" onclick="showScreen('screen-home')">Back to home</button>
-</div>
-
-<!-- ═══ WORD JAR ═══ -->
-<div id="screen-wordjar" class="screen">
-  <div class="back-row">
-    <button class="btn-icon" onclick="showScreen('screen-home')">←</button>
-    <span class="screen-label">Word jar</span>
-    <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="clearWordJar()">Clear all</button>
-  </div>
-  <div id="wordjar-chips"></div>
 </div>
 
 <!-- ═══ BADGES ═══ -->
@@ -381,7 +366,6 @@
   <div class="stat-row"><span class="stat-label">Stories read</span><span class="stat-val" id="pc-stories">0</span></div>
   <div class="stat-row"><span class="stat-label">Current level</span><span class="stat-val" id="pc-level">Level 2</span></div>
   <div class="stat-row"><span class="stat-label">Badges earned</span><span class="stat-val" id="pc-badges">0 / 14</span></div>
-  <div class="stat-row"><span class="stat-label">Words saved</span><span class="stat-val" id="pc-words">0</span></div>
   <div class="stat-row"><span class="stat-label">Day streak</span><span class="stat-val" id="pc-streak">0</span></div>
 
   <div class="divider"></div>
@@ -429,8 +413,6 @@ const BADGES = [
   { id:'three_perfect',icon:'🌟', name:'Quiz Star',        desc:'Get 3 perfect scores' },
   { id:'level_up',     icon:'🚀', name:'Level Up!',        desc:'Reach Level 3' },
   { id:'level_4',      icon:'🎯', name:'Advanced Reader',  desc:'Reach Level 4' },
-  { id:'word_collector',icon:'🫙',name:'Word Collector',   desc:'Save 10 words' },
-  { id:'word_hoarder', icon:'💎', name:'Word Hoarder',     desc:'Save 25 words' },
   { id:'streak_3',     icon:'🔥', name:'3-Day Streak',     desc:'Read 3 days in a row' },
   { id:'streak_7',     icon:'⚡', name:'Week Streak',      desc:'Read 7 days in a row' },
   { id:'sw_first',     icon:'🎮', name:'Word Gamer',       desc:'Complete a word game' },
@@ -464,7 +446,6 @@ function lsJson(k, def) {
 
 const S = {
   level:    parseInt(lsGet('rl_level','1')),
-  journal:  lsJson('rl_journal', []),
   sessions: lsJson('rl_sessions', []),
   stories:  parseInt(lsGet('rl_stories','0')),
   streak:   parseInt(lsGet('rl_streak','0')),
@@ -488,7 +469,6 @@ const S = {
 
 function persist() {
   lsSet('rl_level',    S.level);
-  lsSet('rl_journal',  S.journal);
   lsSet('rl_sessions', S.sessions);
   lsSet('rl_stories',  S.stories);
   lsSet('rl_streak',   S.streak);
@@ -510,7 +490,6 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if (id === 'screen-home')          refreshHome();
-  if (id === 'screen-wordjar')       renderWordJar();
   if (id === 'screen-badges')        renderBadges();
   if (id === 'screen-parent-corner') renderParentCorner();
   if (id === 'screen-parent-entry')  initPinEntry();
@@ -524,7 +503,6 @@ function refreshHome() {
   document.getElementById('home-streak-pill').innerHTML = S.streak > 0
     ? `<i class="ti ti-flame"></i> ${S.streak} day streak`
     : `<i class="ti ti-flame"></i> No streak yet`;
-  document.getElementById('sc-words-count').textContent  = `${S.journal.length} saved`;
   document.getElementById('sc-badges-count').textContent = `${S.badges.length} earned`;
 
   document.getElementById('topic-list').innerHTML = TOPICS.map(t => `
@@ -613,8 +591,7 @@ function renderReading() {
   document.getElementById('reading-title').textContent = S.title;
   document.getElementById('story-text').innerHTML = S.words.map((w, i) => {
     const clean = w.replace(/[^a-zA-Z']/g, '').toLowerCase();
-    const saved = clean && S.journal.includes(clean);
-    return `<span class="word${saved?' saved':''}" data-i="${i}" data-w="${clean}" onclick="tapWord(this)">${w} </span>`;
+    return `<span class="word" data-i="${i}" data-w="${clean}" onclick="tapWord(this)">${w} </span>`;
   }).join('');
   document.getElementById('read-bar').style.display = 'none';
   document.getElementById('quiz-btn-wrap').style.display = '';
@@ -628,13 +605,6 @@ function tapWord(el) {
   speak(word || el.textContent.trim());
   el.classList.add('tapped');
   setTimeout(() => el.classList.remove('tapped'), 400);
-  if (word && !S.journal.includes(word)) {
-    S.journal.push(word);
-    el.classList.add('saved');
-    persist();
-    awardWordBadges();
-    showToast(`"${word}" saved to word jar`);
-  }
 }
 
 function goHomeFromReading() {
@@ -777,20 +747,12 @@ function awardAll() {
   if (S.perfect  >= 3)  give('three_perfect');
   if (S.maxlevel >= 3)  give('level_up');
   if (S.maxlevel >= 4)  give('level_4');
-  if (S.journal.length  >= 10) give('word_collector');
-  if (S.journal.length  >= 25) give('word_hoarder');
   if (S.streak   >= 3)  give('streak_3');
   if (S.streak   >= 7)  give('streak_7');
   if (S.swgames  >= 1)  give('sw_first');
   if (S.swperfect>= 1)  give('sw_perfect');
   if (S.topics.length >= 6) give('explorer');
   return earned.filter(Boolean);
-}
-
-function awardWordBadges() {
-  const prev = S.badges.length;
-  const news = awardAll();
-  if (news.length) { persist(); news.forEach(b => showToast(`Badge unlocked: ${b.name}!`)); }
 }
 
 function renderBadges() {
@@ -802,27 +764,6 @@ function renderBadges() {
       <div class="bc-desc">${unlocked ? b.desc : 'Keep reading!'}</div>
     </div>`;
   }).join('');
-}
-
-// ─── WORD JAR ─────────────────────────────────────────────────────────────────
-
-function renderWordJar() {
-  const el = document.getElementById('wordjar-chips');
-  if (!S.journal.length) {
-    el.innerHTML = '<div class="empty"><i class="ti ti-books"></i>Tap words while reading to save them here!</div>';
-    return;
-  }
-  el.innerHTML = '<div class="chips">' +
-    S.journal.map(w => `<div class="chip" onclick="speak('${w.replace(/'/g,"\\'")}')"> ${w}</div>`).join('') +
-    '</div>';
-}
-
-function clearWordJar() {
-  if (!confirm('Clear all saved words?')) return;
-  S.journal = [];
-  persist();
-  renderWordJar();
-  document.getElementById('sc-words-count').textContent = '0 saved';
 }
 
 // ─── SIGHT WORD GAME ─────────────────────────────────────────────────────────
@@ -934,7 +875,6 @@ function renderParentCorner() {
   document.getElementById('pc-stories').textContent = S.stories;
   document.getElementById('pc-level').textContent   = `Level ${S.level}`;
   document.getElementById('pc-badges').textContent  = `${S.badges.length} / 14`;
-  document.getElementById('pc-words').textContent   = S.journal.length;
   document.getElementById('pc-streak').textContent  = `${S.streak} day${S.streak !== 1 ? 's' : ''}`;
   document.getElementById('api-key-input').value    = S.apiKey;
   document.getElementById('proxy-url-input').value  = S.proxyUrl;
@@ -972,7 +912,7 @@ function changePIN() {
 
 function confirmReset() {
   if (!confirm('Reset ALL progress? This cannot be undone.')) return;
-  ['rl_level','rl_journal','rl_sessions','rl_stories','rl_streak','rl_lastdate',
+  ['rl_level','rl_sessions','rl_stories','rl_streak','rl_lastdate',
    'rl_badges','rl_perfect','rl_maxlevel','rl_swgames','rl_swperfect','rl_topics','rl_pin']
     .forEach(k => localStorage.removeItem(k));
   location.reload();

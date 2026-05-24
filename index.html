@@ -309,9 +309,7 @@
       border-radius: var(--r); padding: 14px 16px; margin-bottom: 10px;
       box-shadow: var(--shadow-sm);
     }
-    .dn-article-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 6px; }
-    .dn-article-headline { font-size: 16px; font-weight: 900; line-height: 1.35; margin-bottom: 7px; }
-    .dn-article-body { font-size: 14px; font-weight: 600; line-height: 1.75; color: var(--text); }
+    .dn-article-text { font-size: 15px; font-weight: 600; line-height: 1.8; color: var(--text); }
     @keyframes dnArticleIn { from{opacity:0;transform:translateY(20px) scale(0.96)} to{opacity:1;transform:translateY(0) scale(1)} }
     .dn-question-box {
       background: var(--surface); border: 1.5px solid var(--border);
@@ -399,9 +397,7 @@
     <div class="dn-step-dot" id="dn-dot-2"></div>
   </div>
   <div class="dn-article-card" id="dn-article-card">
-    <div class="dn-article-label">📰 BREAKING NEWS</div>
-    <div class="dn-article-headline" id="dn-headline"></div>
-    <div class="dn-article-body" id="dn-body"></div>
+    <div class="dn-article-text" id="dn-article-text"></div>
   </div>
   <div class="dn-question-box" id="dn-question-box">
     <div class="dn-step-label" id="dn-step-label">Step 1 of 3 — Count letters</div>
@@ -1369,8 +1365,7 @@ function renderDnRound() {
 
   const card = document.getElementById('dn-article-card');
   if (S.dnStep === 0) {
-    document.getElementById('dn-headline').textContent = r.headline;
-    document.getElementById('dn-body').textContent = r.body;
+    document.getElementById('dn-article-text').textContent = r.headline + ' ' + r.body;
     card.style.display = '';
     card.style.animation = 'none';
     card.offsetWidth;

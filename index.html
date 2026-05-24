@@ -1429,30 +1429,36 @@ function answerDn(num) {
   const r = S.dnRounds[S.dnRoundIdx];
   const correctVal = S.dnStep === 0 ? r.c1 : S.dnStep === 1 ? r.c2 : r.answer;
   const correct = num === correctVal;
-  if (correct) S.dnScore++;
 
   const btns = [...document.querySelectorAll('.dn-num-btn')];
   btns.forEach(b => { b.disabled = true; });
   const chosen = btns.find(b => +b.textContent === num);
-  if (chosen) chosen.classList.add(correct ? 'dn-correct' : 'dn-wrong');
-  if (!correct) {
-    const correctBtn = btns.find(b => +b.textContent === correctVal);
-    if (correctBtn) setTimeout(() => correctBtn.classList.add('dn-correct'), 320);
-  }
-  if (correct) dnBurst(chosen);
-
   const fb = document.getElementById('dn-feedback');
-  fb.textContent = correct
-    ? (S.dnStep === 2 ? '🎉 Correct!' : `✓ Yes, ${correctVal}!`)
-    : `The answer was ${correctVal}`;
-  fb.className = 'dn-feedback ' + (correct ? 'correct' : 'wrong');
 
-  setTimeout(() => {
-    S.dnStep++;
-    if (S.dnStep > 2) { S.dnStep = 0; S.dnRoundIdx++; }
-    if (S.dnRoundIdx >= 5) showDnResult();
-    else renderDnRound();
-  }, 1400);
+  if (correct) {
+    S.dnScore++;
+    if (chosen) chosen.classList.add('dn-correct');
+    dnBurst(chosen);
+    fb.textContent = S.dnStep === 2 ? '🎉 Correct!' : `✓ Yes, ${correctVal}!`;
+    fb.className = 'dn-feedback correct';
+    setTimeout(() => {
+      S.dnStep++;
+      if (S.dnStep > 2) { S.dnStep = 0; S.dnRoundIdx++; }
+      if (S.dnRoundIdx >= 5) showDnResult();
+      else renderDnRound();
+    }, 1400);
+  } else {
+    if (chosen) chosen.classList.add('dn-wrong');
+    fb.textContent = 'Not quite — try again!';
+    fb.className = 'dn-feedback wrong';
+    setTimeout(() => {
+      if (chosen) chosen.classList.remove('dn-wrong');
+      fb.textContent = '';
+      fb.className = 'dn-feedback';
+      btns.forEach(b => { b.disabled = false; });
+      S.dnAnswered = false;
+    }, 900);
+  }
 }
 
 function dnBurst(anchorEl) {

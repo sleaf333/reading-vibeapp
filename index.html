@@ -293,33 +293,52 @@
       transition: transform 0.13s, box-shadow 0.13s;
     }
     .dn-home-card:active { transform: scale(0.97); box-shadow: none; }
-    .dn-word-display {
-      font-size: 48px; font-weight: 900; letter-spacing: 4px;
-      display: flex; justify-content: center; flex-wrap: wrap; gap: 2px;
+    .dn-progress-bar { height: 6px; background: var(--border); border-radius: 3px; margin: 6px 0 2px; overflow: hidden; }
+    .dn-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #a78bfa); border-radius: 3px; transition: width 0.5s ease; }
+    .dn-steps { display: flex; justify-content: center; gap: 10px; margin: 8px 0 10px; }
+    .dn-step-dot {
+      width: 13px; height: 13px; border-radius: 50%;
+      background: var(--border); border: 2px solid var(--border);
+      transition: all 0.3s ease;
     }
-    .dn-letter     { display: inline-block; transition: color 0.2s, opacity 0.2s; }
-    .dn-letter-hi  { color: var(--accent); }
-    .dn-letter-hi2 { color: #e05050; }
-    .dn-letter-dim { opacity: 0.22; }
+    .dn-step-dot.active { background: var(--accent); border-color: var(--accent); animation: dotPulse 1.1s ease-in-out infinite; }
+    .dn-step-dot.done   { background: #22c55e; border-color: #22c55e; transform: scale(1.15); }
+    @keyframes dotPulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(99,102,241,0.5)} 50%{transform:scale(1.2);box-shadow:0 0 0 6px rgba(99,102,241,0)} }
+    .dn-article-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r); padding: 14px 16px; margin-bottom: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+    .dn-article-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 6px; }
+    .dn-article-headline { font-size: 16px; font-weight: 900; line-height: 1.35; margin-bottom: 7px; }
+    .dn-article-body { font-size: 14px; font-weight: 600; line-height: 1.75; color: var(--text); }
+    @keyframes dnArticleIn { from{opacity:0;transform:translateY(20px) scale(0.96)} to{opacity:1;transform:translateY(0) scale(1)} }
     .dn-question-box {
       background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: var(--r); padding: 16px 18px; margin: 14px 0 10px;
+      border-radius: var(--r); padding: 14px 16px; margin: 0 0 10px;
       text-align: center; box-shadow: var(--shadow-sm);
     }
+    @keyframes dnQuestionIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
     .dn-step-label { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
     .dn-question   { font-size: 19px; font-weight: 800; line-height: 1.5; }
-    .dn-numpad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 4px 0; }
+    .dn-numpad { display: grid; gap: 8px; margin: 4px 0; }
     .dn-num-btn {
-      height: 58px; background: var(--surface); border: 1.5px solid var(--border);
+      height: 56px; background: var(--surface); border: 1.5px solid var(--border);
       border-radius: 14px; font-size: 22px; font-weight: 800; cursor: pointer;
       color: var(--text); font-family: inherit; box-shadow: var(--shadow-sm);
-      -webkit-tap-highlight-color: transparent; transition: transform 0.1s;
+      -webkit-tap-highlight-color: transparent; transition: transform 0.12s, background 0.15s;
     }
-    .dn-num-btn:active:not(:disabled) { transform: scale(0.92); background: var(--accent-lt); border-color: var(--accent); }
+    .dn-num-btn:active:not(:disabled) { transform: scale(0.9); }
     .dn-num-btn:disabled { cursor: default; opacity: 0.5; }
+    .dn-num-btn.dn-correct { background: #dcfce7; border-color: #22c55e; color: #16a34a; animation: dnCorrectPop 0.35s ease forwards; }
+    .dn-num-btn.dn-wrong   { background: #fee2e2; border-color: #ef4444; color: #dc2626; animation: dnShake 0.4s ease; }
+    @keyframes dnCorrectPop { 0%{transform:scale(1)} 40%{transform:scale(1.18)} 70%{transform:scale(0.94)} 100%{transform:scale(1.05)} }
+    @keyframes dnShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
     .dn-feedback { text-align: center; font-size: 20px; font-weight: 800; min-height: 38px; padding: 6px 0; }
-    .dn-feedback.correct { color: var(--accent); }
-    .dn-feedback.wrong   { color: #e05050; }
+    .dn-feedback.correct { color: #16a34a; }
+    .dn-feedback.wrong   { color: #dc2626; }
+    .dn-particle { position: fixed; pointer-events: none; z-index: 9998; border-radius: 50%; }
+    @keyframes dnBurstAnim { 0%{transform:translate(0,0) scale(1);opacity:1} 100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0} }
 
     /* ── TOAST ── */
     #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: var(--pr); font-size: 14px; font-weight: 700; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
@@ -370,13 +389,21 @@
 <div id="screen-dnews" class="screen">
   <div class="sw-header">
     <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
-    <span class="sw-prog-text" id="dn-prog">Word 1 of 5</span>
+    <span class="sw-prog-text" id="dn-prog">Article 1 of 5</span>
     <span class="pill pill-green" id="dn-score-pill">0 ✓</span>
   </div>
-  <div style="text-align:center;padding:16px 0 6px">
-    <div id="dn-word-display" class="dn-word-display"></div>
+  <div class="dn-progress-bar"><div class="dn-progress-fill" id="dn-progress-fill" style="width:0%"></div></div>
+  <div class="dn-steps">
+    <div class="dn-step-dot active" id="dn-dot-0"></div>
+    <div class="dn-step-dot" id="dn-dot-1"></div>
+    <div class="dn-step-dot" id="dn-dot-2"></div>
   </div>
-  <div class="dn-question-box">
+  <div class="dn-article-card" id="dn-article-card">
+    <div class="dn-article-label">📰 BREAKING NEWS</div>
+    <div class="dn-article-headline" id="dn-headline"></div>
+    <div class="dn-article-body" id="dn-body"></div>
+  </div>
+  <div class="dn-question-box" id="dn-question-box">
     <div class="dn-step-label" id="dn-step-label">Step 1 of 3 — Count letters</div>
     <div class="dn-question" id="dn-question"></div>
   </div>
@@ -1222,119 +1249,230 @@ function showToast(msg) {
 
 // ─── DAILY NEWS ──────────────────────────────────────────────────────────────
 
-const DN_WORDS = [
-  null,
-  ['CAT','DOG','HAT','SUN','RUN','BIG','HOP','BAT','FAN','PIN'],
-  ['TREE','BOOK','MOON','FEET','SEED','POOL','BELL','FROG','STAR','RAIN'],
-  ['APPLE','BUNNY','PUPPY','HAPPY','QUEEN','GREEN','KITTY','FUNNY','PEPPER'],
-  ['BANANA','RABBIT','BALLOON','KITTEN','BUTTER','LETTER','SUMMER','ZIPPER'],
-  ['STRAWBERRY','CATERPILLAR','CHOCOLATE','ELEPHANT','BUTTERFLY','MISSISSIPPI'],
-];
+async function fetchDnArticles() {
+  const levelDesc = [
+    '', 'beginner (very simple words, very short sentences)',
+    'early reader (simple words, short sentences)',
+    'developing reader (common words, 2 short sentences)',
+    'confident reader (varied vocabulary, 2 clear sentences)',
+    'advanced reader (rich vocabulary, 2-3 sentences)',
+  ][Math.min(S.level, 5)];
+  const prompt = `Create 5 short fictional fun news articles for a ${levelDesc} child aged 6. Topics: animals, magic, food, adventures, space, sports, inventions.
+Return ONLY a JSON array with exactly 5 objects. Each object must have:
+- "headline": a fun short headline in ALL CAPS (5-8 words)
+- "body": exactly 2 short fun sentences for the reading level
+- "l1": a single lowercase letter appearing 2-5 times in headline+body combined
+- "l2": a DIFFERENT single lowercase letter also appearing 2-5 times in headline+body
+No markdown, no explanation, only the JSON array.`;
 
-function startDnGame() {
-  const bank = DN_WORDS[Math.min(S.level, 5)];
-  const words = [...bank].sort(() => Math.random() - 0.5).slice(0, 5);
-  S.dnRounds   = words.map(generateDnRound);
-  S.dnRoundIdx = 0;
-  S.dnStep     = 0;
-  S.dnScore    = 0;
-  S.dnAnswered = false;
-  showScreen('screen-dnews');
-  renderDnRound();
+  const h = window.location.hostname;
+  const hasLocalProxy = h.endsWith('.vercel.app') || h.endsWith('.pages.dev');
+  const endpoint = S.proxyUrl || (hasLocalProxy ? '/api/proxy' : 'https://api.anthropic.com/v1/messages');
+  const headers = { 'Content-Type': 'application/json', 'x-api-key': S.apiKey, 'anthropic-version': '2023-06-01' };
+  if (!S.proxyUrl && !hasLocalProxy) headers['anthropic-dangerous-allow-browser'] = 'true';
+
+  const res = await fetch(endpoint, {
+    method: 'POST', headers,
+    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] }),
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(`${res.status}: ${e.error?.message || 'unknown'}`);
+  }
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || 'API error');
+  const raw = data.content[0].text.trim().replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '').trim();
+  return JSON.parse(raw);
 }
 
-function generateDnRound(word) {
+function verifyDnArticle(a) {
+  const full = (a.headline + ' ' + a.body).toLowerCase();
   const freq = {};
-  for (const ch of word) freq[ch] = (freq[ch] || 0) + 1;
-  const all = Object.keys(freq).sort((a, b) => freq[b] - freq[a]);
-  const rich = all.filter(l => freq[l] > 1);
-  const plain = all.filter(l => freq[l] === 1);
-  const pool = rich.length >= 2 ? [...rich].sort(() => Math.random() - 0.5)
-             : rich.length === 1 ? [rich[0], ...[...plain].sort(() => Math.random() - 0.5)]
-             : [...all].sort(() => Math.random() - 0.5);
-  let l1 = pool[0], l2 = pool.find(l => l !== l1) || pool[1];
-  let c1 = freq[l1], c2 = freq[l2];
-  let op = '+';
+  for (const ch of full) { if (/[a-z]/.test(ch)) freq[ch] = (freq[ch] || 0) + 1; }
+
+  let l1 = a.l1.toLowerCase(), l2 = a.l2.toLowerCase();
+  let c1 = freq[l1] || 0, c2 = freq[l2] || 0;
+
+  const inRange = n => n >= 2 && n <= 9;
+  if (!inRange(c1) || !inRange(c2) || l1 === l2) {
+    const pool = Object.entries(freq).filter(([, n]) => inRange(n)).sort((a, b) => a[1] - b[1]);
+    if (pool.length >= 2) {
+      if (inRange(c1) && pool.some(([ch]) => ch !== l1)) {
+        const alt = pool.find(([ch]) => ch !== l1);
+        l2 = alt[0]; c2 = alt[1];
+      } else if (inRange(c2) && pool.some(([ch]) => ch !== l2)) {
+        const alt = pool.find(([ch]) => ch !== l2);
+        l1 = alt[0]; c1 = alt[1];
+      } else {
+        l1 = pool[0][0]; c1 = pool[0][1];
+        l2 = pool[1][0]; c2 = pool[1][1];
+      }
+    }
+  }
+
+  a.l1 = l1; a.l2 = l2; a.c1 = c1; a.c2 = c2;
+  a.op = '+';
   if (S.level >= 2 && c1 !== c2) {
     const p = S.level === 2 ? 0.25 : S.level === 3 ? 0.4 : 0.5;
-    if (Math.random() < p) op = '-';
+    if (Math.random() < p) a.op = '-';
   }
-  if (op === '-' && c1 < c2) { [l1, l2] = [l2, l1]; [c1, c2] = [c2, c1]; }
-  return { word, l1, c1, l2, c2, op, answer: op === '+' ? c1 + c2 : c1 - c2 };
+  if (a.op === '-') {
+    if (a.c1 < a.c2) { [a.l1, a.l2] = [a.l2, a.l1]; [a.c1, a.c2] = [a.c2, a.c1]; }
+    if (a.c1 === a.c2) a.op = '+';
+  }
+  a.answer = a.op === '+' ? a.c1 + a.c2 : a.c1 - a.c2;
+  return a;
+}
+
+async function startDnGame() {
+  if (_loadingBusy) return;
+  if (!S.apiKey) {
+    showScreen('screen-loading');
+    showLoadingState('error', { emoji: '🔒', title: 'Ask a grown-up!', sub: 'A parent needs to add the API key. Go home and tap 🔒 Parent.', retry: false });
+    return;
+  }
+  _loadingBusy = true;
+  showLoadingState('normal');
+  document.getElementById('loading-label').textContent = 'Fetching today\'s news…';
+  showScreen('screen-loading');
+  try {
+    const raw = await fetchDnArticles();
+    S.dnRounds   = raw.slice(0, 5).map(verifyDnArticle);
+    S.dnRoundIdx = 0;
+    S.dnStep     = 0;
+    S.dnScore    = 0;
+    S.dnAnswered = false;
+    _loadingBusy = false;
+    showScreen('screen-dnews');
+    renderDnRound();
+  } catch (e) {
+    _loadingBusy = false;
+    showLoadingState('error', { emoji: '📰', title: 'News not available', sub: 'Check your connection and try again.', retry: false });
+  }
 }
 
 function renderDnRound() {
   const r = S.dnRounds[S.dnRoundIdx];
   S.dnAnswered = false;
-  document.getElementById('dn-prog').textContent = `Word ${S.dnRoundIdx + 1} of 5`;
+  document.getElementById('dn-prog').textContent = `Article ${S.dnRoundIdx + 1} of 5`;
   document.getElementById('dn-score-pill').textContent = `${S.dnScore} ✓`;
-  document.getElementById('dn-feedback').textContent = '';
-  document.getElementById('dn-feedback').className = 'dn-feedback';
+  const fb = document.getElementById('dn-feedback');
+  fb.textContent = ''; fb.className = 'dn-feedback';
+
+  const done = S.dnRoundIdx * 3 + S.dnStep;
+  document.getElementById('dn-progress-fill').style.width = `${(done / 15) * 100}%`;
+
+  for (let i = 0; i < 3; i++) {
+    const dot = document.getElementById(`dn-dot-${i}`);
+    dot.className = 'dn-step-dot' + (i < S.dnStep ? ' done' : i === S.dnStep ? ' active' : '');
+  }
+
+  const card = document.getElementById('dn-article-card');
+  if (S.dnStep === 0) {
+    document.getElementById('dn-headline').textContent = r.headline;
+    document.getElementById('dn-body').textContent = r.body;
+    card.style.display = '';
+    card.style.animation = 'none';
+    card.offsetWidth;
+    card.style.animation = 'dnArticleIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both';
+  }
+
+  const qbox = document.getElementById('dn-question-box');
+  qbox.style.animation = 'none';
+  qbox.offsetWidth;
+  qbox.style.animation = 'dnQuestionIn 0.3s ease both';
 
   const stepLabels = [
-    'Step 1 of 3 — Count the letters',
-    'Step 2 of 3 — Count the letters',
+    'Step 1 of 3 — Count the letter',
+    'Step 2 of 3 — Count the letter',
     'Step 3 of 3 — Solve the math! 🧮',
   ];
   document.getElementById('dn-step-label').textContent = stepLabels[S.dnStep];
 
   if (S.dnStep === 0) {
-    renderDnWord(r.word, r.l1, null);
     document.getElementById('dn-question').innerHTML =
-      `How many <span style="color:var(--accent);font-size:26px">${r.l1}</span>'s do you see?`;
+      `How many <span style="color:var(--accent);font-size:36px;font-weight:900">"${r.l1.toUpperCase()}"</span> do you see in the article?`;
   } else if (S.dnStep === 1) {
-    renderDnWord(r.word, r.l2, null);
     document.getElementById('dn-question').innerHTML =
-      `Now count the <span style="color:#e05050;font-size:26px">${r.l2}</span>'s — how many?`;
+      `Now find all the <span style="color:#e05050;font-size:36px;font-weight:900">"${r.l2.toUpperCase()}"</span> — how many?`;
   } else {
-    renderDnWord(r.word, r.l1, r.l2);
     document.getElementById('dn-question').innerHTML =
-      `<span style="color:var(--accent)">${r.c1} ${r.l1}</span> and <span style="color:#e05050">${r.c2} ${r.l2}</span> &nbsp;→&nbsp; ` +
-      `<span style="font-size:28px;letter-spacing:3px">${r.c1} ${r.op} ${r.c2} = ?</span>`;
+      `<span style="color:var(--accent)">${r.c1} <b>"${r.l1.toUpperCase()}"</b></span> and ` +
+      `<span style="color:#e05050">${r.c2} <b>"${r.l2.toUpperCase()}"</b></span><br>` +
+      `<span style="font-size:28px;letter-spacing:2px;display:block;margin-top:8px">${r.c1} ${r.op} ${r.c2} = ?</span>`;
   }
   renderDnNumpad();
 }
 
-function renderDnWord(word, hi1, hi2) {
-  const fs = word.length <= 4 ? '52px' : word.length <= 6 ? '42px' : word.length <= 8 ? '34px' : '27px';
-  const el = document.getElementById('dn-word-display');
-  el.style.fontSize = fs;
-  el.innerHTML = word.split('').map(ch => {
-    let cls = 'dn-letter';
-    if      (ch === hi1 && !hi2) cls += ' dn-letter-hi';
-    else if (ch === hi1)         cls += ' dn-letter-hi';
-    else if (ch === hi2)         cls += ' dn-letter-hi2';
-    else if (hi1 || hi2)         cls += ' dn-letter-dim';
-    return `<span class="${cls}">${ch}</span>`;
-  }).join('');
-}
-
 function renderDnNumpad() {
-  document.getElementById('dn-numpad').innerHTML =
-    Array.from({length: 10}, (_, i) =>
-      `<button class="dn-num-btn" onclick="answerDn(${i})">${i}</button>`
-    ).join('');
+  const r = S.dnRounds[S.dnRoundIdx];
+  let nums, cols;
+  if (S.dnStep < 2) {
+    nums = Array.from({ length: 10 }, (_, i) => i);
+    cols = 5;
+  } else {
+    const ans = r.answer;
+    const set = new Set([ans]);
+    for (let n = Math.max(0, ans - 4); n <= ans + 5 && set.size < 8; n++) set.add(n);
+    while (set.size < 8) set.add(set.size);
+    nums = [...set].sort((a, b) => a - b);
+    cols = 4;
+  }
+  const pad = document.getElementById('dn-numpad');
+  pad.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  pad.innerHTML = nums.map(n => `<button class="dn-num-btn" onclick="answerDn(${n})">${n}</button>`).join('');
 }
 
 function answerDn(num) {
   if (S.dnAnswered) return;
   S.dnAnswered = true;
   const r = S.dnRounds[S.dnRoundIdx];
-  document.querySelectorAll('.dn-num-btn').forEach(b => b.disabled = true);
-  const correct = num === (S.dnStep === 0 ? r.c1 : S.dnStep === 1 ? r.c2 : r.answer);
-  if (correct) S.dnScore++;
   const correctVal = S.dnStep === 0 ? r.c1 : S.dnStep === 1 ? r.c2 : r.answer;
+  const correct = num === correctVal;
+  if (correct) S.dnScore++;
+
+  const btns = [...document.querySelectorAll('.dn-num-btn')];
+  btns.forEach(b => { b.disabled = true; });
+  const chosen = btns.find(b => +b.textContent === num);
+  if (chosen) chosen.classList.add(correct ? 'dn-correct' : 'dn-wrong');
+  if (!correct) {
+    const correctBtn = btns.find(b => +b.textContent === correctVal);
+    if (correctBtn) setTimeout(() => correctBtn.classList.add('dn-correct'), 320);
+  }
+  if (correct) dnBurst(chosen);
+
   const fb = document.getElementById('dn-feedback');
   fb.textContent = correct
     ? (S.dnStep === 2 ? '🎉 Correct!' : `✓ Yes, ${correctVal}!`)
-    : `The answer is ${correctVal}`;
+    : `The answer was ${correctVal}`;
   fb.className = 'dn-feedback ' + (correct ? 'correct' : 'wrong');
+
   setTimeout(() => {
     S.dnStep++;
     if (S.dnStep > 2) { S.dnStep = 0; S.dnRoundIdx++; }
     if (S.dnRoundIdx >= 5) showDnResult();
     else renderDnRound();
-  }, 1300);
+  }, 1400);
+}
+
+function dnBurst(anchorEl) {
+  if (!anchorEl) return;
+  const rect = anchorEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+  const colors = ['#6366f1', '#22c55e', '#fbbf24', '#f472b6', '#60a5fa', '#a78bfa'];
+  for (let i = 0; i < 10; i++) {
+    const el = document.createElement('div');
+    el.className = 'dn-particle';
+    const size = 7 + Math.random() * 6;
+    const angle = (Math.PI * 2 / 10) * i + Math.random() * 0.4;
+    const dist = 40 + Math.random() * 50;
+    el.style.cssText = `left:${cx}px;top:${cy}px;width:${size}px;height:${size}px;` +
+      `background:${colors[i % colors.length]};` +
+      `--tx:${Math.cos(angle) * dist}px;--ty:${Math.sin(angle) * dist}px;` +
+      `animation:dnBurstAnim 0.65s ease forwards;`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 750);
+  }
 }
 
 function showDnResult() {
@@ -1345,7 +1483,7 @@ function showDnResult() {
   const pct = S.dnScore / 15;
   document.getElementById('dn-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
   document.getElementById('dn-result-score').textContent = `${S.dnScore} / 15`;
-  document.getElementById('dn-result-msg').textContent   =
+  document.getElementById('dn-result-msg').textContent =
     pct === 1 ? 'Perfect score! Math wizard! 🧮' : pct >= 0.8 ? 'Amazing work!' : pct >= 0.6 ? 'Good effort!' : 'Keep practicing!';
   document.getElementById('dn-new-badges').innerHTML = newB.map(b => `
     <div class="new-badge">

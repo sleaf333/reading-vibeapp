@@ -74,9 +74,10 @@
     .topic-sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
 
     /* ── SHORTCUTS ── */
-    .shortcuts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 24px; }
-    .sc-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 16px 12px 14px; cursor: pointer; text-align: center; -webkit-tap-highlight-color: transparent; transition: border-color 0.12s; }
+    .shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
+    .sc-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 20px 12px 18px; cursor: pointer; text-align: center; -webkit-tap-highlight-color: transparent; transition: border-color 0.12s; }
     .sc-card:active { border-color: var(--accent); }
+    .sc-card-featured { background: var(--accent-lt); border-color: var(--accent); }
     .sc-icon { font-size: 22px; color: var(--accent); margin-bottom: 7px; }
     .sc-label { font-size: 13px; font-weight: 600; }
     .sc-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
@@ -157,9 +158,10 @@
     /* ── SIGHT WORD GAME ── */
     .sw-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 8px; }
     .sw-prog-text { font-size: 15px; color: var(--muted); font-weight: 500; }
-    .sw-center { text-align: center; padding: 32px 0 8px; }
-    .sw-word { font-size: 56px; font-weight: 800; line-height: 1.1; }
-    .sw-speak-btn { background: none; border: 1.5px solid var(--border); border-radius: var(--pr); padding: 8px 20px; font-size: 14px; cursor: pointer; color: var(--muted); margin-top: 12px; font-family: inherit; }
+    .sw-center { text-align: center; padding: 24px 0 8px; }
+    .sw-hear-btn { width: 100%; min-height: 130px; font-size: 28px; font-weight: 700; background: var(--accent-lt); border: 2.5px solid var(--accent); border-radius: var(--r); cursor: pointer; color: var(--accent); font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; -webkit-tap-highlight-color: transparent; }
+    .sw-hear-btn:active { opacity: 0.8; }
+    .sw-hear-label { font-size: 15px; font-weight: 500; color: var(--accent); opacity: 0.8; }
     .sw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
     .sw-choice { background: var(--surface); border: 2px solid var(--border); border-radius: var(--r); padding: 22px 12px; font-size: 22px; font-weight: 700; cursor: pointer; color: var(--text); font-family: inherit; -webkit-tap-highlight-color: transparent; transition: border-color 0.12s, background 0.12s; }
     .sw-choice.correct { border-color: #3d9e68 !important; background: #eaf5f0; color: #1a5c38; }
@@ -224,10 +226,10 @@
       <div class="sc-label">Badges</div>
       <div class="sc-sub" id="sc-badges-count">0 earned</div>
     </div>
-    <div class="sc-card" onclick="startSwGame()">
-      <div class="sc-icon"><i class="ti ti-cards"></i></div>
-      <div class="sc-label">Word game</div>
-      <div class="sc-sub">Sight words</div>
+    <div class="sc-card sc-card-featured" onclick="startSwGame()">
+      <div class="sc-icon" style="color:var(--accent)">🎮</div>
+      <div class="sc-label" style="font-size:15px;color:var(--accent)">Sight Word Game</div>
+      <div class="sc-sub" style="color:var(--accent);opacity:0.8">Tap to play!</div>
     </div>
   </div>
 </div>
@@ -304,8 +306,10 @@
     <span class="pill pill-green" id="sw-score-pill">0 correct</span>
   </div>
   <div class="sw-center">
-    <div class="sw-word" id="sw-word">---</div>
-    <button class="sw-speak-btn" onclick="speakSwWord()">🔊 Hear it again</button>
+    <button class="sw-hear-btn" onclick="speakSwWord()">
+      <span style="font-size:48px">🔊</span>
+      <span class="sw-hear-label">Tap to hear the word again</span>
+    </button>
   </div>
   <div class="sw-grid" id="sw-choices"></div>
 </div>
@@ -782,7 +786,7 @@ function renderSwRound() {
   const word = S.swWords[S.swIdx];
   document.getElementById('sw-prog').textContent       = `${S.swIdx + 1} / 10`;
   document.getElementById('sw-score-pill').textContent  = `${S.swScore} correct`;
-  document.getElementById('sw-word').textContent        = word;
+  S.swCurrentWord = word;
   S.swAnswered = false;
 
   const pool = S.level >= 3 ? [...SW_EASY, ...SW_HARD] : [...SW_EASY];
@@ -796,13 +800,13 @@ function renderSwRound() {
 }
 
 function speakSwWord() {
-  speak(document.getElementById('sw-word').textContent);
+  speak(S.swCurrentWord);
 }
 
 function answerSw(el, idx) {
   if (S.swAnswered) return;
   S.swAnswered = true;
-  const correct = S.swWords[S.swIdx];
+  const correct = S.swCurrentWord;
   document.querySelectorAll('.sw-choice').forEach(b => b.disabled = true);
   if (el.dataset.word === correct) {
     el.classList.add('correct');

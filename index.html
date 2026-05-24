@@ -222,7 +222,6 @@
     </div>
     <div class="header-pills">
       <span class="pill pill-green" id="home-level-pill"><i class="ti ti-star"></i> Level 2</span>
-      <span class="pill pill-amber" id="home-streak-pill"><i class="ti ti-flame"></i> 1 day streak</span>
       <button class="lock-btn" onclick="showScreen('screen-parent-entry')">🔒 Parent</button>
     </div>
   </div>
@@ -230,15 +229,15 @@
   <div style="margin-top:20px" id="topic-list"></div>
 
   <div class="shortcuts">
-    <div class="sc-card" onclick="showScreen('screen-badges')">
-      <div class="sc-icon"><i class="ti ti-award"></i></div>
-      <div class="sc-label">Badges</div>
-      <div class="sc-sub" id="sc-badges-count">0 earned</div>
-    </div>
     <div class="sc-card sc-card-featured" onclick="startSwGame()">
       <div class="sc-icon" style="color:var(--accent)">🎮</div>
       <div class="sc-label" style="font-size:15px;color:var(--accent)">Sight Word Game</div>
       <div class="sc-sub" style="color:var(--accent);opacity:0.8">Tap to play!</div>
+    </div>
+    <div class="sc-card" onclick="showScreen('screen-badges')">
+      <div class="sc-icon">🏆</div>
+      <div class="sc-label">Badges &amp; Awards</div>
+      <div class="sc-sub" id="sc-badges-count">0 earned</div>
     </div>
   </div>
 </div>
@@ -514,9 +513,6 @@ function showScreen(id) {
 function refreshHome() {
   document.getElementById('home-level-pill').innerHTML =
     `<i class="ti ti-star"></i> Level ${S.level}`;
-  document.getElementById('home-streak-pill').innerHTML = S.streak > 0
-    ? `<i class="ti ti-flame"></i> ${S.streak} day streak`
-    : `<i class="ti ti-flame"></i> No streak yet`;
   document.getElementById('sc-badges-count').textContent = `${S.badges.length} earned`;
 
   document.getElementById('topic-list').innerHTML = TOPICS.map(t => `

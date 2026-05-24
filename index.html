@@ -1281,7 +1281,11 @@ No markdown, no explanation, only the JSON array.`;
 }
 
 function verifyDnArticle(a) {
-  const full = (a.text || '').toLowerCase();
+  // Force sentence case regardless of what the API returned
+  a.text = (a.text || '')
+    .replace(/\b[A-Z]{2,}\b/g, w => w.toLowerCase())
+    .replace(/(^|[.!?]\s+)(\w)/g, (_, p, c) => p + c.toUpperCase());
+  const full = a.text.toLowerCase();
   const freq = {};
   for (const ch of full) { if (/[a-z]/.test(ch)) freq[ch] = (freq[ch] || 0) + 1; }
 

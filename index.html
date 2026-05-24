@@ -533,6 +533,7 @@ function lsJson(k, def) {
 
 const S = {
   level:    parseInt(lsGet('rl_level','1')),
+  levelProgress: parseInt(lsGet('rl_levelprog','0')),
   sessions: lsJson('rl_sessions', []),
   stories:  parseInt(lsGet('rl_stories','0')),
   streak:   parseInt(lsGet('rl_streak','0')),
@@ -556,6 +557,7 @@ const S = {
 
 function persist() {
   lsSet('rl_level',    S.level);
+  lsSet('rl_levelprog',S.levelProgress);
   lsSet('rl_sessions', S.sessions);
   lsSet('rl_stories',  S.stories);
   lsSet('rl_streak',   S.streak);
@@ -815,8 +817,13 @@ function showResult() {
   if (pct === 1) S.perfect++;
 
   const prevLevel = S.level;
-  if (pct >= 0.9 && S.level < 5) S.level++;
-  else if (pct < 0.5 && S.level > 1) S.level--;
+  if (pct >= 0.9 && S.level < 5) {
+    S.levelProgress++;
+    if (S.levelProgress >= 3) { S.level++; S.levelProgress = 0; }
+  } else if (pct < 0.5 && S.level > 1) {
+    S.level--;
+    S.levelProgress = 0;
+  }
   if (S.level > S.maxlevel) S.maxlevel = S.level;
 
   S.sessions.unshift({ topic: S.topic.name, score:`${score}/${total}`, date: new Date().toLocaleDateString(), level: S.level });
@@ -831,9 +838,11 @@ function showResult() {
 
   const pill = document.getElementById('level-change-pill');
   if (S.level > prevLevel)
-    pill.innerHTML = `<span class="level-pill pill-up">↑ Level up! Now Level ${S.level}</span>`;
+    pill.innerHTML = `<span class="level-pill pill-up">↑ Level up! Now Level ${S.level} 🎉</span>`;
   else if (S.level < prevLevel)
     pill.innerHTML = `<span class="level-pill pill-down">Keeping it at Level ${S.level}</span>`;
+  else if (pct >= 0.9 && S.levelProgress > 0)
+    pill.innerHTML = `<span class="level-pill pill-amber">⭐ ${S.levelProgress} / 3 great scores toward next level!</span>`;
   else
     pill.innerHTML = '';
 
@@ -1026,7 +1035,7 @@ function changePIN() {
 
 function confirmReset() {
   if (!confirm('Reset ALL progress? This cannot be undone.')) return;
-  ['rl_level','rl_sessions','rl_stories','rl_streak','rl_lastdate',
+  ['rl_level','rl_levelprog','rl_sessions','rl_stories','rl_streak','rl_lastdate',
    'rl_badges','rl_perfect','rl_maxlevel','rl_swgames','rl_swperfect','rl_topics','rl_pin']
     .forEach(k => localStorage.removeItem(k));
   location.reload();

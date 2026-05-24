@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Let's Read!</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/tabler-icons.min.css">
+  <style>
+    :root {
+      --bg: #f9f9f9;
+      --surface: #ffffff;
+      --border: #ebebeb;
+      --text: #1e1e1e;
+      --muted: #999;
+      --accent: #3d9e68;
+      --accent-lt: #eaf5f0;
+      --r: 16px;
+      --pr: 99px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #161616;
+        --surface: #1f1f1f;
+        --border: #2e2e2e;
+        --text: #efefef;
+        --muted: #777;
+        --accent-lt: #1a2e24;
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 16px 80px;
+      min-height: 100vh;
+    }
+    button { font-family: inherit; }
+
+    /* ── SCREENS ── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+    #screen-loading { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; }
+    #screen-loading.active { display: flex; }
+
+    /* ── TYPE ── */
+    .page-title { font-size: 30px; font-weight: 800; line-height: 1.2; }
+    .section-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+    .subtitle { font-size: 15px; color: var(--muted); margin-bottom: 20px; }
+
+    /* ── PILLS ── */
+    .pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 13px; border-radius: var(--pr); font-size: 14px; font-weight: 600; }
+    .pill-green { background: #e6f4ec; color: #2a7a4e; }
+    .pill-amber { background: #fef3e2; color: #9a6000; }
+
+    /* ── HOME HEADER ── */
+    .home-header { display: flex; align-items: flex-start; justify-content: space-between; padding-top: 24px; margin-bottom: 4px; gap: 12px; }
+    .header-pills { display: flex; gap: 8px; align-items: center; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+    .lock-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px; padding: 4px 2px; line-height: 1; }
+
+    /* ── TOPIC CARDS ── */
+    .topic-card {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r); padding: 15px 16px;
+      margin-bottom: 10px; cursor: pointer; min-height: 76px;
+      -webkit-tap-highlight-color: transparent; transition: border-color 0.12s;
+    }
+    .topic-card:active { border-color: var(--accent); background: var(--accent-lt); }
+    .topic-icon { width: 52px; height: 52px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+    .topic-name { font-size: 17px; font-weight: 600; }
+    .topic-sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    /* ── SHORTCUTS ── */
+    .shortcuts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 24px; }
+    .sc-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 16px 12px 14px; cursor: pointer; text-align: center; -webkit-tap-highlight-color: transparent; transition: border-color 0.12s; }
+    .sc-card:active { border-color: var(--accent); }
+    .sc-icon { font-size: 22px; color: var(--accent); margin-bottom: 7px; }
+    .sc-label { font-size: 13px; font-weight: 600; }
+    .sc-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+    /* ── LOADING ── */
+    .loading-label { font-size: 20px; font-weight: 600; margin-bottom: 8px; text-align: center; }
+    .loading-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+    .dots { display: flex; gap: 8px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); animation: bpulse 1.2s ease-in-out infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bpulse { 0%,80%,100%{transform:scale(0.6);opacity:0.3} 40%{transform:scale(1);opacity:1} }
+
+    /* ── BACK ROW ── */
+    .back-row { display: flex; align-items: center; gap: 8px; padding: 20px 0 12px; }
+    .btn-icon { width: 44px; height: 44px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--text); flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+    .screen-label { font-size: 18px; font-weight: 700; }
+
+    /* ── READING ── */
+    .reading-actions { display: flex; gap: 8px; margin-left: auto; }
+    .story-text { font-size: 19px; line-height: 2.1; padding: 4px 0 32px; }
+    .word { cursor: pointer; display: inline; border-radius: 4px; padding: 0 1px; -webkit-tap-highlight-color: transparent; transition: background 0.1s; }
+    .word.tapped { background: #ffe08299; }
+    .word.highlight { background: #ffe082; }
+    .word.saved { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
+
+    .read-bar { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0 16px; border-top: 1px solid var(--border); }
+    .prog-wrap { height: 5px; background: var(--border); border-radius: 3px; margin-bottom: 10px; }
+    .prog-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; width: 0; }
+    .read-controls { display: flex; gap: 10px; align-items: center; justify-content: center; }
+
+    /* ── BUTTONS ── */
+    .btn { min-height: 48px; border-radius: 13px; font-size: 16px; font-weight: 600; cursor: pointer; border: none; padding: 0 22px; -webkit-tap-highlight-color: transparent; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:active { opacity: 0.85; }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-secondary:active { border-color: var(--accent); }
+    .btn-full { width: 100%; }
+    .btn-danger { background: #fdeaea; color: #b83030; border: 1.5px solid #f5c6c6; }
+    .btn-sm { min-height: 40px; font-size: 14px; padding: 0 16px; }
+
+    /* ── QUIZ ── */
+    .quiz-meta { display: flex; align-items: center; gap: 10px; padding: 4px 0 8px; }
+    .quiz-prog { padding: 4px 12px; border-radius: var(--pr); background: var(--accent-lt); color: var(--accent); font-size: 13px; font-weight: 600; }
+    .quiz-q { font-size: 18px; font-weight: 600; line-height: 1.5; margin: 16px 0 14px; }
+    .choice { display: block; width: 100%; text-align: left; background: var(--surface); border: 2px solid var(--border); border-radius: var(--r); padding: 13px 17px; font-size: 16px; cursor: pointer; margin-bottom: 10px; color: var(--text); font-family: inherit; -webkit-tap-highlight-color: transparent; transition: border-color 0.12s, background 0.12s; }
+    .choice.correct { border-color: #3d9e68 !important; background: #eaf5f0; color: #1a5c38; }
+    .choice.wrong { border-color: #e05050 !important; background: #fdeaea; color: #802020; }
+    .choice:disabled { cursor: default; }
+
+    /* ── RESULT ── */
+    .result-center { text-align: center; padding: 28px 0 20px; }
+    .stars-row { font-size: 44px; letter-spacing: 6px; margin-bottom: 12px; }
+    .result-score { font-size: 34px; font-weight: 800; margin-bottom: 6px; }
+    .result-msg { font-size: 16px; color: var(--muted); margin-bottom: 18px; }
+    .level-pill { display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px; border-radius: var(--pr); font-size: 15px; font-weight: 600; margin-bottom: 24px; }
+    .pill-up { background: #eaf5f0; color: #2a7a4e; }
+    .pill-down { background: #fdeaea; color: #882222; }
+    .new-badge { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 14px 16px; margin-bottom: 10px; }
+    .nb-emoji { font-size: 30px; }
+    .nb-name { font-size: 15px; font-weight: 600; }
+    .nb-desc { font-size: 13px; color: var(--muted); }
+
+    /* ── WORD JAR ── */
+    .jar-header { display: flex; align-items: center; justify-content: space-between; }
+    .chips { display: flex; flex-wrap: wrap; gap: 9px; padding: 8px 0; }
+    .chip { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--pr); padding: 8px 16px; font-size: 15px; cursor: pointer; color: var(--text); -webkit-tap-highlight-color: transparent; }
+    .chip:active { border-color: var(--accent); }
+
+    /* ── BADGES ── */
+    .badge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; padding: 4px 0; }
+    .badge-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 18px 14px; text-align: center; }
+    .badge-card.locked { opacity: 0.4; }
+    .bc-emoji { font-size: 30px; margin-bottom: 7px; }
+    .bc-name { font-size: 14px; font-weight: 600; }
+    .bc-desc { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+    /* ── SIGHT WORD GAME ── */
+    .sw-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 8px; }
+    .sw-prog-text { font-size: 15px; color: var(--muted); font-weight: 500; }
+    .sw-center { text-align: center; padding: 32px 0 8px; }
+    .sw-word { font-size: 56px; font-weight: 800; line-height: 1.1; }
+    .sw-speak-btn { background: none; border: 1.5px solid var(--border); border-radius: var(--pr); padding: 8px 20px; font-size: 14px; cursor: pointer; color: var(--muted); margin-top: 12px; font-family: inherit; }
+    .sw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
+    .sw-choice { background: var(--surface); border: 2px solid var(--border); border-radius: var(--r); padding: 22px 12px; font-size: 22px; font-weight: 700; cursor: pointer; color: var(--text); font-family: inherit; -webkit-tap-highlight-color: transparent; transition: border-color 0.12s, background 0.12s; }
+    .sw-choice.correct { border-color: #3d9e68 !important; background: #eaf5f0; color: #1a5c38; }
+    .sw-choice.wrong { border-color: #e05050 !important; background: #fdeaea; color: #802020; }
+    .sw-choice:disabled { cursor: default; }
+
+    /* ── SW RESULT ── */
+    .sw-result-center { text-align: center; padding: 32px 0 24px; }
+
+    /* ── PIN ── */
+    .pin-title { text-align: center; font-size: 22px; font-weight: 700; margin-top: 32px; margin-bottom: 8px; }
+    .pin-sub { text-align: center; font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+    .pin-dots { display: flex; gap: 14px; justify-content: center; margin-bottom: 28px; }
+    .pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--muted); background: transparent; transition: all 0.15s; }
+    .pin-dot.filled { background: var(--text); border-color: var(--text); }
+    .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 280px; margin: 0 auto 24px; }
+    .pin-key { height: 66px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); font-size: 24px; font-weight: 600; cursor: pointer; color: var(--text); font-family: inherit; -webkit-tap-highlight-color: transparent; }
+    .pin-key:active { background: var(--accent-lt); border-color: var(--accent); }
+    .pin-error { text-align: center; color: #e05050; font-size: 14px; margin-top: -16px; margin-bottom: 16px; min-height: 20px; }
+
+    /* ── PARENT CORNER ── */
+    .stat-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--border); }
+    .stat-label { font-size: 15px; color: var(--muted); }
+    .stat-val { font-size: 16px; font-weight: 600; }
+    .session-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 12px 16px; margin-bottom: 8px; }
+    .si-topic { font-size: 15px; font-weight: 600; }
+    .si-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .text-input { width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 16px; color: var(--text); font-family: inherit; margin-bottom: 8px; outline: none; }
+    .text-input:focus { border-color: var(--accent); }
+
+    /* ── UTILITY ── */
+    .empty { text-align: center; padding: 60px 0; color: var(--muted); font-size: 15px; }
+    .empty i { font-size: 36px; display: block; margin-bottom: 12px; opacity: 0.4; }
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    /* ── TOAST ── */
+    #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: var(--pr); font-size: 14px; font-weight: 500; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
+    #toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HOME ═══ -->
+<div id="screen-home" class="screen active">
+  <div class="home-header">
+    <div>
+      <div class="page-title">Let's read!</div>
+      <div style="font-size:15px;color:var(--muted);margin-top:4px">Pick a topic and start reading.</div>
+    </div>
+    <div class="header-pills">
+      <span class="pill pill-green" id="home-level-pill"><i class="ti ti-star"></i> Level 2</span>
+      <span class="pill pill-amber" id="home-streak-pill"><i class="ti ti-flame"></i> 1 day streak</span>
+      <button class="lock-btn" onclick="showScreen('screen-parent-entry')" aria-label="Parent corner"><i class="ti ti-lock"></i></button>
+    </div>
+  </div>
+
+  <div style="margin-top:20px" id="topic-list"></div>
+
+  <div class="shortcuts">
+    <div class="sc-card" onclick="showScreen('screen-wordjar')">
+      <div class="sc-icon"><i class="ti ti-books"></i></div>
+      <div class="sc-label">Word jar</div>
+      <div class="sc-sub" id="sc-words-count">0 saved</div>
+    </div>
+    <div class="sc-card" onclick="showScreen('screen-badges')">
+      <div class="sc-icon"><i class="ti ti-award"></i></div>
+      <div class="sc-label">Badges</div>
+      <div class="sc-sub" id="sc-badges-count">0 earned</div>
+    </div>
+    <div class="sc-card" onclick="startSwGame()">
+      <div class="sc-icon"><i class="ti ti-cards"></i></div>
+      <div class="sc-label">Word game</div>
+      <div class="sc-sub">Sight words</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOADING ═══ -->
+<div id="screen-loading" class="screen">
+  <div class="loading-label" id="loading-label">Getting your story…</div>
+  <div class="loading-sub">Just a moment!</div>
+  <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+</div>
+
+<!-- ═══ READING ═══ -->
+<div id="screen-reading" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="goHomeFromReading()"><i class="ti ti-arrow-left"></i></button>
+    <span class="screen-label" id="reading-title">Story</span>
+    <div class="reading-actions">
+      <button class="btn-icon" id="btn-read-aloud" onclick="toggleReadAloud()" title="Read aloud"><i class="ti ti-volume"></i></button>
+    </div>
+  </div>
+  <div class="story-text" id="story-text"></div>
+  <div class="read-bar" id="read-bar" style="display:none">
+    <div class="prog-wrap"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="read-controls">
+      <button class="btn btn-secondary" onclick="stopReadAloud()">Stop</button>
+      <button class="btn btn-primary" onclick="goToQuiz()">Quiz <i class="ti ti-chevron-right"></i></button>
+    </div>
+  </div>
+  <div id="quiz-btn-wrap" style="padding:16px 0 8px;text-align:right">
+    <button class="btn btn-primary" onclick="goToQuiz()">Take quiz <i class="ti ti-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div id="screen-quiz" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="showScreen('screen-reading')"><i class="ti ti-arrow-left"></i></button>
+    <span class="screen-label">Quiz time!</span>
+  </div>
+  <div class="quiz-meta">
+    <span class="quiz-prog" id="quiz-prog">1 / 3</span>
+  </div>
+  <div class="quiz-q" id="quiz-question"></div>
+  <div id="quiz-choices"></div>
+</div>
+
+<!-- ═══ RESULT ═══ -->
+<div id="screen-result" class="screen">
+  <div class="back-row">
+    <span style="font-size:20px;font-weight:700;padding-top:20px">Great reading!</span>
+  </div>
+  <div class="result-center">
+    <div class="stars-row" id="result-stars">⭐⭐⭐</div>
+    <div class="result-score" id="result-score">3 / 3</div>
+    <div class="result-msg" id="result-msg">Amazing job!</div>
+    <div id="level-change-pill"></div>
+  </div>
+  <div id="new-badges-list"></div>
+  <button class="btn btn-primary btn-full" onclick="showScreen('screen-home')">Back to home</button>
+</div>
+
+<!-- ═══ WORD JAR ═══ -->
+<div id="screen-wordjar" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="showScreen('screen-home')"><i class="ti ti-arrow-left"></i></button>
+    <span class="screen-label">Word jar</span>
+    <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="clearWordJar()">Clear all</button>
+  </div>
+  <div id="wordjar-chips"></div>
+</div>
+
+<!-- ═══ BADGES ═══ -->
+<div id="screen-badges" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="showScreen('screen-home')"><i class="ti ti-arrow-left"></i></button>
+    <span class="screen-label">Badges</span>
+  </div>
+  <div class="badge-grid" id="badge-grid"></div>
+</div>
+
+<!-- ═══ SIGHT WORD GAME ═══ -->
+<div id="screen-swgame" class="screen">
+  <div class="sw-header">
+    <button class="btn-icon" onclick="showScreen('screen-home')"><i class="ti ti-x"></i></button>
+    <span class="sw-prog-text" id="sw-prog">1 / 10</span>
+    <span class="pill pill-green" id="sw-score-pill">0 correct</span>
+  </div>
+  <div class="sw-center">
+    <div class="sw-word" id="sw-word">---</div>
+    <button class="sw-speak-btn" onclick="speakSwWord()"><i class="ti ti-volume"></i> Hear it again</button>
+  </div>
+  <div class="sw-grid" id="sw-choices"></div>
+</div>
+
+<!-- ═══ SW RESULT ═══ -->
+<div id="screen-swresult" class="screen">
+  <div class="back-row">
+    <span style="font-size:20px;font-weight:700;padding-top:20px">Word game done!</span>
+  </div>
+  <div class="sw-result-center">
+    <div class="stars-row" id="sw-stars">⭐⭐⭐</div>
+    <div class="result-score" id="sw-score-display">10 / 10</div>
+    <div class="result-msg" id="sw-msg">Word wizard!</div>
+  </div>
+  <div id="sw-new-badges" style="margin-bottom:16px"></div>
+  <button class="btn btn-primary btn-full" onclick="startSwGame()">Play again</button>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ PARENT ENTRY ═══ -->
+<div id="screen-parent-entry" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="showScreen('screen-home')"><i class="ti ti-arrow-left"></i></button>
+  </div>
+  <div class="pin-title">Parent Corner</div>
+  <div class="pin-sub">Enter your 4-digit PIN</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-error" id="pin-error"></div>
+  <div class="pin-pad">
+    <button class="pin-key" onclick="pinInput('1')">1</button>
+    <button class="pin-key" onclick="pinInput('2')">2</button>
+    <button class="pin-key" onclick="pinInput('3')">3</button>
+    <button class="pin-key" onclick="pinInput('4')">4</button>
+    <button class="pin-key" onclick="pinInput('5')">5</button>
+    <button class="pin-key" onclick="pinInput('6')">6</button>
+    <button class="pin-key" onclick="pinInput('7')">7</button>
+    <button class="pin-key" onclick="pinInput('8')">8</button>
+    <button class="pin-key" onclick="pinInput('9')">9</button>
+    <button class="pin-key" onclick="pinDel()"><i class="ti ti-backspace" style="font-size:18px"></i></button>
+    <button class="pin-key" onclick="pinInput('0')">0</button>
+    <button class="pin-key" style="visibility:hidden"></button>
+  </div>
+</div>
+
+<!-- ═══ PARENT CORNER ═══ -->
+<div id="screen-parent-corner" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="showScreen('screen-home')"><i class="ti ti-arrow-left"></i></button>
+    <span class="screen-label">Parent corner</span>
+  </div>
+
+  <div class="section-title">Stats</div>
+  <div class="stat-row"><span class="stat-label">Stories read</span><span class="stat-val" id="pc-stories">0</span></div>
+  <div class="stat-row"><span class="stat-label">Current level</span><span class="stat-val" id="pc-level">Level 2</span></div>
+  <div class="stat-row"><span class="stat-label">Badges earned</span><span class="stat-val" id="pc-badges">0 / 14</span></div>
+  <div class="stat-row"><span class="stat-label">Words saved</span><span class="stat-val" id="pc-words">0</span></div>
+  <div class="stat-row"><span class="stat-label">Day streak</span><span class="stat-val" id="pc-streak">0</span></div>
+
+  <div class="divider"></div>
+  <div class="section-title">Recent sessions</div>
+  <div id="pc-sessions"></div>
+
+  <div class="divider"></div>
+  <div class="section-title">API key</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Required for story generation. Get yours at console.anthropic.com</div>
+  <input type="password" class="text-input" id="api-key-input" placeholder="sk-ant-…" oninput="saveApiKey(this.value)">
+
+  <div class="divider"></div>
+  <div class="section-title">Change PIN</div>
+  <input type="text" class="text-input" id="new-pin-input" placeholder="New 4-digit PIN" maxlength="4" inputmode="numeric">
+  <button class="btn btn-secondary btn-full" onclick="changePIN()">Update PIN</button>
+
+  <div class="divider"></div>
+  <button class="btn btn-danger btn-full" onclick="confirmReset()">Reset all progress</button>
+  <div style="height:40px"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const TOPICS = [
+  { id:'space',     name:'Space adventures',  sub:'Planets, stars, and rockets',   bg:'#ede8f5', icon:'🚀' },
+  { id:'animals',   name:'Animals',           sub:'Wild creatures and their world', bg:'#e6f5ee', icon:'🦁' },
+  { id:'magic',     name:'Magic and mystery', sub:'Spells, potions, and puzzles',  bg:'#fce8ef', icon:'🔮' },
+  { id:'ocean',     name:'Ocean world',       sub:'Deep sea and hidden treasures', bg:'#e3eeff', icon:'🐬' },
+  { id:'inventors', name:'Young inventors',   sub:'Science, gadgets, and big ideas',bg:'#fef3e2',icon:'💡' },
+  { id:'dinosaurs', name:'Dinosaurs',         sub:'Giants of the ancient world',   bg:'#e8f5e8', icon:'🦕' },
+];
+
+const BADGES = [
+  { id:'first_story',  icon:'📖', name:'First Story',      desc:'Read your first story' },
+  { id:'five_stories', icon:'📚', name:'Bookworm',         desc:'Read 5 stories' },
+  { id:'ten_stories',  icon:'🏆', name:'Super Reader',     desc:'Read 10 stories' },
+  { id:'perfect_quiz', icon:'⭐', name:'Gold Star',        desc:'Get a perfect quiz score' },
+  { id:'three_perfect',icon:'🌟', name:'Quiz Star',        desc:'Get 3 perfect scores' },
+  { id:'level_up',     icon:'🚀', name:'Level Up!',        desc:'Reach Level 3' },
+  { id:'level_4',      icon:'🎯', name:'Advanced Reader',  desc:'Reach Level 4' },
+  { id:'word_collector',icon:'🫙',name:'Word Collector',   desc:'Save 10 words' },
+  { id:'word_hoarder', icon:'💎', name:'Word Hoarder',     desc:'Save 25 words' },
+  { id:'streak_3',     icon:'🔥', name:'3-Day Streak',     desc:'Read 3 days in a row' },
+  { id:'streak_7',     icon:'⚡', name:'Week Streak',      desc:'Read 7 days in a row' },
+  { id:'sw_first',     icon:'🎮', name:'Word Gamer',       desc:'Complete a word game' },
+  { id:'sw_perfect',   icon:'🎖️', name:'Word Master',      desc:'Perfect word game score' },
+  { id:'explorer',     icon:'🌍', name:'Explorer',         desc:'Read all 6 topics' },
+];
+
+const SW_EASY = ['the','a','is','it','in','on','at','up','do','go','he','she','we','my','no','so','to','of','or','as','be','by','am','an','if','me','us','him','not','and','but','for','you','can','had','was','are','all','one','two','out','get','see','big','run','fun','dog','cat','hat','red','sun'];
+const SW_HARD = ['said','have','from','they','were','there','their','what','when','where','which','could','would','should','every','about','after','again','also','been','both','come','does','each','find','give','good','help','here','into','just','keep','know','like','live','long','look','made','make','many','more','most','much','must','name','need','over','part','play','read','right','same','show','some','than','that','them','then','these','think','this','time','very','want','well','went','with','word','work','your'];
+
+const LEVEL_DESC = [
+  '',
+  'age 4-5, very simple 2-3 letter words, 3-4 short sentences total',
+  'age 5-6, simple common words, 4-6 short sentences',
+  'age 6-7, grade 1-2 vocabulary, 6-8 sentences',
+  'age 7-8, grade 2-3 vocabulary, 8-10 sentences',
+  'age 8-9, grade 3-4 vocabulary, 10-12 sentences',
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+function lsGet(k, def) {
+  const v = localStorage.getItem(k);
+  if (v === null) return def;
+  return v;
+}
+function lsSet(k, v) { localStorage.setItem(k, typeof v === 'object' ? JSON.stringify(v) : String(v)); }
+function lsJson(k, def) {
+  try { return JSON.parse(localStorage.getItem(k)) || def; } catch { return def; }
+}
+
+const S = {
+  level:    parseInt(lsGet('rl_level','2')),
+  journal:  lsJson('rl_journal', []),
+  sessions: lsJson('rl_sessions', []),
+  stories:  parseInt(lsGet('rl_stories','0')),
+  streak:   parseInt(lsGet('rl_streak','0')),
+  lastdate: lsGet('rl_lastdate',''),
+  badges:   lsJson('rl_badges', []),
+  perfect:  parseInt(lsGet('rl_perfect','0')),
+  maxlevel: parseInt(lsGet('rl_maxlevel','2')),
+  swgames:  parseInt(lsGet('rl_swgames','0')),
+  swperfect:parseInt(lsGet('rl_swperfect','0')),
+  topics:   lsJson('rl_topics', []),
+  pin:      lsGet('rl_pin','1234'),
+  apiKey:   lsGet('rl_apikey',''),
+  // transient
+  topic: null, title: '', story: '', words: [], quiz: [],
+  quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
+  readActive: false, readIdx: 0,
+  swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
+  pinBuf: '',
+};
+
+function persist() {
+  lsSet('rl_level',    S.level);
+  lsSet('rl_journal',  S.journal);
+  lsSet('rl_sessions', S.sessions);
+  lsSet('rl_stories',  S.stories);
+  lsSet('rl_streak',   S.streak);
+  lsSet('rl_lastdate', S.lastdate);
+  lsSet('rl_badges',   S.badges);
+  lsSet('rl_perfect',  S.perfect);
+  lsSet('rl_maxlevel', S.maxlevel);
+  lsSet('rl_swgames',  S.swgames);
+  lsSet('rl_swperfect',S.swperfect);
+  lsSet('rl_topics',   S.topics);
+  lsSet('rl_pin',      S.pin);
+  lsSet('rl_apikey',   S.apiKey);
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'screen-home')          refreshHome();
+  if (id === 'screen-wordjar')       renderWordJar();
+  if (id === 'screen-badges')        renderBadges();
+  if (id === 'screen-parent-corner') renderParentCorner();
+  if (id === 'screen-parent-entry')  initPinEntry();
+}
+
+// ─── HOME ─────────────────────────────────────────────────────────────────────
+
+function refreshHome() {
+  document.getElementById('home-level-pill').innerHTML =
+    `<i class="ti ti-star"></i> Level ${S.level}`;
+  document.getElementById('home-streak-pill').innerHTML = S.streak > 0
+    ? `<i class="ti ti-flame"></i> ${S.streak} day streak`
+    : `<i class="ti ti-flame"></i> No streak yet`;
+  document.getElementById('sc-words-count').textContent  = `${S.journal.length} saved`;
+  document.getElementById('sc-badges-count').textContent = `${S.badges.length} earned`;
+
+  document.getElementById('topic-list').innerHTML = TOPICS.map(t => `
+    <div class="topic-card" onclick="pickTopic('${t.id}')">
+      <div class="topic-icon" style="background:${t.bg}">${t.icon}</div>
+      <div>
+        <div class="topic-name">${t.name}</div>
+        <div class="topic-sub">${t.sub}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── STORY FETCH ─────────────────────────────────────────────────────────────
+
+async function pickTopic(topicId) {
+  if (!S.apiKey) {
+    showToast('Add your API key in Parent Corner first');
+    return;
+  }
+  S.topic = TOPICS.find(t => t.id === topicId);
+  document.getElementById('loading-label').textContent = `Loading ${S.topic.name}…`;
+  showScreen('screen-loading');
+  updateStreak();
+  try {
+    const data = await fetchStory(S.topic, S.level);
+    S.title = data.title;
+    S.story = data.story;
+    S.quiz  = data.questions;
+    S.words = S.story.split(/\s+/).filter(Boolean);
+    renderReading();
+    showScreen('screen-reading');
+  } catch (err) {
+    console.error(err);
+    showToast('Could not load story — check your API key');
+    showScreen('screen-home');
+  }
+}
+
+async function fetchStory(topic, level) {
+  const prompt = `Write a short children's reading story about "${topic.name}" (${topic.sub}) for a child at reading level: ${LEVEL_DESC[level]}.
+
+Return ONLY valid JSON, no markdown, no code fences:
+{
+  "title": "Story title",
+  "story": "Full story as one paragraph.",
+  "questions": [
+    {"q": "Question?", "choices": ["A","B","C","D"], "answer": 0},
+    {"q": "Question?", "choices": ["A","B","C","D"], "answer": 2},
+    {"q": "Question?", "choices": ["A","B","C","D"], "answer": 1}
+  ]
+}
+Rules: story must be engaging and age-appropriate. All 3 questions must be about the story. "answer" is the 0-based index of the correct choice. Keep choices short (2-5 words). Return raw JSON only.`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': S.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-allow-browser': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.error?.message || `HTTP ${res.status}`);
+  }
+  const body = await res.json();
+  const raw  = body.content[0].text.trim().replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'');
+  return JSON.parse(raw);
+}
+
+// ─── READING ─────────────────────────────────────────────────────────────────
+
+function renderReading() {
+  document.getElementById('reading-title').textContent = S.title;
+  document.getElementById('story-text').innerHTML = S.words.map((w, i) => {
+    const clean = w.replace(/[^a-zA-Z']/g, '').toLowerCase();
+    const saved = clean && S.journal.includes(clean);
+    return `<span class="word${saved?' saved':''}" data-i="${i}" data-w="${clean}" onclick="tapWord(this)">${w} </span>`;
+  }).join('');
+  document.getElementById('read-bar').style.display  = 'none';
+  document.getElementById('quiz-btn-wrap').style.display = '';
+  document.getElementById('btn-read-aloud').querySelector('i').className = 'ti ti-volume';
+  stopSpeech();
+}
+
+function tapWord(el) {
+  const word = el.dataset.w;
+  speak(word || el.textContent.trim());
+  el.classList.add('tapped');
+  setTimeout(() => el.classList.remove('tapped'), 400);
+  if (word && !S.journal.includes(word)) {
+    S.journal.push(word);
+    el.classList.add('saved');
+    persist();
+    awardWordBadges();
+    showToast(`"${word}" saved to word jar`);
+  }
+}
+
+function goHomeFromReading() {
+  stopSpeech();
+  showScreen('screen-home');
+}
+
+// ─── READ ALOUD ───────────────────────────────────────────────────────────────
+
+function toggleReadAloud() {
+  S.readActive ? stopReadAloud() : startReadAloud();
+}
+
+function startReadAloud() {
+  S.readActive = true;
+  S.readIdx = 0;
+  document.getElementById('read-bar').style.display  = '';
+  document.getElementById('quiz-btn-wrap').style.display = 'none';
+  document.getElementById('btn-read-aloud').querySelector('i').className = 'ti ti-volume-off';
+  advanceRead();
+}
+
+function stopReadAloud() {
+  S.readActive = false;
+  stopSpeech();
+  document.querySelectorAll('#story-text .word.highlight').forEach(el => el.classList.remove('highlight'));
+  document.getElementById('read-bar').style.display  = 'none';
+  document.getElementById('quiz-btn-wrap').style.display = '';
+  document.getElementById('btn-read-aloud').querySelector('i').className = 'ti ti-volume';
+  document.getElementById('prog-fill').style.width = '0';
+}
+
+function advanceRead() {
+  if (!S.readActive) return;
+  const els = document.querySelectorAll('#story-text .word');
+  if (S.readIdx >= els.length) { stopReadAloud(); return; }
+  document.querySelectorAll('#story-text .word.highlight').forEach(el => el.classList.remove('highlight'));
+  const el = els[S.readIdx];
+  el.classList.add('highlight');
+  el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  document.getElementById('prog-fill').style.width = ((S.readIdx + 1) / els.length * 100) + '%';
+  const word = el.dataset.w || el.textContent.trim().replace(/\s/,'');
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(word);
+  utt.rate = 0.85;
+  utt.onend = () => { S.readIdx++; setTimeout(advanceRead, 130); };
+  speechSynthesis.speak(utt);
+}
+
+// ─── QUIZ ─────────────────────────────────────────────────────────────────────
+
+function goToQuiz() {
+  stopSpeech();
+  S.quizIdx = 0; S.quizScore = 0; S.quizAnswered = false;
+  renderQuizQ();
+  showScreen('screen-quiz');
+}
+
+function renderQuizQ() {
+  const q = S.quiz[S.quizIdx];
+  document.getElementById('quiz-prog').textContent = `${S.quizIdx + 1} / ${S.quiz.length}`;
+  document.getElementById('quiz-question').textContent = q.q;
+  document.getElementById('quiz-choices').innerHTML = q.choices.map((c, i) =>
+    `<button class="choice" onclick="answerQuiz(${i})">${c}</button>`).join('');
+  S.quizAnswered = false;
+}
+
+function answerQuiz(chosen) {
+  if (S.quizAnswered) return;
+  S.quizAnswered = true;
+  const q   = S.quiz[S.quizIdx];
+  const btns = document.querySelectorAll('.choice');
+  btns.forEach(b => b.disabled = true);
+  btns[chosen].classList.add(chosen === q.answer ? 'correct' : 'wrong');
+  if (chosen !== q.answer) btns[q.answer].classList.add('correct');
+  if (chosen === q.answer) S.quizScore++;
+  setTimeout(() => {
+    S.quizIdx++;
+    S.quizIdx < S.quiz.length ? renderQuizQ() : showResult();
+  }, 900);
+}
+
+// ─── RESULT ───────────────────────────────────────────────────────────────────
+
+function showResult() {
+  const total = S.quiz.length;
+  const score = S.quizScore;
+  const pct   = score / total;
+
+  S.stories++;
+  const tid = S.topic.id;
+  if (!S.topics.includes(tid)) S.topics.push(tid);
+  if (pct === 1) S.perfect++;
+
+  const prevLevel = S.level;
+  if (pct >= 0.9 && S.level < 5) S.level++;
+  else if (pct < 0.5 && S.level > 1) S.level--;
+  if (S.level > S.maxlevel) S.maxlevel = S.level;
+
+  S.sessions.unshift({ topic: S.topic.name, score:`${score}/${total}`, date: new Date().toLocaleDateString(), level: S.level });
+  if (S.sessions.length > 20) S.sessions.pop();
+
+  S.newBadges = awardAll();
+  persist();
+
+  document.getElementById('result-stars').textContent = ['☆','⭐','⭐⭐','⭐⭐⭐'][score] || '⭐⭐⭐';
+  document.getElementById('result-score').textContent = `${score} / ${total}`;
+  document.getElementById('result-msg').textContent   = pct === 1 ? 'Amazing! Perfect score!' : pct >= 0.67 ? 'Great job!' : 'Keep practicing!';
+
+  const pill = document.getElementById('level-change-pill');
+  if (S.level > prevLevel)
+    pill.innerHTML = `<span class="level-pill pill-up"><i class="ti ti-trending-up"></i> Level up! Now Level ${S.level}</span>`;
+  else if (S.level < prevLevel)
+    pill.innerHTML = `<span class="level-pill pill-down">Keeping it at Level ${S.level}</span>`;
+  else
+    pill.innerHTML = '';
+
+  document.getElementById('new-badges-list').innerHTML = S.newBadges.map(b => `
+    <div class="new-badge">
+      <span class="nb-emoji">${b.icon}</span>
+      <div><div class="nb-name">New badge: ${b.name}</div><div class="nb-desc">${b.desc}</div></div>
+    </div>`).join('');
+
+  showScreen('screen-result');
+}
+
+// ─── BADGES ───────────────────────────────────────────────────────────────────
+
+function awardAll() {
+  const earned = [];
+  const has  = id => S.badges.includes(id);
+  const give = id => { if (!has(id)) { S.badges.push(id); earned.push(BADGES.find(b=>b.id===id)); } };
+  if (S.stories  >= 1)  give('first_story');
+  if (S.stories  >= 5)  give('five_stories');
+  if (S.stories  >= 10) give('ten_stories');
+  if (S.perfect  >= 1)  give('perfect_quiz');
+  if (S.perfect  >= 3)  give('three_perfect');
+  if (S.maxlevel >= 3)  give('level_up');
+  if (S.maxlevel >= 4)  give('level_4');
+  if (S.journal.length  >= 10) give('word_collector');
+  if (S.journal.length  >= 25) give('word_hoarder');
+  if (S.streak   >= 3)  give('streak_3');
+  if (S.streak   >= 7)  give('streak_7');
+  if (S.swgames  >= 1)  give('sw_first');
+  if (S.swperfect>= 1)  give('sw_perfect');
+  if (S.topics.length >= 6) give('explorer');
+  return earned.filter(Boolean);
+}
+
+function awardWordBadges() {
+  const prev = S.badges.length;
+  const news = awardAll();
+  if (news.length) { persist(); news.forEach(b => showToast(`Badge unlocked: ${b.name}!`)); }
+}
+
+function renderBadges() {
+  document.getElementById('badge-grid').innerHTML = BADGES.map(b => {
+    const unlocked = S.badges.includes(b.id);
+    return `<div class="badge-card${unlocked?'':' locked'}">
+      <div class="bc-emoji">${unlocked ? b.icon : '❓'}</div>
+      <div class="bc-name">${unlocked ? b.name : '???'}</div>
+      <div class="bc-desc">${unlocked ? b.desc : 'Keep reading!'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── WORD JAR ─────────────────────────────────────────────────────────────────
+
+function renderWordJar() {
+  const el = document.getElementById('wordjar-chips');
+  if (!S.journal.length) {
+    el.innerHTML = '<div class="empty"><i class="ti ti-books"></i>Tap words while reading to save them here!</div>';
+    return;
+  }
+  el.innerHTML = '<div class="chips">' +
+    S.journal.map(w => `<div class="chip" onclick="speak('${w.replace(/'/g,"\\'")}')"> ${w}</div>`).join('') +
+    '</div>';
+}
+
+function clearWordJar() {
+  if (!confirm('Clear all saved words?')) return;
+  S.journal = [];
+  persist();
+  renderWordJar();
+  document.getElementById('sc-words-count').textContent = '0 saved';
+}
+
+// ─── SIGHT WORD GAME ─────────────────────────────────────────────────────────
+
+function startSwGame() {
+  const pool = S.level >= 3 ? [...SW_EASY, ...SW_HARD] : [...SW_EASY];
+  const shuffled = pool.sort(() => Math.random() - 0.5);
+  S.swWords = shuffled.slice(0, 10);
+  S.swIdx   = 0;
+  S.swScore = 0;
+  showScreen('screen-swgame');
+  renderSwRound();
+}
+
+function renderSwRound() {
+  const word = S.swWords[S.swIdx];
+  document.getElementById('sw-prog').textContent       = `${S.swIdx + 1} / 10`;
+  document.getElementById('sw-score-pill').textContent  = `${S.swScore} correct`;
+  document.getElementById('sw-word').textContent        = word;
+  S.swAnswered = false;
+
+  const pool = S.level >= 3 ? [...SW_EASY, ...SW_HARD] : [...SW_EASY];
+  const distractors = pool.filter(w => w !== word).sort(() => Math.random() - 0.5).slice(0, 3);
+  const choices = [...distractors, word].sort(() => Math.random() - 0.5);
+
+  document.getElementById('sw-choices').innerHTML = choices.map((c, i) =>
+    `<button class="sw-choice" onclick="answerSw(this,${i})" data-word="${c}">${c}</button>`).join('');
+
+  setTimeout(speakSwWord, 350);
+}
+
+function speakSwWord() {
+  speak(document.getElementById('sw-word').textContent);
+}
+
+function answerSw(el, idx) {
+  if (S.swAnswered) return;
+  S.swAnswered = true;
+  const correct = S.swWords[S.swIdx];
+  document.querySelectorAll('.sw-choice').forEach(b => b.disabled = true);
+  if (el.dataset.word === correct) {
+    el.classList.add('correct');
+    S.swScore++;
+  } else {
+    el.classList.add('wrong');
+    document.querySelectorAll('.sw-choice').forEach(b => { if (b.dataset.word === correct) b.classList.add('correct'); });
+  }
+  setTimeout(() => { S.swIdx++; S.swIdx < 10 ? renderSwRound() : showSwResult(); }, 850);
+}
+
+function showSwResult() {
+  S.swgames++;
+  if (S.swScore === 10) S.swperfect++;
+  const news = awardAll();
+  persist();
+
+  const pct = S.swScore / 10;
+  document.getElementById('sw-score-display').textContent = `${S.swScore} / 10`;
+  document.getElementById('sw-stars').textContent         = pct === 1 ? '⭐⭐⭐' : pct >= 0.7 ? '⭐⭐' : '⭐';
+  document.getElementById('sw-msg').textContent           = pct === 1 ? 'Word wizard! Perfect!' : pct >= 0.7 ? 'Great work!' : 'Keep practicing!';
+  document.getElementById('sw-new-badges').innerHTML      = news.map(b => `
+    <div class="new-badge">
+      <span class="nb-emoji">${b.icon}</span>
+      <div><div class="nb-name">New badge: ${b.name}</div><div class="nb-desc">${b.desc}</div></div>
+    </div>`).join('');
+
+  showScreen('screen-swresult');
+}
+
+// ─── PIN ──────────────────────────────────────────────────────────────────────
+
+function initPinEntry() {
+  S.pinBuf = '';
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+}
+
+function pinInput(d) {
+  if (S.pinBuf.length >= 4) return;
+  S.pinBuf += d;
+  updatePinDots();
+  if (S.pinBuf.length === 4) setTimeout(checkPin, 150);
+}
+
+function pinDel() {
+  S.pinBuf = S.pinBuf.slice(0, -1);
+  updatePinDots();
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++)
+    document.getElementById(`pd${i}`).classList.toggle('filled', i < S.pinBuf.length);
+}
+
+function checkPin() {
+  if (S.pinBuf === S.pin) {
+    document.getElementById('pin-error').textContent = '';
+    showScreen('screen-parent-corner');
+  } else {
+    document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
+    S.pinBuf = '';
+    updatePinDots();
+  }
+}
+
+// ─── PARENT CORNER ────────────────────────────────────────────────────────────
+
+function renderParentCorner() {
+  document.getElementById('pc-stories').textContent = S.stories;
+  document.getElementById('pc-level').textContent   = `Level ${S.level}`;
+  document.getElementById('pc-badges').textContent  = `${S.badges.length} / 14`;
+  document.getElementById('pc-words').textContent   = S.journal.length;
+  document.getElementById('pc-streak').textContent  = `${S.streak} day${S.streak !== 1 ? 's' : ''}`;
+  document.getElementById('api-key-input').value    = S.apiKey;
+
+  const sessEl = document.getElementById('pc-sessions');
+  if (!S.sessions.length) {
+    sessEl.innerHTML = '<div class="empty" style="padding:16px 0"><i class="ti ti-history"></i>No sessions yet</div>';
+  } else {
+    sessEl.innerHTML = S.sessions.slice(0, 10).map(s =>
+      `<div class="session-item">
+        <div class="si-topic">${s.topic}</div>
+        <div class="si-meta">${s.date} · Score: ${s.score} · Level ${s.level}</div>
+      </div>`).join('');
+  }
+}
+
+function saveApiKey(v) {
+  S.apiKey = v.trim();
+  lsSet('rl_apikey', S.apiKey);
+}
+
+function changePIN() {
+  const v = document.getElementById('new-pin-input').value.trim();
+  if (!/^\d{4}$/.test(v)) { showToast('PIN must be exactly 4 digits'); return; }
+  S.pin = v;
+  persist();
+  document.getElementById('new-pin-input').value = '';
+  showToast('PIN updated!');
+}
+
+function confirmReset() {
+  if (!confirm('Reset ALL progress? This cannot be undone.')) return;
+  ['rl_level','rl_journal','rl_sessions','rl_stories','rl_streak','rl_lastdate',
+   'rl_badges','rl_perfect','rl_maxlevel','rl_swgames','rl_swperfect','rl_topics','rl_pin']
+    .forEach(k => localStorage.removeItem(k));
+  location.reload();
+}
+
+// ─── STREAK ───────────────────────────────────────────────────────────────────
+
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (S.lastdate === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  S.streak = S.lastdate === yesterday ? S.streak + 1 : 1;
+  S.lastdate = today;
+  persist();
+}
+
+// ─── SPEECH ───────────────────────────────────────────────────────────────────
+
+function speak(word) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(word);
+  utt.rate = 0.9;
+  speechSynthesis.speak(utt);
+}
+
+function stopSpeech() {
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  S.readActive = false;
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+
+let _toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+// ─── BOOT ────────────────────────────────────────────────────────────────────
+
+refreshHome();
+</script>
+</body>
+</html>

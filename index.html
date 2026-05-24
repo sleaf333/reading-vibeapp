@@ -463,7 +463,7 @@ function lsJson(k, def) {
 }
 
 const S = {
-  level:    parseInt(lsGet('rl_level','2')),
+  level:    parseInt(lsGet('rl_level','1')),
   journal:  lsJson('rl_journal', []),
   sessions: lsJson('rl_sessions', []),
   stories:  parseInt(lsGet('rl_stories','0')),
@@ -471,7 +471,7 @@ const S = {
   lastdate: lsGet('rl_lastdate',''),
   badges:   lsJson('rl_badges', []),
   perfect:  parseInt(lsGet('rl_perfect','0')),
-  maxlevel: parseInt(lsGet('rl_maxlevel','2')),
+  maxlevel: parseInt(lsGet('rl_maxlevel','1')),
   swgames:  parseInt(lsGet('rl_swgames','0')),
   swperfect:parseInt(lsGet('rl_swperfect','0')),
   topics:   lsJson('rl_topics', []),

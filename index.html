@@ -554,7 +554,7 @@ async function pickTopic(topicId) {
     showScreen('screen-reading');
   } catch (err) {
     console.error(err);
-    showToast('Could not load story — check your API key');
+    showToast(err.message || 'Could not load story — check your API key');
     showScreen('screen-home');
   }
 }
@@ -575,7 +575,7 @@ Return ONLY valid JSON, no markdown, no code fences:
 Rules: story must be engaging and age-appropriate. All 3 questions must be about the story. "answer" is the 0-based index of the correct choice. Keep choices short (2-5 words). Return raw JSON only.`;
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${S.apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${S.apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

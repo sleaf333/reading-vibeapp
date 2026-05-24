@@ -836,8 +836,8 @@ function renderReading() {
     return `<span class="word" data-i="${i}" data-w="${clean}" onclick="tapWord(this)">${w} </span>`;
   }).join('');
   const st = document.getElementById('story-text');
-  st.style.fontSize   = S.level <= 2 ? '21px' : '19px';
-  st.style.lineHeight = S.level <= 2 ? '2.4'  : '2.2';
+  st.style.fontSize   = S.level <= 2 ? '26px' : '23px';
+  st.style.lineHeight = S.level <= 2 ? '2.5'  : '2.3';
   document.getElementById('read-bar').style.display = 'none';
   document.getElementById('quiz-btn-wrap').style.display = '';
   document.getElementById('quiz-section').style.display = 'none';

@@ -281,6 +281,46 @@
     .confetti-piece { position: fixed; top: -20px; pointer-events: none; z-index: 9999; animation: confettiFall linear forwards; }
     @keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
 
+    /* ── DAILY NEWS ── */
+    .dn-home-card {
+      display: flex; align-items: center; gap: 16px;
+      background: linear-gradient(145deg, #fffde7, #fff8c4);
+      border: 1.5px solid #f0c820;
+      border-radius: var(--r); padding: 16px 18px; margin-top: 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.7);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.13s, box-shadow 0.13s;
+    }
+    .dn-home-card:active { transform: scale(0.97); box-shadow: none; }
+    .dn-word-display {
+      font-size: 48px; font-weight: 900; letter-spacing: 4px;
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 2px;
+    }
+    .dn-letter     { display: inline-block; transition: color 0.2s, opacity 0.2s; }
+    .dn-letter-hi  { color: var(--accent); }
+    .dn-letter-hi2 { color: #e05050; }
+    .dn-letter-dim { opacity: 0.22; }
+    .dn-question-box {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r); padding: 16px 18px; margin: 14px 0 10px;
+      text-align: center; box-shadow: var(--shadow-sm);
+    }
+    .dn-step-label { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .dn-question   { font-size: 19px; font-weight: 800; line-height: 1.5; }
+    .dn-numpad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 4px 0; }
+    .dn-num-btn {
+      height: 58px; background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; font-size: 22px; font-weight: 800; cursor: pointer;
+      color: var(--text); font-family: inherit; box-shadow: var(--shadow-sm);
+      -webkit-tap-highlight-color: transparent; transition: transform 0.1s;
+    }
+    .dn-num-btn:active:not(:disabled) { transform: scale(0.92); background: var(--accent-lt); border-color: var(--accent); }
+    .dn-num-btn:disabled { cursor: default; opacity: 0.5; }
+    .dn-feedback { text-align: center; font-size: 20px; font-weight: 800; min-height: 38px; padding: 6px 0; }
+    .dn-feedback.correct { color: var(--accent); }
+    .dn-feedback.wrong   { color: #e05050; }
+
     /* ── TOAST ── */
     #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: var(--pr); font-size: 14px; font-weight: 700; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
     #toast.show { opacity: 1; }
@@ -315,6 +355,49 @@
       <div class="sc-sub" id="sc-badges-count">0 earned</div>
     </div>
   </div>
+
+  <div class="dn-home-card" onclick="startDnGame()">
+    <div style="font-size:42px;line-height:1">📰</div>
+    <div>
+      <div style="font-size:17px;font-weight:800">Daily News</div>
+      <div style="font-size:13px;color:rgba(0,0,0,0.5);font-weight:600;margin-top:3px">Count letters · solve the math</div>
+    </div>
+    <div style="margin-left:auto;font-size:26px;opacity:0.4">›</div>
+  </div>
+</div>
+
+<!-- ═══ DAILY NEWS GAME ═══ -->
+<div id="screen-dnews" class="screen">
+  <div class="sw-header">
+    <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
+    <span class="sw-prog-text" id="dn-prog">Word 1 of 5</span>
+    <span class="pill pill-green" id="dn-score-pill">0 ✓</span>
+  </div>
+  <div style="text-align:center;padding:16px 0 6px">
+    <div id="dn-word-display" class="dn-word-display"></div>
+  </div>
+  <div class="dn-question-box">
+    <div class="dn-step-label" id="dn-step-label">Step 1 of 3 — Count letters</div>
+    <div class="dn-question" id="dn-question"></div>
+  </div>
+  <div class="dn-numpad" id="dn-numpad"></div>
+  <div class="dn-feedback" id="dn-feedback"></div>
+</div>
+
+<!-- ═══ DAILY NEWS RESULT ═══ -->
+<div id="screen-dnresult" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="showScreen('screen-home')">🏠</button>
+    <span class="screen-label">Daily News done! 📰</span>
+  </div>
+  <div class="sw-result-center">
+    <div class="stars-row" id="dn-result-stars">⭐⭐⭐</div>
+    <div class="result-score" id="dn-result-score">15 / 15</div>
+    <div class="result-msg" id="dn-result-msg">Math wizard!</div>
+  </div>
+  <div id="dn-new-badges" style="margin-bottom:16px"></div>
+  <button class="btn btn-primary btn-full" onclick="startDnGame()">Play again</button>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
 </div>
 
 <!-- ═══ LOADING ═══ -->
@@ -516,6 +599,8 @@ const BADGES = [
   { id:'sw_first',     icon:'🎮', name:'Word Gamer',       desc:'Complete a word game' },
   { id:'sw_perfect',   icon:'🎖️', name:'Word Master',      desc:'Perfect word game score' },
   { id:'explorer',     icon:'🌍', name:'Explorer',         desc:'Read all 6 topics' },
+  { id:'dn_first',     icon:'📰', name:'Daily Reporter',   desc:'Complete your first Daily News' },
+  { id:'dn_perfect',   icon:'🧮', name:'Math Whiz',        desc:'Perfect Daily News score (15/15)' },
 ];
 
 const SW_EASY = ['the','a','is','it','in','on','at','up','do','go','he','she','we','my','no','so','to','of','or','as','be','by','am','an','if','me','us','him','not','and','but','for','you','can','had','was','are','all','one','two','out','get','see','big','run','fun','dog','cat','hat','red','sun'];
@@ -554,6 +639,8 @@ const S = {
   maxlevel: parseInt(lsGet('rl_maxlevel','1')),
   swgames:  parseInt(lsGet('rl_swgames','0')),
   swperfect:parseInt(lsGet('rl_swperfect','0')),
+  dngames:  parseInt(lsGet('rl_dngames','0')),
+  dnperfect:parseInt(lsGet('rl_dnperfect','0')),
   topics:   lsJson('rl_topics', []),
   pin:      lsGet('rl_pin','1234'),
   apiKey:   lsGet('rl_apikey',''),
@@ -563,6 +650,7 @@ const S = {
   quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
   readActive: false, readIdx: 0,
   swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
+  dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false,
   pinBuf: '',
 };
 
@@ -578,6 +666,8 @@ function persist() {
   lsSet('rl_maxlevel', S.maxlevel);
   lsSet('rl_swgames',  S.swgames);
   lsSet('rl_swperfect',S.swperfect);
+  lsSet('rl_dngames',  S.dngames);
+  lsSet('rl_dnperfect',S.dnperfect);
   lsSet('rl_topics',   S.topics);
   lsSet('rl_pin',      S.pin);
   lsSet('rl_apikey',   S.apiKey);
@@ -924,6 +1014,8 @@ function awardAll() {
   if (S.swgames  >= 1)  give('sw_first');
   if (S.swperfect>= 1)  give('sw_perfect');
   if (S.topics.length >= 6) give('explorer');
+  if (S.dngames  >= 1)  give('dn_first');
+  if (S.dnperfect >= 1) give('dn_perfect');
   return earned.filter(Boolean);
 }
 
@@ -1086,7 +1178,7 @@ function changePIN() {
 function confirmReset() {
   if (!confirm('Reset ALL progress? This cannot be undone.')) return;
   ['rl_level','rl_levelprog','rl_sessions','rl_stories','rl_streak','rl_lastdate',
-   'rl_badges','rl_perfect','rl_maxlevel','rl_swgames','rl_swperfect','rl_topics','rl_pin']
+   'rl_badges','rl_perfect','rl_maxlevel','rl_swgames','rl_swperfect','rl_dngames','rl_dnperfect','rl_topics','rl_pin']
     .forEach(k => localStorage.removeItem(k));
   location.reload();
 }
@@ -1126,6 +1218,142 @@ function showToast(msg) {
   el.classList.add('show');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+// ─── DAILY NEWS ──────────────────────────────────────────────────────────────
+
+const DN_WORDS = [
+  null,
+  ['CAT','DOG','HAT','SUN','RUN','BIG','HOP','BAT','FAN','PIN'],
+  ['TREE','BOOK','MOON','FEET','SEED','POOL','BELL','FROG','STAR','RAIN'],
+  ['APPLE','BUNNY','PUPPY','HAPPY','QUEEN','GREEN','KITTY','FUNNY','PEPPER'],
+  ['BANANA','RABBIT','BALLOON','KITTEN','BUTTER','LETTER','SUMMER','ZIPPER'],
+  ['STRAWBERRY','CATERPILLAR','CHOCOLATE','ELEPHANT','BUTTERFLY','MISSISSIPPI'],
+];
+
+function startDnGame() {
+  const bank = DN_WORDS[Math.min(S.level, 5)];
+  const words = [...bank].sort(() => Math.random() - 0.5).slice(0, 5);
+  S.dnRounds   = words.map(generateDnRound);
+  S.dnRoundIdx = 0;
+  S.dnStep     = 0;
+  S.dnScore    = 0;
+  S.dnAnswered = false;
+  showScreen('screen-dnews');
+  renderDnRound();
+}
+
+function generateDnRound(word) {
+  const freq = {};
+  for (const ch of word) freq[ch] = (freq[ch] || 0) + 1;
+  const all = Object.keys(freq).sort((a, b) => freq[b] - freq[a]);
+  const rich = all.filter(l => freq[l] > 1);
+  const plain = all.filter(l => freq[l] === 1);
+  const pool = rich.length >= 2 ? [...rich].sort(() => Math.random() - 0.5)
+             : rich.length === 1 ? [rich[0], ...[...plain].sort(() => Math.random() - 0.5)]
+             : [...all].sort(() => Math.random() - 0.5);
+  let l1 = pool[0], l2 = pool.find(l => l !== l1) || pool[1];
+  let c1 = freq[l1], c2 = freq[l2];
+  let op = '+';
+  if (S.level >= 2 && c1 !== c2) {
+    const p = S.level === 2 ? 0.25 : S.level === 3 ? 0.4 : 0.5;
+    if (Math.random() < p) op = '-';
+  }
+  if (op === '-' && c1 < c2) { [l1, l2] = [l2, l1]; [c1, c2] = [c2, c1]; }
+  return { word, l1, c1, l2, c2, op, answer: op === '+' ? c1 + c2 : c1 - c2 };
+}
+
+function renderDnRound() {
+  const r = S.dnRounds[S.dnRoundIdx];
+  S.dnAnswered = false;
+  document.getElementById('dn-prog').textContent = `Word ${S.dnRoundIdx + 1} of 5`;
+  document.getElementById('dn-score-pill').textContent = `${S.dnScore} ✓`;
+  document.getElementById('dn-feedback').textContent = '';
+  document.getElementById('dn-feedback').className = 'dn-feedback';
+
+  const stepLabels = [
+    'Step 1 of 3 — Count the letters',
+    'Step 2 of 3 — Count the letters',
+    'Step 3 of 3 — Solve the math! 🧮',
+  ];
+  document.getElementById('dn-step-label').textContent = stepLabels[S.dnStep];
+
+  if (S.dnStep === 0) {
+    renderDnWord(r.word, r.l1, null);
+    document.getElementById('dn-question').innerHTML =
+      `How many <span style="color:var(--accent);font-size:26px">${r.l1}</span>'s do you see?`;
+  } else if (S.dnStep === 1) {
+    renderDnWord(r.word, r.l2, null);
+    document.getElementById('dn-question').innerHTML =
+      `Now count the <span style="color:#e05050;font-size:26px">${r.l2}</span>'s — how many?`;
+  } else {
+    renderDnWord(r.word, r.l1, r.l2);
+    document.getElementById('dn-question').innerHTML =
+      `<span style="color:var(--accent)">${r.c1} ${r.l1}</span> and <span style="color:#e05050">${r.c2} ${r.l2}</span> &nbsp;→&nbsp; ` +
+      `<span style="font-size:28px;letter-spacing:3px">${r.c1} ${r.op} ${r.c2} = ?</span>`;
+  }
+  renderDnNumpad();
+}
+
+function renderDnWord(word, hi1, hi2) {
+  const fs = word.length <= 4 ? '52px' : word.length <= 6 ? '42px' : word.length <= 8 ? '34px' : '27px';
+  const el = document.getElementById('dn-word-display');
+  el.style.fontSize = fs;
+  el.innerHTML = word.split('').map(ch => {
+    let cls = 'dn-letter';
+    if      (ch === hi1 && !hi2) cls += ' dn-letter-hi';
+    else if (ch === hi1)         cls += ' dn-letter-hi';
+    else if (ch === hi2)         cls += ' dn-letter-hi2';
+    else if (hi1 || hi2)         cls += ' dn-letter-dim';
+    return `<span class="${cls}">${ch}</span>`;
+  }).join('');
+}
+
+function renderDnNumpad() {
+  document.getElementById('dn-numpad').innerHTML =
+    Array.from({length: 10}, (_, i) =>
+      `<button class="dn-num-btn" onclick="answerDn(${i})">${i}</button>`
+    ).join('');
+}
+
+function answerDn(num) {
+  if (S.dnAnswered) return;
+  S.dnAnswered = true;
+  const r = S.dnRounds[S.dnRoundIdx];
+  document.querySelectorAll('.dn-num-btn').forEach(b => b.disabled = true);
+  const correct = num === (S.dnStep === 0 ? r.c1 : S.dnStep === 1 ? r.c2 : r.answer);
+  if (correct) S.dnScore++;
+  const correctVal = S.dnStep === 0 ? r.c1 : S.dnStep === 1 ? r.c2 : r.answer;
+  const fb = document.getElementById('dn-feedback');
+  fb.textContent = correct
+    ? (S.dnStep === 2 ? '🎉 Correct!' : `✓ Yes, ${correctVal}!`)
+    : `The answer is ${correctVal}`;
+  fb.className = 'dn-feedback ' + (correct ? 'correct' : 'wrong');
+  setTimeout(() => {
+    S.dnStep++;
+    if (S.dnStep > 2) { S.dnStep = 0; S.dnRoundIdx++; }
+    if (S.dnRoundIdx >= 5) showDnResult();
+    else renderDnRound();
+  }, 1300);
+}
+
+function showDnResult() {
+  S.dngames++;
+  if (S.dnScore === 15) S.dnperfect++;
+  const newB = awardAll();
+  persist();
+  const pct = S.dnScore / 15;
+  document.getElementById('dn-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
+  document.getElementById('dn-result-score').textContent = `${S.dnScore} / 15`;
+  document.getElementById('dn-result-msg').textContent   =
+    pct === 1 ? 'Perfect score! Math wizard! 🧮' : pct >= 0.8 ? 'Amazing work!' : pct >= 0.6 ? 'Good effort!' : 'Keep practicing!';
+  document.getElementById('dn-new-badges').innerHTML = newB.map(b => `
+    <div class="new-badge">
+      <span class="nb-emoji">${b.icon}</span>
+      <div><div class="nb-name">New badge: ${b.name}</div><div class="nb-desc">${b.desc}</div></div>
+    </div>`).join('');
+  showScreen('screen-dnresult');
+  if (pct === 1) setTimeout(spawnConfetti, 250);
 }
 
 // ─── CONFETTI ────────────────────────────────────────────────────────────────

@@ -340,6 +340,28 @@
     .dn-particle { position: fixed; pointer-events: none; z-index: 9998; border-radius: 50%; }
     @keyframes dnBurstAnim { 0%{transform:translate(0,0) scale(1);opacity:1} 100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0} }
 
+    /* ── MATH TIME ── */
+    .math-home-card {
+      display: flex; align-items: center; gap: 16px;
+      background: linear-gradient(145deg, #eff6ff, #dbeafe);
+      border: 1.5px solid #93c5fd;
+      border-radius: var(--r); padding: 16px 18px; margin-top: 10px;
+      cursor: pointer;
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.7);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.13s, box-shadow 0.13s;
+    }
+    .math-home-card:active { transform: scale(0.97); box-shadow: none; }
+    .math-problem-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r); padding: 18px 16px; margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+      animation: dnArticleIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .math-visual { font-size: 28px; line-height: 1.6; text-align: center; margin-bottom: 10px; min-height: 36px; word-break: break-word; letter-spacing: 2px; }
+    .math-word-problem { font-size: 19px; font-weight: 700; line-height: 1.6; text-align: center; margin-bottom: 10px; color: var(--text); }
+    .math-equation { font-size: 28px; font-weight: 900; text-align: center; color: var(--accent); letter-spacing: 2px; min-height: 36px; }
+
     /* ── TOAST ── */
     #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: var(--pr); font-size: 14px; font-weight: 700; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
     #toast.show { opacity: 1; }
@@ -378,6 +400,12 @@
   <div class="dn-home-card" onclick="startDnGame()">
     <div style="font-size:42px;line-height:1">📰</div>
     <div style="font-size:22px;font-weight:900">Daily News</div>
+    <div style="margin-left:auto;font-size:26px;opacity:0.4">›</div>
+  </div>
+
+  <div class="math-home-card" onclick="startMathGame()">
+    <div style="font-size:42px;line-height:1">➕</div>
+    <div style="font-size:22px;font-weight:900">Math Time</div>
     <div style="margin-left:auto;font-size:26px;opacity:0.4">›</div>
   </div>
 </div>
@@ -419,6 +447,41 @@
   </div>
   <div id="dn-new-badges" style="margin-bottom:16px"></div>
   <button class="btn btn-primary btn-full" onclick="startDnGame()">Play again</button>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ MATH TIME GAME ═══ -->
+<div id="screen-math" class="screen">
+  <div class="sw-header">
+    <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
+    <span class="sw-prog-text" id="math-prog">1 of 10</span>
+    <span class="pill" style="background:#dbeafe;color:#1d4ed8;font-weight:800" id="math-score-pill">0 ✓</span>
+  </div>
+  <div class="dn-progress-bar"><div class="dn-progress-fill" id="math-progress-fill" style="width:0%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+
+  <div class="math-problem-card" id="math-problem-card">
+    <div class="math-visual" id="math-visual"></div>
+    <div class="math-word-problem" id="math-word-problem"></div>
+    <div class="math-equation" id="math-equation"></div>
+  </div>
+
+  <div class="dn-numpad" id="math-numpad"></div>
+  <div class="dn-feedback" id="math-feedback"></div>
+</div>
+
+<!-- ═══ MATH TIME RESULT ═══ -->
+<div id="screen-mathresult" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="showScreen('screen-home')">🏠</button>
+    <span class="screen-label">Math Time done! ➕</span>
+  </div>
+  <div class="sw-result-center">
+    <div class="stars-row" id="math-result-stars">⭐⭐⭐</div>
+    <div class="result-score" id="math-result-score">10 / 10</div>
+    <div class="result-msg" id="math-result-msg">Math champion!</div>
+  </div>
+  <div id="math-new-badges" style="margin-bottom:16px"></div>
+  <button class="btn btn-primary btn-full" onclick="startMathGame()">Play again</button>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
 </div>
 
@@ -623,6 +686,8 @@ const BADGES = [
   { id:'explorer',     icon:'🌍', name:'Explorer',         desc:'Read all 6 topics' },
   { id:'dn_first',     icon:'📰', name:'Daily Reporter',   desc:'Complete your first Daily News' },
   { id:'dn_perfect',   icon:'🧮', name:'Math Whiz',        desc:'Perfect Daily News score (15/15)' },
+  { id:'math_first',   icon:'➕', name:'Math Star',        desc:'Complete your first Math Time' },
+  { id:'math_perfect', icon:'🏅', name:'Math Champion',    desc:'Perfect Math Time score (10/10)' },
 ];
 
 const SW_EASY = ['the','a','is','it','in','on','at','up','do','go','he','she','we','my','no','so','to','of','or','as','be','by','am','an','if','me','us','him','not','and','but','for','you','can','had','was','are','all','one','two','out','get','see','big','run','fun','dog','cat','hat','red','sun'];
@@ -663,6 +728,8 @@ const S = {
   swperfect:parseInt(lsGet('rl_swperfect','0')),
   dngames:  parseInt(lsGet('rl_dngames','0')),
   dnperfect:parseInt(lsGet('rl_dnperfect','0')),
+  mathgames: parseInt(lsGet('rl_mathgames','0')),
+  mathperfect:parseInt(lsGet('rl_mathperfect','0')),
   topics:   lsJson('rl_topics', []),
   pin:      lsGet('rl_pin','1234'),
   apiKey:   lsGet('rl_apikey',''),
@@ -673,6 +740,7 @@ const S = {
   readActive: false, readIdx: 0,
   swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
   dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false,
+  mathRounds: [], mathIdx: 0, mathScore: 0, mathAnswered: false,
   pinBuf: '',
 };
 
@@ -690,6 +758,8 @@ function persist() {
   lsSet('rl_swperfect',S.swperfect);
   lsSet('rl_dngames',  S.dngames);
   lsSet('rl_dnperfect',S.dnperfect);
+  lsSet('rl_mathgames', S.mathgames);
+  lsSet('rl_mathperfect',S.mathperfect);
   lsSet('rl_topics',   S.topics);
   lsSet('rl_pin',      S.pin);
   lsSet('rl_apikey',   S.apiKey);
@@ -1038,6 +1108,8 @@ function awardAll() {
   if (S.topics.length >= 6) give('explorer');
   if (S.dngames  >= 1)  give('dn_first');
   if (S.dnperfect >= 1) give('dn_perfect');
+  if (S.mathgames  >= 1)  give('math_first');
+  if (S.mathperfect >= 1) give('math_perfect');
   return earned.filter(Boolean);
 }
 
@@ -1505,6 +1577,175 @@ function showDnResult() {
       <div><div class="nb-name">New badge: ${b.name}</div><div class="nb-desc">${b.desc}</div></div>
     </div>`).join('');
   showScreen('screen-dnresult');
+  if (pct === 1) setTimeout(spawnConfetti, 250);
+}
+
+// ─── MATH TIME ───────────────────────────────────────────────────────────────
+
+const MATH_CONTEXTS = [
+  { emoji:'🍎', singular:'apple',      plural:'apples',      names:['Luna','Maya'] },
+  { emoji:'⭐', singular:'star',       plural:'stars',       names:['Max','Leo'] },
+  { emoji:'🍪', singular:'cookie',     plural:'cookies',     names:['Lily','Zoe'] },
+  { emoji:'🎈', singular:'balloon',    plural:'balloons',    names:['Sam','Ava'] },
+  { emoji:'🐟', singular:'fish',       plural:'fish',        names:['Mia','Ben'] },
+  { emoji:'🌸', singular:'flower',     plural:'flowers',     names:['Ella','Jake'] },
+  { emoji:'🚗', singular:'toy car',    plural:'toy cars',    names:['Leo','Tom'] },
+  { emoji:'🧁', singular:'cupcake',    plural:'cupcakes',    names:['Zoe','Lily'] },
+  { emoji:'🦋', singular:'butterfly',  plural:'butterflies', names:['Ava','Mia'] },
+  { emoji:'🏀', singular:'ball',       plural:'balls',       names:['Jay','Sam'] },
+];
+
+function randInt(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
+
+function generateMathRound() {
+  const lv = Math.min(S.level, 5);
+  let a, b, op;
+  if (lv === 1) {
+    a = randInt(1, 5); b = randInt(1, Math.min(5, 10 - a)); op = '+';
+  } else if (lv === 2) {
+    op = Math.random() < 0.4 ? '-' : '+';
+    if (op === '+') { a = randInt(1, 8); b = randInt(1, Math.min(8, 10 - a)); }
+    else             { a = randInt(3, 10); b = randInt(1, a); }
+  } else if (lv === 3) {
+    op = Math.random() < 0.5 ? '-' : '+';
+    if (op === '+') { a = randInt(5, 14); b = randInt(2, Math.min(10, 20 - a)); }
+    else             { a = randInt(8, 20); b = randInt(2, Math.min(a, 10)); }
+  } else if (lv === 4) {
+    op = Math.random() < 0.5 ? '-' : '+';
+    if (op === '+') { a = randInt(10, 22); b = randInt(5, Math.min(12, 30 - a)); }
+    else             { a = randInt(15, 30); b = randInt(5, Math.min(a, 15)); }
+  } else {
+    op = Math.random() < 0.5 ? '-' : '+';
+    if (op === '+') { a = randInt(12, 30); b = randInt(10, Math.min(20, 50 - a)); }
+    else             { a = randInt(20, 50); b = randInt(10, Math.min(a, 25)); }
+  }
+  const answer = op === '+' ? a + b : a - b;
+  const ctx = MATH_CONTEXTS[randInt(0, MATH_CONTEXTS.length - 1)];
+  const name = ctx.names[randInt(0, ctx.names.length - 1)];
+  const showVisual = lv <= 2;
+  return { a, b, op, answer, ctx, name, showVisual };
+}
+
+function mathWordProblem(r) {
+  const { a, b, op, ctx, name } = r;
+  const thingA = a === 1 ? ctx.singular : ctx.plural;
+  const thingB = b === 1 ? ctx.singular : ctx.plural;
+  if (op === '+') {
+    const templates = [
+      `${name} has ${a} ${thingA}. ${name} gets ${b} more ${thingB}. How many in all?`,
+      `There are ${a} ${thingA} in one group and ${b} ${thingB} in another. How many total?`,
+      `${name} finds ${a} ${thingA}, then finds ${b} more ${thingB}. How many altogether?`,
+    ];
+    return templates[randInt(0, templates.length - 1)];
+  } else {
+    const templates = [
+      `${name} has ${a} ${thingA}. ${name} gives away ${b} ${thingB}. How many are left?`,
+      `There are ${a} ${thingA}. ${b} ${thingB} go away. How many remain?`,
+      `${name} starts with ${a} ${thingA} and uses ${b} ${thingB}. How many are left?`,
+    ];
+    return templates[randInt(0, templates.length - 1)];
+  }
+}
+
+function startMathGame() {
+  S.mathRounds  = Array.from({ length: 10 }, generateMathRound);
+  S.mathIdx     = 0;
+  S.mathScore   = 0;
+  S.mathAnswered = false;
+  showScreen('screen-math');
+  renderMathRound();
+}
+
+function renderMathRound() {
+  const r = S.mathRounds[S.mathIdx];
+  S.mathAnswered = false;
+  document.getElementById('math-prog').textContent = `${S.mathIdx + 1} of 10`;
+  document.getElementById('math-score-pill').textContent = `${S.mathScore} ✓`;
+  document.getElementById('math-feedback').textContent = '';
+  document.getElementById('math-feedback').className = 'dn-feedback';
+  document.getElementById('math-progress-fill').style.width = `${(S.mathIdx / 10) * 100}%`;
+
+  const card = document.getElementById('math-problem-card');
+  card.style.animation = 'none';
+  card.offsetWidth;
+  card.style.animation = 'dnArticleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both';
+
+  if (r.showVisual) {
+    document.getElementById('math-visual').textContent =
+      r.ctx.emoji.repeat(r.a) + '  ' + r.op + '  ' + r.ctx.emoji.repeat(r.b);
+  } else {
+    document.getElementById('math-visual').textContent = '';
+  }
+  document.getElementById('math-word-problem').textContent = mathWordProblem(r);
+  document.getElementById('math-equation').textContent = `${r.a} ${r.op} ${r.b} = ?`;
+
+  renderMathNumpad(r);
+}
+
+function renderMathNumpad(r) {
+  const ans = r.answer;
+  const set = new Set([ans]);
+  for (let n = Math.max(0, ans - 4); n <= ans + 5 && set.size < 8; n++) set.add(n);
+  while (set.size < 8) set.add(Math.max(0, ans + set.size));
+  const nums = [...set].sort((a, b) => a - b);
+  const pad = document.getElementById('math-numpad');
+  pad.style.gridTemplateColumns = 'repeat(4, 1fr)';
+  pad.innerHTML = nums.map(n =>
+    `<button class="dn-num-btn" onclick="answerMath(${n})">${n}</button>`
+  ).join('');
+}
+
+function answerMath(num) {
+  if (S.mathAnswered) return;
+  S.mathAnswered = true;
+  const r = S.mathRounds[S.mathIdx];
+  const correct = num === r.answer;
+  const btns = [...document.querySelectorAll('#math-numpad .dn-num-btn')];
+  btns.forEach(b => { b.disabled = true; });
+  const chosen = btns.find(b => +b.textContent === num);
+  const fb = document.getElementById('math-feedback');
+
+  if (correct) {
+    S.mathScore++;
+    if (chosen) chosen.classList.add('dn-correct');
+    dnBurst(chosen);
+    fb.textContent = '🎉 Correct!';
+    fb.className = 'dn-feedback correct';
+    setTimeout(() => {
+      S.mathIdx++;
+      if (S.mathIdx >= 10) showMathResult();
+      else renderMathRound();
+    }, 1300);
+  } else {
+    if (chosen) chosen.classList.add('dn-wrong');
+    fb.textContent = 'Not quite — try again!';
+    fb.className = 'dn-feedback wrong';
+    setTimeout(() => {
+      fb.textContent = '';
+      fb.className = 'dn-feedback';
+      S.mathAnswered = false;
+      renderMathNumpad(r);
+    }, 900);
+  }
+}
+
+function showMathResult() {
+  S.mathgames++;
+  if (S.mathScore === 10) S.mathperfect++;
+  const newB = awardAll();
+  persist();
+  const pct = S.mathScore / 10;
+  document.getElementById('math-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
+  document.getElementById('math-result-score').textContent = `${S.mathScore} / 10`;
+  document.getElementById('math-result-msg').textContent =
+    pct === 1 ? 'Perfect score! Math champion! 🏅' : pct >= 0.8 ? 'Amazing work!' : pct >= 0.6 ? 'Good effort!' : 'Keep practicing!';
+  document.getElementById('math-new-badges').innerHTML = newB.map(b => `
+    <div class="new-badge">
+      <span class="nb-emoji">${b.icon}</span>
+      <div><div class="nb-name">New badge: ${b.name}</div><div class="nb-desc">${b.desc}</div></div>
+    </div>`).join('');
+  document.getElementById('math-progress-fill').style.width = '100%';
+  showScreen('screen-mathresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
 

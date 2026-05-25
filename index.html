@@ -1011,8 +1011,8 @@ function answerQuiz(chosen) {
   }, 1500);
 }
 
-function burstReward(anchorEl) {
-  const emojis = (S.topic && S.topic.reward) ? S.topic.reward : ['⭐','✨','🎉'];
+function burstReward(anchorEl, emojis) {
+  emojis = emojis || ((S.topic && S.topic.reward) ? S.topic.reward : ['⭐','✨','🎉']);
   const rect = anchorEl.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
@@ -1709,6 +1709,7 @@ function answerMath(num) {
     S.mathScore++;
     if (chosen) chosen.classList.add('dn-correct');
     dnBurst(chosen);
+    burstReward(chosen, ['⭐','🎉','✨','💯','🌟','🎊']);
     fb.textContent = '🎉 Correct!';
     fb.className = 'dn-feedback correct';
     setTimeout(() => {

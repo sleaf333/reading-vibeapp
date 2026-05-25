@@ -1365,16 +1365,17 @@ function renderDnRound() {
     dot.className = 'dn-step-dot' + (i < S.dnStep ? ' done' : i === S.dnStep ? ' active' : '');
   }
 
-  // Clear any letter highlights from previous step
-  document.querySelectorAll('#dn-article-text .dn-letter-tap.marked').forEach(el => el.classList.remove('marked'));
+  const rawText = r.text || ((r.headline || '') + ' ' + (r.body || '')).trim();
+  const clean = rawText.toLowerCase().replace(/(^|[.!?]\s+)(\w)/g, (_, p, c) => p + c.toUpperCase());
+  const target = S.dnStep === 0 ? r.l1 : S.dnStep === 1 ? r.l2 : null;
+  document.getElementById('dn-article-text').innerHTML = clean.split('').map(ch =>
+    target && /[a-zA-Z]/.test(ch) && ch.toLowerCase() === target
+      ? `<span class="dn-letter-tap" onclick="toggleDnLetter(this)">${ch}</span>`
+      : ch
+  ).join('');
 
   const card = document.getElementById('dn-article-card');
   if (S.dnStep === 0) {
-    const rawText = r.text || ((r.headline || '') + ' ' + (r.body || '')).trim();
-    const clean = rawText.toLowerCase().replace(/(^|[.!?]\s+)(\w)/g, (_, p, c) => p + c.toUpperCase());
-    document.getElementById('dn-article-text').innerHTML = clean.split('').map(ch =>
-      /[a-zA-Z]/.test(ch) ? `<span class="dn-letter-tap" onclick="toggleDnLetter(this)">${ch}</span>` : ch
-    ).join('');
     card.style.display = '';
     card.style.animation = 'none';
     card.offsetWidth;

@@ -323,7 +323,7 @@
     }
     @keyframes dnQuestionIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
     .dn-step-label { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-    .dn-question   { font-size: 38px; font-weight: 800; line-height: 1.4; }
+    .dn-question   { font-size: 67px; font-weight: 800; line-height: 1.3; }
     .dn-numpad { display: grid; gap: 8px; margin: 4px 0; }
     .dn-num-btn {
       height: 64px; background: var(--surface); border: 1.5px solid var(--border);
@@ -1540,7 +1540,7 @@ function renderDnRound() {
     document.getElementById('dn-question').innerHTML =
       `<span style="color:var(--accent)">${r.c1} <b>"${r.l1.toUpperCase()}"</b></span> and ` +
       `<span style="color:#e05050">${r.c2} <b>"${r.l2.toUpperCase()}"</b></span><br>` +
-      `<span style="font-size:56px;letter-spacing:2px;display:block;margin-top:8px">${r.c1} ${r.op} ${r.c2} = ?</span>`;
+      `<span style="font-size:98px;letter-spacing:2px;display:block;margin-top:8px">${r.c1} ${r.op} ${r.c2} = ?</span>`;
   }
   renderDnNumpad();
 }

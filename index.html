@@ -454,7 +454,7 @@
   </div>
   <div class="sw-result-center">
     <div class="stars-row" id="dn-result-stars">⭐⭐⭐</div>
-    <div class="result-score" id="dn-result-score">15 / 15</div>
+    <div class="result-score" id="dn-result-score">9 / 9</div>
     <div class="result-msg" id="dn-result-msg">Math wizard!</div>
     <div id="dn-level-msg" style="margin-top:10px"></div>
   </div>
@@ -1388,8 +1388,8 @@ async function fetchDnArticles() {
     'confident reader (varied vocabulary, 2 clear sentences)',
     'advanced reader (rich vocabulary, 2-3 sentences)',
   ][Math.min(S.dnLevel, 5)];
-  const prompt = `Create 5 short fictional fun news stories for a ${levelDesc} child aged 6. Topics: animals, magic, food, adventures, space, sports, inventions.
-Return ONLY a JSON array with exactly 5 objects. Each object must have:
+  const prompt = `Create 3 short fictional fun news stories for a ${levelDesc} child aged 6. Topics: animals, magic, food, adventures, space, sports, inventions.
+Return ONLY a JSON array with exactly 3 objects. Each object must have:
 - "text": 2-3 fun sentences in normal sentence case (capitalize only the first word of each sentence and proper nouns, no all-caps words)
 - "l1": a single lowercase letter appearing 2-5 times in text
 - "l2": a DIFFERENT single lowercase letter also appearing 2-5 times in text
@@ -1471,7 +1471,7 @@ async function startDnGame() {
   showScreen('screen-loading');
   try {
     const raw = await fetchDnArticles();
-    S.dnRounds   = raw.slice(0, 5).map(verifyDnArticle);
+    S.dnRounds   = raw.slice(0, 3).map(verifyDnArticle);
     S.dnRoundIdx = 0;
     S.dnStep     = 0;
     S.dnScore    = 0;
@@ -1494,7 +1494,7 @@ function renderDnRound() {
   fb.textContent = ''; fb.className = 'dn-feedback';
 
   const done = S.dnRoundIdx * 3 + S.dnStep;
-  document.getElementById('dn-progress-fill').style.width = `${(done / 15) * 100}%`;
+  document.getElementById('dn-progress-fill').style.width = `${(done / 9) * 100}%`;
 
   for (let i = 0; i < 3; i++) {
     const dot = document.getElementById(`dn-dot-${i}`);
@@ -1589,7 +1589,7 @@ function answerDn(num) {
     setTimeout(() => {
       S.dnStep++;
       if (S.dnStep > 2) { S.dnStep = 0; S.dnRoundIdx++; }
-      if (S.dnRoundIdx >= 5) showDnResult();
+      if (S.dnRoundIdx >= 3) showDnResult();
       else renderDnRound();
     }, 1400);
   } else {
@@ -1627,13 +1627,13 @@ function dnBurst(anchorEl) {
 
 function showDnResult() {
   S.dngames++;
-  if (S.dnScore === 15) S.dnperfect++;
-  const pct = S.dnScore / 15;
+  if (S.dnScore === 9) S.dnperfect++;
+  const pct = S.dnScore / 9;
   const prevLevel = advanceLevel('dnLevel', 'dnLevelProg', pct);
   const newB = awardAll();
   persist();
   document.getElementById('dn-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
-  document.getElementById('dn-result-score').textContent = `${S.dnScore} / 15`;
+  document.getElementById('dn-result-score').textContent = `${S.dnScore} / 9`;
   document.getElementById('dn-result-msg').textContent =
     pct === 1 ? 'Perfect score! Math wizard! 🧮' : pct >= 0.8 ? 'Amazing work!' : pct >= 0.6 ? 'Good effort!' : 'Keep practicing!';
   document.getElementById('dn-level-msg').innerHTML = levelChangeMsg('dnLevel', 'dnLevelProg', prevLevel);

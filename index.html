@@ -174,7 +174,7 @@
     .choice {
       display: block; width: 100%; text-align: left; background: var(--surface);
       border: 2px solid var(--border); border-left: 5px solid var(--border);
-      border-radius: var(--r); padding: 15px 18px; font-size: 16px; font-weight: 700;
+      border-radius: var(--r); padding: 15px 18px; font-size: 24px; font-weight: 700;
       cursor: pointer; margin-bottom: 10px; color: var(--text); font-family: inherit;
       box-shadow: var(--shadow-sm); -webkit-tap-highlight-color: transparent;
       transition: transform 0.1s, border-color 0.12s, background 0.12s;
@@ -235,7 +235,7 @@
     }
     .sw-hear-label { font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.85); }
     .sw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
-    .sw-choice { background: var(--surface); border: 2.5px solid var(--border); border-radius: var(--r); padding: 24px 12px; font-size: 22px; font-weight: 800; cursor: pointer; color: var(--text); font-family: inherit; box-shadow: var(--shadow-sm); -webkit-tap-highlight-color: transparent; transition: transform 0.1s, border-color 0.12s, background 0.12s; }
+    .sw-choice { background: var(--surface); border: 2.5px solid var(--border); border-radius: var(--r); padding: 24px 12px; font-size: 33px; font-weight: 800; cursor: pointer; color: var(--text); font-family: inherit; box-shadow: var(--shadow-sm); -webkit-tap-highlight-color: transparent; transition: transform 0.1s, border-color 0.12s, background 0.12s; }
     .sw-choice:active:not(:disabled) { transform: scale(0.95); }
     .sw-choice.correct { border-color: #3d9e68 !important; background: #eaf5f0; color: #1a5c38; }
     .sw-choice.wrong   { border-color: #e05050 !important; background: #fdeaea; color: #802020; }
@@ -326,8 +326,8 @@
     .dn-question   { font-size: 38px; font-weight: 800; line-height: 1.4; }
     .dn-numpad { display: grid; gap: 8px; margin: 4px 0; }
     .dn-num-btn {
-      height: 56px; background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 14px; font-size: 22px; font-weight: 800; cursor: pointer;
+      height: 64px; background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; font-size: 33px; font-weight: 800; cursor: pointer;
       color: var(--text); font-family: inherit; box-shadow: var(--shadow-sm);
       -webkit-tap-highlight-color: transparent; transition: transform 0.12s, background 0.15s;
     }
@@ -645,7 +645,10 @@
 
   <div class="section-title">Stats</div>
   <div class="stat-row"><span class="stat-label">Stories read</span><span class="stat-val" id="pc-stories">0</span></div>
-  <div class="stat-row"><span class="stat-label">Current level</span><span class="stat-val" id="pc-level">Level 2</span></div>
+  <div class="stat-row"><span class="stat-label">Reading level</span><span class="stat-val" id="pc-level">Level 1</span></div>
+  <div class="stat-row"><span class="stat-label">Sight Words level</span><span class="stat-val" id="pc-sw-level">Level 1</span></div>
+  <div class="stat-row"><span class="stat-label">Daily News level</span><span class="stat-val" id="pc-dn-level">Level 1</span></div>
+  <div class="stat-row"><span class="stat-label">Math level</span><span class="stat-val" id="pc-math-level">Level 1</span></div>
   <div class="stat-row"><span class="stat-label">Badges earned</span><span class="stat-val" id="pc-badges">0 / 14</span></div>
   <div class="stat-row"><span class="stat-label">Day streak</span><span class="stat-val" id="pc-streak">0</span></div>
 
@@ -1274,10 +1277,13 @@ function checkPin() {
 // ─── PARENT CORNER ────────────────────────────────────────────────────────────
 
 function renderParentCorner() {
-  document.getElementById('pc-stories').textContent = S.stories;
-  document.getElementById('pc-level').textContent   = `Level ${S.level}`;
-  document.getElementById('pc-badges').textContent  = `${S.badges.length} / 14`;
-  document.getElementById('pc-streak').textContent  = `${S.streak} day${S.streak !== 1 ? 's' : ''}`;
+  document.getElementById('pc-stories').textContent   = S.stories;
+  document.getElementById('pc-level').textContent     = `Level ${S.level}`;
+  document.getElementById('pc-sw-level').textContent  = `Level ${S.swLevel}`;
+  document.getElementById('pc-dn-level').textContent  = `Level ${S.dnLevel}`;
+  document.getElementById('pc-math-level').textContent = `Level ${S.mathLevel}`;
+  document.getElementById('pc-badges').textContent    = `${S.badges.length} / 14`;
+  document.getElementById('pc-streak').textContent    = `${S.streak} day${S.streak !== 1 ? 's' : ''}`;
   document.getElementById('api-key-input').value    = S.apiKey;
   document.getElementById('proxy-url-input').value  = S.proxyUrl;
   document.getElementById('pc-qr-btn').style.display = S.apiKey ? '' : 'none';

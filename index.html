@@ -447,6 +447,7 @@
     <div class="stars-row" id="dn-result-stars">⭐⭐⭐</div>
     <div class="result-score" id="dn-result-score">15 / 15</div>
     <div class="result-msg" id="dn-result-msg">Math wizard!</div>
+    <div id="dn-level-msg" style="margin-top:10px"></div>
   </div>
   <div id="dn-new-badges" style="margin-bottom:16px"></div>
   <button class="btn btn-primary btn-full" onclick="startDnGame()">Play again</button>
@@ -482,6 +483,7 @@
     <div class="stars-row" id="math-result-stars">⭐⭐⭐</div>
     <div class="result-score" id="math-result-score">10 / 10</div>
     <div class="result-msg" id="math-result-msg">Math champion!</div>
+    <div id="math-level-msg" style="margin-top:10px"></div>
   </div>
   <div id="math-new-badges" style="margin-bottom:16px"></div>
   <button class="btn btn-primary btn-full" onclick="startMathGame()">Play again</button>
@@ -588,6 +590,7 @@
     <div class="stars-row" id="sw-stars">⭐⭐⭐</div>
     <div class="result-score" id="sw-score-display">10 / 10</div>
     <div class="result-msg" id="sw-msg">Word wizard!</div>
+    <div id="sw-level-msg" style="margin-top:10px"></div>
   </div>
   <div id="sw-new-badges" style="margin-bottom:16px"></div>
   <button class="btn btn-primary btn-full" onclick="startSwGame()">Play again</button>
@@ -725,6 +728,12 @@ function lsJson(k, def) {
 const S = {
   level:    parseInt(lsGet('rl_level','1')),
   levelProgress: parseInt(lsGet('rl_levelprog','0')),
+  swLevel:  parseInt(lsGet('rl_swlevel','1')),
+  swLevelProg: parseInt(lsGet('rl_swlevelprog','0')),
+  dnLevel:  parseInt(lsGet('rl_dnlevel','1')),
+  dnLevelProg: parseInt(lsGet('rl_dnlevelprog','0')),
+  mathLevel: parseInt(lsGet('rl_mathlevel','1')),
+  mathLevelProg: parseInt(lsGet('rl_mathlevelprog','0')),
   sessions: lsJson('rl_sessions', []),
   stories:  parseInt(lsGet('rl_stories','0')),
   streak:   parseInt(lsGet('rl_streak','0')),
@@ -755,6 +764,12 @@ const S = {
 function persist() {
   lsSet('rl_level',    S.level);
   lsSet('rl_levelprog',S.levelProgress);
+  lsSet('rl_swlevel',  S.swLevel);
+  lsSet('rl_swlevelprog', S.swLevelProg);
+  lsSet('rl_dnlevel',  S.dnLevel);
+  lsSet('rl_dnlevelprog', S.dnLevelProg);
+  lsSet('rl_mathlevel', S.mathLevel);
+  lsSet('rl_mathlevelprog', S.mathLevelProg);
   lsSet('rl_sessions', S.sessions);
   lsSet('rl_stories',  S.stories);
   lsSet('rl_streak',   S.streak);
@@ -976,6 +991,28 @@ function advanceRead() {
   speechSynthesis.speak(utt);
 }
 
+// ─── LEVEL PROGRESSION ───────────────────────────────────────────────────────
+
+function advanceLevel(levelKey, progKey, pct) {
+  const prev = S[levelKey];
+  if (pct >= 0.9 && S[levelKey] < 5) {
+    S[progKey]++;
+    if (S[progKey] >= 3) { S[levelKey]++; S[progKey] = 0; }
+  } else if (pct < 0.5 && S[levelKey] > 1) {
+    S[levelKey]--; S[progKey] = 0;
+  }
+  if (S[levelKey] > S.maxlevel) S.maxlevel = S[levelKey];
+  return prev;
+}
+
+function levelChangeMsg(levelKey, progKey, prevLevel) {
+  const lv = S[levelKey], prog = S[progKey];
+  if (lv > prevLevel) return `<span class="level-pill pill-up">↑ Level up! Now Level ${lv} 🎉</span>`;
+  if (lv < prevLevel) return `<span class="level-pill pill-down">Back to Level ${lv}</span>`;
+  if (prog > 0)       return `<span class="level-pill pill-amber">⭐ ${prog} / 3 toward next level!</span>`;
+  return '';
+}
+
 // ─── QUIZ ─────────────────────────────────────────────────────────────────────
 
 function goToQuiz() {
@@ -1056,15 +1093,7 @@ function showResult() {
   if (!S.topics.includes(tid)) S.topics.push(tid);
   if (pct === 1) S.perfect++;
 
-  const prevLevel = S.level;
-  if (pct >= 0.9 && S.level < 5) {
-    S.levelProgress++;
-    if (S.levelProgress >= 3) { S.level++; S.levelProgress = 0; }
-  } else if (pct < 0.5 && S.level > 1) {
-    S.level--;
-    S.levelProgress = 0;
-  }
-  if (S.level > S.maxlevel) S.maxlevel = S.level;
+  const prevLevel = advanceLevel('level', 'levelProgress', pct);
 
   S.sessions.unshift({ topic: S.topic.name, score:`${score}/${total}`, date: new Date().toLocaleDateString(), level: S.level });
   if (S.sessions.length > 20) S.sessions.pop();
@@ -1076,15 +1105,7 @@ function showResult() {
   document.getElementById('result-score').textContent = `${score} / ${total}`;
   document.getElementById('result-msg').textContent   = pct === 1 ? 'Amazing! Perfect score!' : pct >= 0.67 ? 'Great job!' : 'Keep practicing!';
 
-  const pill = document.getElementById('level-change-pill');
-  if (S.level > prevLevel)
-    pill.innerHTML = `<span class="level-pill pill-up">↑ Level up! Now Level ${S.level} 🎉</span>`;
-  else if (S.level < prevLevel)
-    pill.innerHTML = `<span class="level-pill pill-down">Keeping it at Level ${S.level}</span>`;
-  else if (pct >= 0.9 && S.levelProgress > 0)
-    pill.innerHTML = `<span class="level-pill pill-amber">⭐ ${S.levelProgress} / 3 great scores toward next level!</span>`;
-  else
-    pill.innerHTML = '';
+  document.getElementById('level-change-pill').innerHTML = levelChangeMsg('level', 'levelProgress', prevLevel);
 
   document.getElementById('new-badges-list').innerHTML = S.newBadges.map(b => `
     <div class="new-badge">
@@ -1135,7 +1156,7 @@ function renderBadges() {
 // ─── SIGHT WORD GAME ─────────────────────────────────────────────────────────
 
 function startSwGame() {
-  const pool = S.level >= 3 ? [...SW_EASY, ...SW_HARD] : [...SW_EASY];
+  const pool = S.swLevel >= 3 ? [...SW_EASY, ...SW_HARD] : [...SW_EASY];
   const shuffled = pool.sort(() => Math.random() - 0.5);
   S.swWords = shuffled.slice(0, 10);
   S.swIdx   = 0;
@@ -1151,7 +1172,7 @@ function renderSwRound() {
   S.swCurrentWord = word;
   S.swAnswered = false;
 
-  const pool = S.level >= 3 ? [...SW_EASY, ...SW_HARD] : [...SW_EASY];
+  const pool = S.swLevel >= 3 ? [...SW_EASY, ...SW_HARD] : [...SW_EASY];
   const distractors = pool.filter(w => w !== word).sort(() => Math.random() - 0.5).slice(0, 3);
   const choices = [...distractors, word].sort(() => Math.random() - 0.5);
 
@@ -1183,13 +1204,15 @@ function answerSw(el, idx) {
 function showSwResult() {
   S.swgames++;
   if (S.swScore === 10) S.swperfect++;
+  const pct = S.swScore / 10;
+  const prevLevel = advanceLevel('swLevel', 'swLevelProg', pct);
   const news = awardAll();
   persist();
 
-  const pct = S.swScore / 10;
   document.getElementById('sw-score-display').textContent = `${S.swScore} / 10`;
   document.getElementById('sw-stars').textContent         = pct === 1 ? '⭐⭐⭐' : pct >= 0.7 ? '⭐⭐' : '⭐';
   document.getElementById('sw-msg').textContent           = pct === 1 ? 'Word wizard! Perfect!' : pct >= 0.7 ? 'Great work!' : 'Keep practicing!';
+  document.getElementById('sw-level-msg').innerHTML       = levelChangeMsg('swLevel', 'swLevelProg', prevLevel);
   document.getElementById('sw-new-badges').innerHTML      = news.map(b => `
     <div class="new-badge">
       <span class="nb-emoji">${b.icon}</span>
@@ -1346,7 +1369,7 @@ async function fetchDnArticles() {
     'developing reader (common words, 2 short sentences)',
     'confident reader (varied vocabulary, 2 clear sentences)',
     'advanced reader (rich vocabulary, 2-3 sentences)',
-  ][Math.min(S.level, 5)];
+  ][Math.min(S.dnLevel, 5)];
   const prompt = `Create 5 short fictional fun news stories for a ${levelDesc} child aged 6. Topics: animals, magic, food, adventures, space, sports, inventions.
 Return ONLY a JSON array with exactly 5 objects. Each object must have:
 - "text": 2-3 fun sentences in normal sentence case (capitalize only the first word of each sentence and proper nouns, no all-caps words)
@@ -1405,8 +1428,8 @@ function verifyDnArticle(a) {
 
   a.l1 = l1; a.l2 = l2; a.c1 = c1; a.c2 = c2;
   a.op = '+';
-  if (S.level >= 2 && c1 !== c2) {
-    const p = S.level === 2 ? 0.25 : S.level === 3 ? 0.4 : 0.5;
+  if (S.dnLevel >= 2 && c1 !== c2) {
+    const p = S.dnLevel === 2 ? 0.25 : S.dnLevel === 3 ? 0.4 : 0.5;
     if (Math.random() < p) a.op = '-';
   }
   if (a.op === '-') {
@@ -1587,13 +1610,15 @@ function dnBurst(anchorEl) {
 function showDnResult() {
   S.dngames++;
   if (S.dnScore === 15) S.dnperfect++;
+  const pct = S.dnScore / 15;
+  const prevLevel = advanceLevel('dnLevel', 'dnLevelProg', pct);
   const newB = awardAll();
   persist();
-  const pct = S.dnScore / 15;
   document.getElementById('dn-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
   document.getElementById('dn-result-score').textContent = `${S.dnScore} / 15`;
   document.getElementById('dn-result-msg').textContent =
     pct === 1 ? 'Perfect score! Math wizard! 🧮' : pct >= 0.8 ? 'Amazing work!' : pct >= 0.6 ? 'Good effort!' : 'Keep practicing!';
+  document.getElementById('dn-level-msg').innerHTML = levelChangeMsg('dnLevel', 'dnLevelProg', prevLevel);
   document.getElementById('dn-new-badges').innerHTML = newB.map(b => `
     <div class="new-badge">
       <span class="nb-emoji">${b.icon}</span>
@@ -1621,7 +1646,7 @@ const MATH_CONTEXTS = [
 function randInt(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
 
 function generateMathRound() {
-  const lv = Math.min(S.level, 5);
+  const lv = Math.min(S.mathLevel, 5);
   let a, b, op;
   if (lv === 1) {
     a = randInt(1, 5); b = randInt(1, Math.min(5, 10 - a)); op = '+';
@@ -1756,13 +1781,15 @@ function answerMath(num) {
 function showMathResult() {
   S.mathgames++;
   if (S.mathScore === 10) S.mathperfect++;
+  const pct = S.mathScore / 10;
+  const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct);
   const newB = awardAll();
   persist();
-  const pct = S.mathScore / 10;
   document.getElementById('math-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
   document.getElementById('math-result-score').textContent = `${S.mathScore} / 10`;
   document.getElementById('math-result-msg').textContent =
     pct === 1 ? 'Perfect score! Math champion! 🏅' : pct >= 0.8 ? 'Amazing work!' : pct >= 0.6 ? 'Good effort!' : 'Keep practicing!';
+  document.getElementById('math-level-msg').innerHTML = levelChangeMsg('mathLevel', 'mathLevelProg', prevLevel);
   document.getElementById('math-new-badges').innerHTML = newB.map(b => `
     <div class="new-badge">
       <span class="nb-emoji">${b.icon}</span>

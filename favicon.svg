@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f72b52"/>
+      <stop offset="100%" stop-color="#d40f35"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="90" fill="url(#bg)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="108" cy="148" r="72" fill="rgba(255,255,255,0.13)"/>
+  <circle cx="424" cy="188" r="46" fill="rgba(255,255,255,0.09)"/>
+  <circle cx="390" cy="415" r="34" fill="rgba(255,255,255,0.08)"/>
+
+  <!-- Star (5-point, centered at 256,112) -->
+  <polygon points="
+    256,42
+    279,112 352,112
+    293,156 315,226
+    256,183 197,226
+    219,156 160,112
+    233,112
+  " fill="white"/>
+
+  <!-- Book drop shadow -->
+  <rect x="108" y="232" width="298" height="172" rx="12" fill="rgba(0,0,0,0.18)"/>
+
+  <!-- Left page -->
+  <rect x="102" y="226" width="146" height="168" rx="10" fill="rgba(255,255,255,0.90)"/>
+  <!-- Right page -->
+  <rect x="264" y="226" width="146" height="168" rx="10" fill="rgba(255,255,255,0.90)"/>
+  <!-- Spine -->
+  <rect x="240" y="220" width="32" height="180" rx="6" fill="#a80d28"/>
+
+  <!-- Lines on left page -->
+  <rect x="118" y="254" width="112" height="10" rx="5" fill="#f72b52" opacity="0.38"/>
+  <rect x="118" y="280" width="86"  height="10" rx="5" fill="#f72b52" opacity="0.38"/>
+  <rect x="118" y="306" width="112" height="10" rx="5" fill="#f72b52" opacity="0.38"/>
+  <rect x="118" y="332" width="66"  height="10" rx="5" fill="#f72b52" opacity="0.38"/>
+  <rect x="118" y="358" width="98"  height="10" rx="5" fill="#f72b52" opacity="0.38"/>
+
+  <!-- Math on right page -->
+  <text x="337" y="305" font-family="Arial Black, Arial, sans-serif" font-size="52" font-weight="900" fill="#d40f35" text-anchor="middle">2+2</text>
+  <text x="337" y="368" font-family="Arial Black, Arial, sans-serif" font-size="52" font-weight="900" fill="#d40f35" text-anchor="middle">=4</text>
+
+  <!-- Juliana -->
+  <text x="256" y="464" font-family="Arial Black, Arial, sans-serif" font-size="56" font-weight="900" fill="white" text-anchor="middle">Juliana</text>
+</svg>

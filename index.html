@@ -259,6 +259,12 @@
     .stat-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--border); }
     .stat-label { font-size: 15px; color: var(--muted); font-weight: 600; }
     .stat-val { font-size: 16px; font-weight: 800; }
+    .pc-level-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .pc-level-label { font-size: 15px; font-weight: 700; }
+    .pc-level-ctrl { display: flex; align-items: center; gap: 12px; }
+    .pc-lvl-btn { width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--surface); font-size: 20px; font-weight: 800; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); -webkit-tap-highlight-color: transparent; transition: transform 0.1s; }
+    .pc-lvl-btn:active { transform: scale(0.9); }
+    .pc-lvl-val { font-size: 18px; font-weight: 900; color: var(--accent); min-width: 44px; text-align: center; }
     .session-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 12px 16px; margin-bottom: 8px; box-shadow: var(--shadow-sm); }
     .si-topic { font-size: 15px; font-weight: 800; }
     .si-meta { font-size: 13px; color: var(--muted); margin-top: 2px; font-weight: 600; }
@@ -645,12 +651,45 @@
 
   <div class="section-title">Stats</div>
   <div class="stat-row"><span class="stat-label">Stories read</span><span class="stat-val" id="pc-stories">0</span></div>
-  <div class="stat-row"><span class="stat-label">Reading level</span><span class="stat-val" id="pc-level">Level 1</span></div>
-  <div class="stat-row"><span class="stat-label">Sight Words level</span><span class="stat-val" id="pc-sw-level">Level 1</span></div>
-  <div class="stat-row"><span class="stat-label">Daily News level</span><span class="stat-val" id="pc-dn-level">Level 1</span></div>
-  <div class="stat-row"><span class="stat-label">Math level</span><span class="stat-val" id="pc-math-level">Level 1</span></div>
   <div class="stat-row"><span class="stat-label">Badges earned</span><span class="stat-val" id="pc-badges">0 / 14</span></div>
   <div class="stat-row"><span class="stat-label">Day streak</span><span class="stat-val" id="pc-streak">0</span></div>
+
+  <div class="divider"></div>
+  <div class="section-title">Difficulty levels</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600">Override the auto-progression to set a specific level for each game.</div>
+
+  <div class="pc-level-row">
+    <span class="pc-level-label">📖 Reading</span>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setGameLevel('level','levelProgress',-1)">−</button>
+      <span class="pc-lvl-val" id="pc-level">Lv. 1</span>
+      <button class="pc-lvl-btn" onclick="setGameLevel('level','levelProgress',+1)">+</button>
+    </div>
+  </div>
+  <div class="pc-level-row">
+    <span class="pc-level-label">🎮 Sight Words</span>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setGameLevel('swLevel','swLevelProg',-1)">−</button>
+      <span class="pc-lvl-val" id="pc-sw-level">Lv. 1</span>
+      <button class="pc-lvl-btn" onclick="setGameLevel('swLevel','swLevelProg',+1)">+</button>
+    </div>
+  </div>
+  <div class="pc-level-row">
+    <span class="pc-level-label">📰 Daily News</span>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setGameLevel('dnLevel','dnLevelProg',-1)">−</button>
+      <span class="pc-lvl-val" id="pc-dn-level">Lv. 1</span>
+      <button class="pc-lvl-btn" onclick="setGameLevel('dnLevel','dnLevelProg',+1)">+</button>
+    </div>
+  </div>
+  <div class="pc-level-row">
+    <span class="pc-level-label">🔢 Math</span>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setGameLevel('mathLevel','mathLevelProg',-1)">−</button>
+      <span class="pc-lvl-val" id="pc-math-level">Lv. 3</span>
+      <button class="pc-lvl-btn" onclick="setGameLevel('mathLevel','mathLevelProg',+1)">+</button>
+    </div>
+  </div>
 
   <div class="divider"></div>
   <div class="section-title">Recent sessions</div>
@@ -744,7 +783,7 @@ const S = {
   swLevelProg: parseInt(lsGet('rl_swlevelprog','0')),
   dnLevel:  parseInt(lsGet('rl_dnlevel','1')),
   dnLevelProg: parseInt(lsGet('rl_dnlevelprog','0')),
-  mathLevel: parseInt(lsGet('rl_mathlevel','1')),
+  mathLevel: parseInt(lsGet('rl_mathlevel','3')),
   mathLevelProg: parseInt(lsGet('rl_mathlevelprog','0')),
   sessions: lsJson('rl_sessions', []),
   stories:  parseInt(lsGet('rl_stories','0')),
@@ -772,6 +811,9 @@ const S = {
   mathRounds: [], mathIdx: 0, mathScore: 0, mathAnswered: false,
   pinBuf: '',
 };
+
+// Bump math to minimum level 3 (parent-requested baseline)
+if (S.mathLevel < 3) { S.mathLevel = 3; lsSet('rl_mathlevel', '3'); }
 
 function persist() {
   lsSet('rl_level',    S.level);
@@ -1278,12 +1320,12 @@ function checkPin() {
 
 function renderParentCorner() {
   document.getElementById('pc-stories').textContent   = S.stories;
-  document.getElementById('pc-level').textContent     = `Level ${S.level}`;
-  document.getElementById('pc-sw-level').textContent  = `Level ${S.swLevel}`;
-  document.getElementById('pc-dn-level').textContent  = `Level ${S.dnLevel}`;
-  document.getElementById('pc-math-level').textContent = `Level ${S.mathLevel}`;
   document.getElementById('pc-badges').textContent    = `${S.badges.length} / 14`;
   document.getElementById('pc-streak').textContent    = `${S.streak} day${S.streak !== 1 ? 's' : ''}`;
+  document.getElementById('pc-level').textContent      = `Lv. ${S.level}`;
+  document.getElementById('pc-sw-level').textContent   = `Lv. ${S.swLevel}`;
+  document.getElementById('pc-dn-level').textContent   = `Lv. ${S.dnLevel}`;
+  document.getElementById('pc-math-level').textContent = `Lv. ${S.mathLevel}`;
   document.getElementById('api-key-input').value    = S.apiKey;
   document.getElementById('proxy-url-input').value  = S.proxyUrl;
   document.getElementById('pc-qr-btn').style.display = S.apiKey ? '' : 'none';
@@ -1299,6 +1341,20 @@ function renderParentCorner() {
         <div class="si-meta">${s.date} · Score: ${s.score} · Level ${s.level}</div>
       </div>`).join('');
   }
+}
+
+function setGameLevel(levelKey, progKey, delta) {
+  const next = Math.min(5, Math.max(1, S[levelKey] + delta));
+  if (next === S[levelKey]) return;
+  S[levelKey] = next;
+  S[progKey]  = 0;
+  if (next > S.maxlevel) S.maxlevel = next;
+  saveState();
+  refreshHome();
+  document.getElementById({
+    level: 'pc-level', swLevel: 'pc-sw-level',
+    dnLevel: 'pc-dn-level', mathLevel: 'pc-math-level'
+  }[levelKey]).textContent = `Lv. ${next}`;
 }
 
 function saveApiKey(v) {

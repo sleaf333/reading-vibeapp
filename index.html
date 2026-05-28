@@ -170,7 +170,7 @@
     /* ── QUIZ ── */
     .quiz-meta { display: flex; align-items: center; gap: 10px; padding: 4px 0 8px; }
     .quiz-prog { padding: 5px 14px; border-radius: var(--pr); background: var(--accent-lt); color: var(--accent); font-size: 13px; font-weight: 800; }
-    .quiz-q { font-size: 18px; font-weight: 800; line-height: 1.5; margin: 16px 0 14px; }
+    .quiz-q { font-size: 36px; font-weight: 800; line-height: 1.4; margin: 16px 0 14px; }
     .choice {
       display: block; width: 100%; text-align: left; background: var(--surface);
       border: 2px solid var(--border); border-left: 5px solid var(--border);
@@ -218,7 +218,7 @@
     .sw-prog-text { font-size: 15px; color: var(--muted); font-weight: 700; }
     .sw-center { text-align: center; padding: 24px 0 8px; }
     .sw-hear-btn {
-      width: 100%; min-height: 144px; font-size: 28px; font-weight: 800;
+      width: 100%; min-height: 144px; font-size: 56px; font-weight: 800;
       background: linear-gradient(135deg, #6c5ce7, #a29bfe);
       border: none; border-radius: 22px; cursor: pointer; color: white;
       font-family: inherit; display: flex; flex-direction: column;
@@ -323,7 +323,7 @@
     }
     @keyframes dnQuestionIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
     .dn-step-label { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-    .dn-question   { font-size: 19px; font-weight: 800; line-height: 1.5; }
+    .dn-question   { font-size: 38px; font-weight: 800; line-height: 1.4; }
     .dn-numpad { display: grid; gap: 8px; margin: 4px 0; }
     .dn-num-btn {
       height: 56px; background: var(--surface); border: 1.5px solid var(--border);
@@ -361,9 +361,9 @@
       box-shadow: var(--shadow-sm);
       animation: dnArticleIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
     }
-    .math-visual { font-size: 28px; line-height: 1.6; text-align: center; margin-bottom: 10px; min-height: 36px; word-break: break-word; letter-spacing: 2px; }
-    .math-word-problem { font-size: 19px; font-weight: 700; line-height: 1.6; text-align: center; margin-bottom: 10px; color: var(--text); }
-    .math-equation { font-size: 28px; font-weight: 900; text-align: center; color: var(--accent); letter-spacing: 2px; min-height: 36px; }
+    .math-visual { font-size: 56px; line-height: 1.4; text-align: center; margin-bottom: 10px; min-height: 36px; word-break: break-word; letter-spacing: 2px; }
+    .math-word-problem { font-size: 38px; font-weight: 700; line-height: 1.4; text-align: center; margin-bottom: 10px; color: var(--text); }
+    .math-equation { font-size: 56px; font-weight: 900; text-align: center; color: var(--accent); letter-spacing: 2px; min-height: 36px; }
 
     /* ── TOAST ── */
     #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: var(--pr); font-size: 14px; font-weight: 700; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
@@ -380,18 +380,21 @@
       <div style="font-size:15px;color:var(--muted);margin-top:4px">Pick a topic and start reading.</div>
     </div>
     <div class="header-pills">
-      <span id="home-level-pill" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#6366f1,#a78bfa);color:#fff;font-size:16px;font-weight:900;padding:8px 16px;border-radius:20px;box-shadow:0 2px 8px rgba(99,102,241,0.4);letter-spacing:0.3px">⭐ Level 2</span>
       <button class="lock-btn" onclick="showScreen('screen-parent-entry')">🔒 Parent</button>
     </div>
   </div>
 
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;margin-top:4px">
+    <span style="font-size:14px;font-weight:800;color:var(--muted)">Reading Stories</span>
+    <span id="home-reading-level" style="font-size:13px;font-weight:700;background:var(--accent-lt);color:var(--accent);padding:3px 10px;border-radius:20px">Lv. 1</span>
+  </div>
   <div id="topic-list"></div>
 
   <div class="shortcuts">
     <div class="sc-card sc-card-featured" onclick="startSwGame()">
       <div class="sc-icon" style="color:var(--accent)">🎮</div>
       <div class="sc-label" style="font-size:15px;color:var(--accent)">Sight Word Game</div>
-      <div class="sc-sub" style="color:var(--accent);opacity:0.8">Tap to play!</div>
+      <div class="sc-sub" style="color:var(--accent);opacity:0.8" id="home-sw-level">Lv. 1</div>
     </div>
     <div class="sc-card" onclick="showScreen('screen-badges')">
       <div class="sc-icon">🏆</div>
@@ -402,13 +405,19 @@
 
   <div class="dn-home-card" onclick="startDnGame()">
     <div style="font-size:42px;line-height:1">📰</div>
-    <div style="font-size:22px;font-weight:900;color:#78350f">Daily News</div>
+    <div>
+      <div style="font-size:22px;font-weight:900;color:#78350f">Daily News</div>
+      <div id="home-dn-level" style="font-size:13px;font-weight:700;color:#78350f;opacity:0.65;margin-top:2px">Lv. 1</div>
+    </div>
     <div style="margin-left:auto;font-size:26px;color:#78350f;opacity:0.4">›</div>
   </div>
 
   <div class="math-home-card" onclick="startMathGame()">
     <div style="font-size:42px;line-height:1">🔢</div>
-    <div style="font-size:22px;font-weight:900;color:#1e3a5f">Math Time</div>
+    <div>
+      <div style="font-size:22px;font-weight:900;color:#1e3a5f">Math Time</div>
+      <div id="home-math-level" style="font-size:13px;font-weight:700;color:#1e3a5f;opacity:0.65;margin-top:2px">Lv. 1</div>
+    </div>
     <div style="margin-left:auto;font-size:26px;color:#1e3a5f;opacity:0.4">›</div>
   </div>
 </div>
@@ -803,7 +812,10 @@ function showScreen(id) {
 // ─── HOME ─────────────────────────────────────────────────────────────────────
 
 function refreshHome() {
-  document.getElementById('home-level-pill').innerHTML = `⭐ Level ${S.level}`;
+  document.getElementById('home-reading-level').textContent = `Lv. ${S.level}`;
+  document.getElementById('home-sw-level').textContent      = `Lv. ${S.swLevel}`;
+  document.getElementById('home-dn-level').textContent      = `Lv. ${S.dnLevel}`;
+  document.getElementById('home-math-level').textContent    = `Lv. ${S.mathLevel}`;
   document.getElementById('sc-badges-count').textContent = `${S.badges.length} earned`;
 
   document.getElementById('topic-list').innerHTML = TOPICS.map(t => `
@@ -1522,7 +1534,7 @@ function renderDnRound() {
     document.getElementById('dn-question').innerHTML =
       `<span style="color:var(--accent)">${r.c1} <b>"${r.l1.toUpperCase()}"</b></span> and ` +
       `<span style="color:#e05050">${r.c2} <b>"${r.l2.toUpperCase()}"</b></span><br>` +
-      `<span style="font-size:28px;letter-spacing:2px;display:block;margin-top:8px">${r.c1} ${r.op} ${r.c2} = ?</span>`;
+      `<span style="font-size:56px;letter-spacing:2px;display:block;margin-top:8px">${r.c1} ${r.op} ${r.c2} = ?</span>`;
   }
   renderDnNumpad();
 }

@@ -6,7 +6,7 @@
   <title>Juliana Reads!</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/favicon.svg">
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/tabler-icons.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -647,7 +647,7 @@
   <input type="password" class="text-input" id="api-key-input" placeholder="sk-ant-…" oninput="saveApiKey(this.value)">
   <button id="pc-qr-btn" class="btn btn-secondary btn-full" style="margin-top:10px;display:none" onclick="showQrCode()">📱 Send to tablet via QR code</button>
   <div id="pc-qr-section" style="display:none;text-align:center;padding:16px 0 8px">
-    <canvas id="pc-qr-canvas" style="border-radius:12px;border:3px solid var(--border);max-width:100%"></canvas>
+    <div id="pc-qr-canvas" style="display:inline-block;border-radius:12px;border:3px solid var(--border);overflow:hidden"></div>
     <div style="font-size:13px;color:var(--muted);font-weight:700;margin-top:10px">Scan with the tablet camera — key saves automatically</div>
   </div>
 
@@ -1272,10 +1272,10 @@ function showQrCode() {
   const url = `${location.origin}/#apikey=${encodeURIComponent(S.apiKey)}`;
   const section = document.getElementById('pc-qr-section');
   section.style.display = '';
-  const size = Math.min(260, window.innerWidth - 64);
-  QRCode.toCanvas(document.getElementById('pc-qr-canvas'), url, { width: size, margin: 2, color: { dark: '#1e1e1e', light: '#ffffff' } }, err => {
-    if (err) { section.style.display = 'none'; showToast('QR generation failed'); }
-  });
+  const el = document.getElementById('pc-qr-canvas');
+  el.innerHTML = '';
+  const size = Math.min(256, window.innerWidth - 80);
+  new QRCode(el, { text: url, width: size, height: size, colorDark: '#1e1e1e', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
 }
 
 function saveProxyUrl(v) {

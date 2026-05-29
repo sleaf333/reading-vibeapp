@@ -468,7 +468,14 @@
     <button class="btn-icon" onclick="showScreen('screen-home')">🏠</button>
     <span class="screen-label">Choose a story</span>
   </div>
-  <div id="topic-list"></div>
+  <div id="topic-list">
+    <div class="topic-card" style="background:#fce8f5" onclick="pickTopic('princesses')"><div class="topic-icon">👑</div><div class="topic-name">Princesses</div></div>
+    <div class="topic-card" style="background:#e6f5ee" onclick="pickTopic('animals')"><div class="topic-icon">🦁</div><div class="topic-name">Animals</div></div>
+    <div class="topic-card" style="background:#fce8ef" onclick="pickTopic('magic')"><div class="topic-icon">🔮</div><div class="topic-name">Magic and mystery</div></div>
+    <div class="topic-card" style="background:#e3eeff" onclick="pickTopic('ocean')"><div class="topic-icon">🐬</div><div class="topic-name">Ocean world</div></div>
+    <div class="topic-card" style="background:#fef3e2" onclick="pickTopic('inventors')"><div class="topic-icon">💡</div><div class="topic-name">Young inventors</div></div>
+    <div class="topic-card" style="background:#e8f5e8" onclick="pickTopic('dinosaurs')"><div class="topic-icon">🦕</div><div class="topic-name">Dinosaurs</div></div>
+  </div>
 </div>
 
 <!-- ═══ DAILY NEWS GAME ═══ -->
@@ -1130,11 +1137,6 @@ function refreshHome() {
     }
   }
 
-  document.getElementById('topic-list').innerHTML = TOPICS.map(t => `
-    <div class="topic-card" style="background:${t.bg}" onclick="pickTopic('${t.id}')">
-      <div class="topic-icon">${t.icon}</div>
-      <div class="topic-name">${t.name}</div>
-    </div>`).join('');
 }
 
 // ─── STORY FETCH ─────────────────────────────────────────────────────────────

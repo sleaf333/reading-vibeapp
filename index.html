@@ -418,13 +418,13 @@
     <div style="margin-left:auto;font-size:26px;color:#78350f;opacity:0.4">›</div>
   </div>
 
-  <div class="math-home-card" onclick="startMathGame()">
-    <div style="font-size:42px;line-height:1">🔢</div>
-    <div>
+  <div class="math-home-card" id="math-home-card" onclick="startMathGame()">
+    <div style="font-size:42px;line-height:1" id="math-card-icon">🔢</div>
+    <div style="flex:1;min-width:0">
       <div style="font-size:22px;font-weight:900;color:#1e3a5f">Math Time</div>
-      <div id="home-math-level" style="font-size:13px;font-weight:700;color:#1e3a5f;opacity:0.65;margin-top:2px">Lv. 1</div>
+      <div id="home-math-level" style="font-size:13px;font-weight:700;color:#1e3a5f;opacity:0.65;margin-top:2px">Lv. 3</div>
     </div>
-    <div style="margin-left:auto;font-size:26px;color:#1e3a5f;opacity:0.4">›</div>
+    <div id="math-lock-badge" style="margin-left:auto;font-size:13px;font-weight:800;color:#1e3a5f;text-align:right;flex-shrink:0;max-width:130px;line-height:1.4"></div>
   </div>
 </div>
 
@@ -503,6 +503,17 @@
   <div id="math-new-badges" style="margin-bottom:16px"></div>
   <button class="btn btn-primary btn-full" onclick="startMathGame()">Play again</button>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ MATH BREAK ═══ -->
+<div id="screen-mathbreak" class="screen">
+  <div style="text-align:center;padding:40px 0 24px">
+    <div style="font-size:72px;margin-bottom:16px" id="mathbreak-emoji">📖</div>
+    <div style="font-size:28px;font-weight:900;margin-bottom:12px" id="mathbreak-title">Reading time!</div>
+    <div style="font-size:18px;color:var(--muted);font-weight:700;line-height:1.6;margin-bottom:32px" id="mathbreak-msg">Great math work! Do a reading game to keep going.</div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="showScreen('screen-home')">📚 Go read a story</button>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">🏠 Home</button>
 </div>
 
 <!-- ═══ LOADING ═══ -->
@@ -692,6 +703,33 @@
   </div>
 
   <div class="divider"></div>
+  <div class="section-title">Math access rules</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600">Set to 0 to disable a rule.</div>
+
+  <div class="pc-level-row">
+    <div>
+      <span class="pc-level-label">📚 Stories to unlock math</span>
+      <div style="font-size:12px;color:var(--muted);font-weight:600;margin-top:2px">Reading games needed per day (story or Daily News)</div>
+    </div>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setMathRule('dnUnlockReq','rl_dnunlockreq',0,5,-1)">−</button>
+      <span class="pc-lvl-val" id="pc-unlock-req">2</span>
+      <button class="pc-lvl-btn" onclick="setMathRule('dnUnlockReq','rl_dnunlockreq',0,5,+1)">+</button>
+    </div>
+  </div>
+  <div class="pc-level-row">
+    <div>
+      <span class="pc-level-label">🔄 Math games before break</span>
+      <div style="font-size:12px;color:var(--muted);font-weight:600;margin-top:2px">Math sessions before a reading break is required</div>
+    </div>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setMathRule('mathBreakEvery','rl_mathbreakevery',0,20,-1)">−</button>
+      <span class="pc-lvl-val" id="pc-break-every">5</span>
+      <button class="pc-lvl-btn" onclick="setMathRule('mathBreakEvery','rl_mathbreakevery',0,20,+1)">+</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
   <div class="section-title">Recent sessions</div>
   <div id="pc-sessions"></div>
 
@@ -802,6 +840,11 @@ const S = {
   pin:      lsGet('rl_pin','1234'),
   apiKey:   lsGet('rl_apikey',''),
   proxyUrl: lsGet('rl_proxy',''),
+  readingToday:  parseInt(lsGet('rl_readingtoday','0')),
+  mathSinceRead: parseInt(lsGet('rl_mathsinceread','0')),
+  mathLastDate:  lsGet('rl_mathlastdate',''),
+  dnUnlockReq:   parseInt(lsGet('rl_dnunlockreq','2')),
+  mathBreakEvery:parseInt(lsGet('rl_mathbreakevery','5')),
   // transient
   topic: null, title: '', story: '', words: [], quiz: [],
   quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
@@ -814,6 +857,17 @@ const S = {
 
 // Bump math to minimum level 3 (parent-requested baseline)
 if (S.mathLevel < 3) { S.mathLevel = 3; lsSet('rl_mathlevel', '3'); }
+
+// Midnight reset for daily reading requirement
+(function() {
+  const today = new Date().toLocaleDateString();
+  if (S.mathLastDate !== today) {
+    S.readingToday = 0;
+    S.mathLastDate = today;
+    lsSet('rl_readingtoday', '0');
+    lsSet('rl_mathlastdate', today);
+  }
+})();
 
 function persist() {
   lsSet('rl_level',    S.level);
@@ -841,6 +895,11 @@ function persist() {
   lsSet('rl_pin',      S.pin);
   lsSet('rl_apikey',   S.apiKey);
   lsSet('rl_proxy',    S.proxyUrl);
+  lsSet('rl_readingtoday',   S.readingToday);
+  lsSet('rl_mathsinceread',  S.mathSinceRead);
+  lsSet('rl_mathlastdate',   S.mathLastDate);
+  lsSet('rl_dnunlockreq',    S.dnUnlockReq);
+  lsSet('rl_mathbreakevery', S.mathBreakEvery);
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
@@ -856,12 +915,44 @@ function showScreen(id) {
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
 
+function mathLockState() {
+  if (S.dnUnlockReq > 0 && S.readingToday < S.dnUnlockReq) return 'daily';
+  if (S.mathBreakEvery > 0 && S.mathSinceRead >= S.mathBreakEvery) return 'break';
+  return null;
+}
+
 function refreshHome() {
   document.getElementById('home-reading-level').textContent = `Lv. ${S.level}`;
   document.getElementById('home-sw-level').textContent      = `Lv. ${S.swLevel}`;
   document.getElementById('home-dn-level').textContent      = `Lv. ${S.dnLevel}`;
   document.getElementById('home-math-level').textContent    = `Lv. ${S.mathLevel}`;
   document.getElementById('sc-badges-count').textContent = `${S.badges.length} earned`;
+
+  const lock = mathLockState();
+  const card = document.getElementById('math-home-card');
+  const badge = document.getElementById('math-lock-badge');
+  const icon = document.getElementById('math-card-icon');
+  if (lock === 'daily') {
+    card.style.opacity = '0.55';
+    icon.textContent = '🔒';
+    const need = S.dnUnlockReq - S.readingToday;
+    badge.innerHTML = `<span style="color:#e05050">${S.readingToday}/${S.dnUnlockReq} reading<br>games today</span>`;
+  } else if (lock === 'break') {
+    card.style.opacity = '0.55';
+    icon.textContent = '📖';
+    badge.innerHTML = `<span style="color:#b45309">Reading<br>break!</span>`;
+  } else {
+    card.style.opacity = '';
+    icon.textContent = '🔢';
+    if (S.mathBreakEvery > 0) {
+      const left = S.mathBreakEvery - S.mathSinceRead;
+      badge.innerHTML = left <= 2
+        ? `<span style="color:#b45309">${left} math left<br>before break</span>`
+        : `<span style="opacity:0.4;font-size:26px">›</span>`;
+    } else {
+      badge.innerHTML = `<span style="opacity:0.4;font-size:26px">›</span>`;
+    }
+  }
 
   document.getElementById('topic-list').innerHTML = TOPICS.map(t => `
     <div class="topic-card" style="background:${t.bg}" onclick="pickTopic('${t.id}')">
@@ -1147,6 +1238,8 @@ function showResult() {
   const pct   = score / total;
 
   S.stories++;
+  S.readingToday++;
+  S.mathSinceRead = 0;
   const tid = S.topic.id;
   if (!S.topics.includes(tid)) S.topics.push(tid);
   if (pct === 1) S.perfect++;
@@ -1326,7 +1419,9 @@ function renderParentCorner() {
   document.getElementById('pc-level').textContent      = `Lv. ${S.level}`;
   document.getElementById('pc-sw-level').textContent   = `Lv. ${S.swLevel}`;
   document.getElementById('pc-dn-level').textContent   = `Lv. ${S.dnLevel}`;
-  document.getElementById('pc-math-level').textContent = `Lv. ${S.mathLevel}`;
+  document.getElementById('pc-math-level').textContent  = `Lv. ${S.mathLevel}`;
+  document.getElementById('pc-unlock-req').textContent  = S.dnUnlockReq === 0 ? 'Off' : S.dnUnlockReq;
+  document.getElementById('pc-break-every').textContent = S.mathBreakEvery === 0 ? 'Off' : S.mathBreakEvery;
   document.getElementById('api-key-input').value    = S.apiKey;
   document.getElementById('proxy-url-input').value  = S.proxyUrl;
   document.getElementById('pc-qr-btn').style.display = S.apiKey ? '' : 'none';
@@ -1351,12 +1446,22 @@ function setGameLevel(levelKey, progKey, delta) {
   S[levelKey] = next;
   S[progKey]  = 0;
   if (next > S.maxlevel) S.maxlevel = next;
-  saveState();
+  persist();
   refreshHome();
   document.getElementById({
     level: 'pc-level', swLevel: 'pc-sw-level',
     dnLevel: 'pc-dn-level', mathLevel: 'pc-math-level'
   }[levelKey]).textContent = `Lv. ${next}`;
+}
+
+function setMathRule(key, lsKey, min, max, delta) {
+  const next = Math.min(max, Math.max(min, S[key] + delta));
+  if (next === S[key]) return;
+  S[key] = next;
+  lsSet(lsKey, String(next));
+  const elId = key === 'dnUnlockReq' ? 'pc-unlock-req' : 'pc-break-every';
+  document.getElementById(elId).textContent = next === 0 ? 'Off' : next;
+  refreshHome();
 }
 
 function saveApiKey(v) {
@@ -1685,6 +1790,8 @@ function dnBurst(anchorEl) {
 
 function showDnResult() {
   S.dngames++;
+  S.readingToday++;
+  S.mathSinceRead = 0;
   if (S.dnScore === 9) S.dnperfect++;
   const pct = S.dnScore / 9;
   const prevLevel = advanceLevel('dnLevel', 'dnLevelProg', pct);
@@ -1868,6 +1975,24 @@ function mathWordProblem(r) {
 }
 
 function startMathGame() {
+  const lock = mathLockState();
+  if (lock === 'daily') {
+    const need = S.dnUnlockReq - S.readingToday;
+    document.getElementById('mathbreak-emoji').textContent = '🔒';
+    document.getElementById('mathbreak-title').textContent = 'Read first!';
+    document.getElementById('mathbreak-msg').textContent =
+      `Complete ${need} more reading game${need !== 1 ? 's' : ''} (story or Daily News) to unlock Math Time today.`;
+    showScreen('screen-mathbreak');
+    return;
+  }
+  if (lock === 'break') {
+    document.getElementById('mathbreak-emoji').textContent = '📖';
+    document.getElementById('mathbreak-title').textContent = 'Reading break!';
+    document.getElementById('mathbreak-msg').textContent =
+      `Amazing math work! Do one reading game (story or Daily News) to keep playing math.`;
+    showScreen('screen-mathbreak');
+    return;
+  }
   S.mathRounds  = Array.from({ length: 10 }, generateMathRound);
   S.mathIdx     = 0;
   S.mathScore   = 0;
@@ -1974,6 +2099,7 @@ function answerMath(num) {
 
 function showMathResult() {
   S.mathgames++;
+  S.mathSinceRead++;
   if (S.mathScore === 10) S.mathperfect++;
   const pct = S.mathScore / 10;
   const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct, 10);

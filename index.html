@@ -372,6 +372,14 @@
     .math-equation { font-size: 56px; font-weight: 900; text-align: center; color: var(--accent); letter-spacing: 2px; min-height: 36px; }
 
     /* ── TOAST ── */
+    .ten-frame-outer { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 6px 0; }
+    .ten-frame-grid { display: grid; grid-template-columns: repeat(5, 30px); grid-template-rows: repeat(2, 30px); gap: 5px; border: 2.5px solid #94a3b8; border-radius: 10px; padding: 8px; background: var(--surface); box-shadow: var(--shadow-sm); }
+    .tf-cell { width: 30px; height: 30px; border-radius: 6px; border: 2px solid #cbd5e1; background: transparent; transition: background 0.15s; }
+    .tf-ten  { background: #f43f5e; border-color: #e11d48; }
+    .tf-ones { background: #fbbf24; border-color: #d97706; }
+    .ten-frame-op { font-size: 30px; font-weight: 900; color: var(--text); }
+    .doubles-visual { font-size: 30px; line-height: 2; text-align: center; }
+    .doubles-extra { background: #fef08a; border-radius: 4px; padding: 0 1px; }
     #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: var(--pr); font-size: 14px; font-weight: 700; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
     #toast.show { opacity: 1; }
   </style>
@@ -1844,15 +1852,36 @@ function generateMathRound() {
     a = randInt(1, 5); b = randInt(1, Math.min(5, 10 - a)); op = '+';
     return { type:'standard', a, b, op, answer:a+b, showVisual:true, showWord:true, ctx, name };
   }
-  // L3 — Gr 1 Early: add/sub within 10, word problems
+  // L3 — Gr 1 Early: add/sub within 10 + doubles (1-5) + teen decomp (11-14)
   if (lv === 3) {
+    const r3 = Math.random();
+    if (r3 < 0.30) {
+      const base = randInt(1, 5);
+      return { type:'doubles', a:base, b:base, isNearDouble:false, answer:base*2, ctx, name };
+    }
+    if (r3 < 0.60) {
+      const ones = randInt(1, 4);
+      const sub = Math.random() < 0.5 ? 'build' : 'break';
+      return { type:'teen_decomp', ones, total:10+ones, sub, answer: sub==='build' ? 10+ones : ones };
+    }
     op = Math.random() < 0.5 ? '-' : '+';
     if (op==='+') { a=randInt(1,8); b=randInt(1,Math.min(8,10-a)); }
     else          { a=randInt(3,10); b=randInt(1,a); }
     return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
   }
-  // L4 — Gr 1 Mid: add/sub within 20, word problems
+  // L4 — Gr 1 Mid: add/sub within 20 + near-doubles (5-9) + teen decomp (11-19)
   if (lv === 4) {
+    const r4 = Math.random();
+    if (r4 < 0.28) {
+      const base = randInt(4, 9);
+      const b2 = base + 1;
+      return { type:'doubles', a:base, b:b2, isNearDouble:true, answer:base+b2, ctx, name };
+    }
+    if (r4 < 0.56) {
+      const ones = randInt(1, 9);
+      const sub = Math.random() < 0.5 ? 'build' : 'break';
+      return { type:'teen_decomp', ones, total:10+ones, sub, answer: sub==='build' ? 10+ones : ones };
+    }
     op = Math.random() < 0.5 ? '-' : '+';
     if (op==='+') { a=randInt(5,14); b=randInt(2,Math.min(10,20-a)); }
     else          { a=randInt(8,20); b=randInt(2,Math.min(a,10)); }
@@ -1941,6 +1970,37 @@ function mathWordProblem(r) {
       `${rows} friends each have ${cols} ${per}. How many ${ctx.plural} are there in total?`,
     ][randInt(0, 2)];
   }
+  if (r.type === 'teen_decomp') {
+    const { ones, total, sub, ctx, name } = r;
+    const thing = ones === 1 ? ctx.singular : ctx.plural;
+    const tThing = total === 1 ? ctx.singular : ctx.plural;
+    if (sub === 'build') return [
+      `${name} has a full group of 10 ${ctx.plural} and ${ones} more ${thing}. How many altogether?`,
+      `There are 10 ${ctx.plural} in a box and ${ones} ${thing} outside. How many in all?`,
+      `A bundle of 10 ${ctx.plural} plus ${ones} more ${thing}. What is the total?`,
+    ][randInt(0, 2)];
+    return [
+      `${name} has ${total} ${tThing}. ${name} groups 10 together. How many ${ctx.plural} are left over?`,
+      `There are ${total} ${tThing}. If you take away the group of 10, how many remain?`,
+      `${total} = 10 + how many more?`,
+    ][randInt(0, 2)];
+  }
+  if (r.type === 'doubles') {
+    const { a, b, isNearDouble, ctx, name } = r;
+    const names = ctx.names;
+    const thingA = a === 1 ? ctx.singular : ctx.plural;
+    const thingB = b === 1 ? ctx.singular : ctx.plural;
+    if (!isNearDouble) return [
+      `${names[0]} and ${names[1]} each have ${a} ${thingA}. Same number! How many in all?`,
+      `Two bags — each has exactly ${a} ${thingA}. How many ${ctx.plural} altogether?`,
+      `${name} doubled ${a} ${thingA}. What is ${a} + ${a}?`,
+    ][randInt(0, 2)];
+    return [
+      `${names[0]} has ${a} ${thingA}. ${names[1]} has ${b} — just one more! How many together?`,
+      `${a} + ${b} — that's almost a double! One more than ${a} + ${a}. How many in all?`,
+      `Two baskets: ${a} ${thingA} and ${b} ${thingB}. They are almost the same. How many total?`,
+    ][randInt(0, 2)];
+  }
   if (r.type === 'multiply') {
     const { a, b, ctx, name } = r;
     const thing = ctx.plural;
@@ -2016,17 +2076,34 @@ function renderMathRound() {
   card.style.animation = 'dnArticleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both';
 
   // Visual
-  let visual = '';
-  if (r.type === 'standard' && r.showVisual) {
-    visual = r.ctx.emoji.repeat(r.a) + '  ' + r.op + '  ' + r.ctx.emoji.repeat(r.b);
-  } else if (r.type === 'groups') {
-    visual = Array(r.rows).fill(r.ctx.emoji.repeat(r.cols)).join('\n');
-  } else if (r.type === 'skip_count') {
-    visual = r.terms.join('  →  ') + '  →  ?';
-  }
   const visEl = document.getElementById('math-visual');
-  visEl.textContent = visual;
-  visEl.style.fontSize = r.type === 'skip_count' ? '36px' : '';
+  visEl.style.fontSize = '';
+  if (r.type === 'teen_decomp') {
+    const tenCells  = Array.from({length:10}, () => `<div class="tf-cell tf-ten"></div>`).join('');
+    const onesCells = Array.from({length:10}, (_,i) =>
+      `<div class="tf-cell${i < r.ones ? ' tf-ones' : ''}"></div>`).join('');
+    visEl.innerHTML = `<div class="ten-frame-outer">
+      <div class="ten-frame-grid">${tenCells}</div>
+      <div class="ten-frame-op">+</div>
+      <div class="ten-frame-grid">${onesCells}</div>
+    </div>`;
+  } else if (r.type === 'doubles') {
+    const e = r.ctx.emoji;
+    const row1 = e.repeat(r.a);
+    const row2 = r.isNearDouble
+      ? e.repeat(r.a) + `<span class="doubles-extra">${e}</span>`
+      : e.repeat(r.b);
+    visEl.innerHTML = `<div class="doubles-visual">${row1}<br>${row2}</div>`;
+  } else if (r.type === 'standard' && r.showVisual) {
+    visEl.innerHTML = `<span style="letter-spacing:2px">${r.ctx.emoji.repeat(r.a)}  ${r.op}  ${r.ctx.emoji.repeat(r.b)}</span>`;
+  } else if (r.type === 'groups') {
+    visEl.innerHTML = `<span style="white-space:pre-line">${Array(r.rows).fill(r.ctx.emoji.repeat(r.cols)).join('\n')}</span>`;
+  } else if (r.type === 'skip_count') {
+    visEl.style.fontSize = '36px';
+    visEl.textContent = r.terms.join('  →  ') + '  →  ?';
+  } else {
+    visEl.textContent = '';
+  }
 
   // Word problem (hidden for L1 visual-only)
   const wpEl = document.getElementById('math-word-problem');
@@ -2035,6 +2112,8 @@ function renderMathRound() {
   // Equation
   let equation = '';
   if (r.type === 'standard')            equation = `${r.a} ${r.op} ${r.b} = ?`;
+  else if (r.type === 'teen_decomp')    equation = r.sub === 'build' ? `10 + ${r.ones} = ?` : `${r.total} = 10 + ?`;
+  else if (r.type === 'doubles')        equation = `${r.a} + ${r.b} = ?`;
   else if (r.type === 'missing_addend') equation = `${r.known} + ? = ${r.total}`;
   else if (r.type === 'groups')         equation = `${r.rows} × ${r.cols} = ?`;
   else if (r.type === 'multiply')       equation = `${r.a} × ${r.b} = ?`;

@@ -544,7 +544,6 @@
   <div class="dn-progress-bar"><div class="dn-progress-fill" id="sb-progress-fill" style="width:0%"></div></div>
   <div style="text-align:center;margin-top:14px">
     <button class="btn btn-secondary btn-sm" onclick="speakSbWord()" style="margin-bottom:8px">🔊 Hear the word</button>
-    <div class="sb-word-display" id="sb-word-display">ship</div>
   </div>
   <div class="sb-boxes-row" id="sb-boxes-row"></div>
   <div style="text-align:center;font-size:14px;color:var(--muted);font-weight:700;margin:4px 0 8px">Tap a sound tile, then tap a box ↑</div>
@@ -2400,7 +2399,6 @@ function renderSbRound() {
   document.getElementById('sb-progress-fill').style.width= `${(S.sbIdx / S.sbWords.length) * 100}%`;
   document.getElementById('sb-feedback').textContent     = '';
   document.getElementById('sb-feedback').className       = 'dn-feedback';
-  document.getElementById('sb-word-display').textContent = w.word;
 
   document.getElementById('sb-boxes-row').innerHTML = w.phonemes.map((_,i) =>
     `<div class="sb-box" id="sb-box-${i}" onclick="assignSbBox(${i})"></div>`

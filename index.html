@@ -104,7 +104,7 @@
     .topic-sub { display: none; }
 
     /* ── SHORTCUTS ── */
-    .shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+    .shortcuts { display: block; margin-top: 24px; }
     .sc-card {
       background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r);
       padding: 22px 12px 20px; cursor: pointer; text-align: center;
@@ -421,11 +421,6 @@
       <div class="sc-icon" style="color:var(--accent)">🎮</div>
       <div class="sc-label" style="font-size:15px;color:var(--accent)">Sight Word Game</div>
       <div class="sc-sub" style="color:var(--accent);opacity:0.8" id="home-sw-level">Lv. 1</div>
-    </div>
-    <div class="sc-card" onclick="showScreen('screen-badges')">
-      <div class="sc-icon">🏆</div>
-      <div class="sc-label">Badges &amp; Awards</div>
-      <div class="sc-sub" id="sc-badges-count">0 earned</div>
     </div>
   </div>
 

@@ -1085,8 +1085,6 @@ function refreshHome() {
   document.getElementById('home-dn-level').textContent      = `Lv. ${S.dnLevel}`;
   document.getElementById('home-math-level').textContent    = `Lv. ${S.mathLevel}`;
   document.getElementById('home-sb-level').textContent      = `Lv. ${S.sbLevel}`;
-  document.getElementById('sc-badges-count').textContent = `${S.badges.length} earned`;
-
   const lock = mathLockState();
   const card = document.getElementById('math-home-card');
   const badge = document.getElementById('math-lock-badge');

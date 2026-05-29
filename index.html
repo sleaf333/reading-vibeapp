@@ -2310,9 +2310,6 @@ function answerMath(num) {
 
   if (correct) {
     S.mathScore++;
-    if (chosen) chosen.classList.add('dn-correct');
-    dnBurst(chosen);
-    burstReward(chosen, ['⭐','🎉','✨','💯','🌟','🎊']);
     fb.textContent = '🎉 Correct!';
     fb.className = 'dn-feedback correct';
     setTimeout(() => {
@@ -2320,6 +2317,11 @@ function answerMath(num) {
       if (S.mathIdx >= 10) showMathResult();
       else renderMathRound();
     }, 1300);
+    if (chosen) {
+      chosen.classList.add('dn-correct');
+      dnBurst(chosen);
+      burstReward(chosen, ['⭐','🎉','✨','💯','🌟','🎊']);
+    }
   } else {
     if (chosen) chosen.classList.add('dn-wrong');
     fb.textContent = 'Not quite — try again!';

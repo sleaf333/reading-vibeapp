@@ -380,6 +380,18 @@
     .ten-frame-op { font-size: 30px; font-weight: 900; color: var(--text); }
     .doubles-visual { font-size: 30px; line-height: 2; text-align: center; }
     .doubles-extra { background: #fef08a; border-radius: 4px; padding: 0 1px; }
+    .sb-home-card { background: linear-gradient(145deg, #f0fdf4, #dcfce7); border: 1.5px solid #86efac; border-radius: var(--r); padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.12s; box-shadow: var(--shadow); margin-top: 12px; }
+    .sb-home-card:active { transform: scale(0.97); }
+    .sb-word-display { font-size: 52px; font-weight: 900; text-align: center; letter-spacing: 4px; color: var(--text); margin: 12px 0 4px; }
+    .sb-boxes-row { display: flex; gap: 12px; justify-content: center; margin: 18px 0; flex-wrap: wrap; }
+    .sb-box { width: 72px; height: 72px; border: 3px solid var(--border); border-radius: 14px; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; color: var(--text); cursor: pointer; box-shadow: var(--shadow-sm); transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+    .sb-box.sb-filled { background: var(--accent-lt); border-color: var(--accent); }
+    .sb-box.sb-correct { background: #dcfce7; border-color: #22c55e; color: #166534; }
+    .sb-box.sb-wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; animation: dnShake 0.4s ease; }
+    .sb-tiles-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 16px 0 8px; }
+    .sb-tile { min-width: 56px; height: 56px; padding: 0 12px; border: 2.5px solid var(--border); border-radius: 12px; background: var(--surface); font-size: 24px; font-weight: 800; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: all 0.15s; -webkit-tap-highlight-color: transparent; font-family: inherit; }
+    .sb-tile.sb-selected { background: var(--accent); border-color: var(--accent); color: #fff; transform: scale(1.1); }
+    .sb-tile.sb-used { opacity: 0.2; pointer-events: none; }
     #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: var(--pr); font-size: 14px; font-weight: 700; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
     #toast.show { opacity: 1; }
   </style>
@@ -433,6 +445,15 @@
       <div id="home-math-level" style="font-size:13px;font-weight:700;color:#1e3a5f;opacity:0.65;margin-top:2px">Lv. 3</div>
     </div>
     <div id="math-lock-badge" style="margin-left:auto;font-size:13px;font-weight:800;color:#1e3a5f;text-align:right;flex-shrink:0;max-width:130px;line-height:1.4"></div>
+  </div>
+
+  <div class="sb-home-card" onclick="startSbGame()">
+    <div style="font-size:42px;line-height:1">📦</div>
+    <div>
+      <div style="font-size:22px;font-weight:900;color:#166534">Sound Boxes</div>
+      <div id="home-sb-level" style="font-size:13px;font-weight:700;color:#166534;opacity:0.65;margin-top:2px">Lv. 1</div>
+    </div>
+    <div style="margin-left:auto;font-size:26px;color:#166534;opacity:0.4">›</div>
   </div>
 </div>
 
@@ -510,6 +531,41 @@
   </div>
   <div id="math-new-badges" style="margin-bottom:16px"></div>
   <button class="btn btn-primary btn-full" onclick="startMathGame()">Play again</button>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ SOUND BOXES GAME ═══ -->
+<div id="screen-sbgame" class="screen">
+  <div class="sw-header">
+    <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
+    <span class="sw-prog-text" id="sb-prog">Word 1 of 8</span>
+    <span class="pill pill-green" id="sb-score-pill">0 ✓</span>
+  </div>
+  <div class="dn-progress-bar"><div class="dn-progress-fill" id="sb-progress-fill" style="width:0%"></div></div>
+  <div style="text-align:center;margin-top:14px">
+    <button class="btn btn-secondary btn-sm" onclick="speakSbWord()" style="margin-bottom:8px">🔊 Hear the word</button>
+    <div class="sb-word-display" id="sb-word-display">ship</div>
+  </div>
+  <div class="sb-boxes-row" id="sb-boxes-row"></div>
+  <div style="text-align:center;font-size:14px;color:var(--muted);font-weight:700;margin:4px 0 8px">Tap a sound tile, then tap a box ↑</div>
+  <div class="sb-tiles-row" id="sb-tiles-row"></div>
+  <div class="dn-feedback" id="sb-feedback"></div>
+</div>
+
+<!-- ═══ SOUND BOXES RESULT ═══ -->
+<div id="screen-sbresult" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="showScreen('screen-home')">🏠</button>
+    <span class="screen-label">Sound Boxes done! 📦</span>
+  </div>
+  <div class="sw-result-center">
+    <div class="stars-row" id="sb-result-stars">⭐⭐⭐</div>
+    <div class="result-score" id="sb-result-score">8 / 8</div>
+    <div class="result-msg" id="sb-result-msg">Sound star!</div>
+    <div id="sb-level-msg" style="margin-top:10px"></div>
+  </div>
+  <div id="sb-new-badges" style="margin-bottom:16px"></div>
+  <button class="btn btn-primary btn-full" onclick="startSbGame()">Play again</button>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
 </div>
 
@@ -709,6 +765,14 @@
       <button class="pc-lvl-btn" onclick="setGameLevel('mathLevel','mathLevelProg',+1)">+</button>
     </div>
   </div>
+  <div class="pc-level-row">
+    <span class="pc-level-label">📦 Sound Boxes</span>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setGameLevel('sbLevel','sbLevelProg',-1)">−</button>
+      <span class="pc-lvl-val" id="pc-sb-level">Lv. 1</span>
+      <button class="pc-lvl-btn" onclick="setGameLevel('sbLevel','sbLevelProg',+1)">+</button>
+    </div>
+  </div>
 
   <div class="divider"></div>
   <div class="section-title">Math access rules</div>
@@ -801,6 +865,89 @@ const BADGES = [
 const SW_EASY = ['the','a','is','it','in','on','at','up','do','go','he','she','we','my','no','so','to','of','or','as','be','by','am','an','if','me','us','him','not','and','but','for','you','can','had','was','are','all','one','two','out','get','see','big','run','fun','dog','cat','hat','red','sun'];
 const SW_HARD = ['said','have','from','they','were','there','their','what','when','where','which','could','would','should','every','about','after','again','also','been','both','come','does','each','find','give','good','help','here','into','just','keep','know','like','live','long','look','made','make','many','more','most','much','must','name','need','over','part','play','read','right','same','show','some','than','that','them','then','these','think','this','time','very','want','well','went','with','word','work','your'];
 
+const SB_WORDS = [
+  // L1: CVC — 3 phonemes, all single letters
+  {lv:1,word:'cat', phonemes:['c','a','t']},
+  {lv:1,word:'dog', phonemes:['d','o','g']},
+  {lv:1,word:'big', phonemes:['b','i','g']},
+  {lv:1,word:'sit', phonemes:['s','i','t']},
+  {lv:1,word:'run', phonemes:['r','u','n']},
+  {lv:1,word:'cup', phonemes:['c','u','p']},
+  {lv:1,word:'hat', phonemes:['h','a','t']},
+  {lv:1,word:'pet', phonemes:['p','e','t']},
+  {lv:1,word:'bug', phonemes:['b','u','g']},
+  {lv:1,word:'red', phonemes:['r','e','d']},
+  {lv:1,word:'sun', phonemes:['s','u','n']},
+  {lv:1,word:'pin', phonemes:['p','i','n']},
+  {lv:1,word:'log', phonemes:['l','o','g']},
+  {lv:1,word:'mud', phonemes:['m','u','d']},
+  {lv:1,word:'hen', phonemes:['h','e','n']},
+  // L2: CVC + digraphs (sh/ch/th) — 3 phonemes
+  {lv:2,word:'ship', phonemes:['sh','i','p']},
+  {lv:2,word:'chip', phonemes:['ch','i','p']},
+  {lv:2,word:'thin', phonemes:['th','i','n']},
+  {lv:2,word:'that', phonemes:['th','a','t']},
+  {lv:2,word:'wish', phonemes:['w','i','sh']},
+  {lv:2,word:'fish', phonemes:['f','i','sh']},
+  {lv:2,word:'rich', phonemes:['r','i','ch']},
+  {lv:2,word:'chat', phonemes:['ch','a','t']},
+  {lv:2,word:'shin', phonemes:['sh','i','n']},
+  {lv:2,word:'chin', phonemes:['ch','i','n']},
+  {lv:2,word:'chop', phonemes:['ch','o','p']},
+  {lv:2,word:'shop', phonemes:['sh','o','p']},
+  {lv:2,word:'math', phonemes:['m','a','th']},
+  {lv:2,word:'bath', phonemes:['b','a','th']},
+  {lv:2,word:'path', phonemes:['p','a','th']},
+  // L3: CCVC / CVCC — 4 phonemes
+  {lv:3,word:'flag', phonemes:['f','l','a','g']},
+  {lv:3,word:'frog', phonemes:['f','r','o','g']},
+  {lv:3,word:'step', phonemes:['s','t','e','p']},
+  {lv:3,word:'clap', phonemes:['c','l','a','p']},
+  {lv:3,word:'slip', phonemes:['s','l','i','p']},
+  {lv:3,word:'trap', phonemes:['t','r','a','p']},
+  {lv:3,word:'snap', phonemes:['s','n','a','p']},
+  {lv:3,word:'drip', phonemes:['d','r','i','p']},
+  {lv:3,word:'lamp', phonemes:['l','a','m','p']},
+  {lv:3,word:'bend', phonemes:['b','e','n','d']},
+  {lv:3,word:'jump', phonemes:['j','u','m','p']},
+  {lv:3,word:'hand', phonemes:['h','a','n','d']},
+  {lv:3,word:'fast', phonemes:['f','a','s','t']},
+  {lv:3,word:'nest', phonemes:['n','e','s','t']},
+  {lv:3,word:'soft', phonemes:['s','o','f','t']},
+  // L4: vowel digraphs — 3 phonemes, vowel pair as one tile
+  {lv:4,word:'boat', phonemes:['b','oa','t']},
+  {lv:4,word:'rain', phonemes:['r','ai','n']},
+  {lv:4,word:'feet', phonemes:['f','ee','t']},
+  {lv:4,word:'coat', phonemes:['c','oa','t']},
+  {lv:4,word:'tail', phonemes:['t','ai','l']},
+  {lv:4,word:'bead', phonemes:['b','ea','d']},
+  {lv:4,word:'sail', phonemes:['s','ai','l']},
+  {lv:4,word:'moon', phonemes:['m','oo','n']},
+  {lv:4,word:'keep', phonemes:['k','ee','p']},
+  {lv:4,word:'food', phonemes:['f','oo','d']},
+  {lv:4,word:'seed', phonemes:['s','ee','d']},
+  {lv:4,word:'pool', phonemes:['p','oo','l']},
+  {lv:4,word:'wait', phonemes:['w','ai','t']},
+  {lv:4,word:'read', phonemes:['r','ea','d']},
+  {lv:4,word:'leaf', phonemes:['l','ea','f']},
+  // L5: complex — igh trigraph, consonant blends as units
+  {lv:5,word:'night',  phonemes:['n','igh','t']},
+  {lv:5,word:'light',  phonemes:['l','igh','t']},
+  {lv:5,word:'right',  phonemes:['r','igh','t']},
+  {lv:5,word:'fight',  phonemes:['f','igh','t']},
+  {lv:5,word:'chain',  phonemes:['ch','ai','n']},
+  {lv:5,word:'train',  phonemes:['tr','ai','n']},
+  {lv:5,word:'float',  phonemes:['fl','oa','t']},
+  {lv:5,word:'cream',  phonemes:['cr','ea','m']},
+  {lv:5,word:'dream',  phonemes:['dr','ea','m']},
+  {lv:5,word:'green',  phonemes:['gr','ee','n']},
+  {lv:5,word:'plain',  phonemes:['pl','ai','n']},
+  {lv:5,word:'brain',  phonemes:['br','ai','n']},
+  {lv:5,word:'steam',  phonemes:['st','ea','m']},
+  {lv:5,word:'grain',  phonemes:['gr','ai','n']},
+  {lv:5,word:'treat',  phonemes:['tr','ea','t']},
+];
+
 const LEVEL_DESC = [
   '',
   'age 4-5, very simple 2-3 letter words, 3-4 short sentences total',
@@ -844,6 +991,10 @@ const S = {
   dnperfect:parseInt(lsGet('rl_dnperfect','0')),
   mathgames: parseInt(lsGet('rl_mathgames','0')),
   mathperfect:parseInt(lsGet('rl_mathperfect','0')),
+  sbLevel:   parseInt(lsGet('rl_sblevel','1')),
+  sbLevelProg: parseInt(lsGet('rl_sblevelprog','0')),
+  sbgames:   parseInt(lsGet('rl_sbgames','0')),
+  sbperfect: parseInt(lsGet('rl_sbperfect','0')),
   topics:   lsJson('rl_topics', []),
   pin:      lsGet('rl_pin','1234'),
   apiKey:   lsGet('rl_apikey',''),
@@ -860,6 +1011,7 @@ const S = {
   swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
   dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false,
   mathRounds: [], mathIdx: 0, mathScore: 0, mathAnswered: false,
+  sbWords: [], sbIdx: 0, sbScore: 0, sbSelected: null, sbBoxes: [], sbTileOrder: [], sbWordPerfect: true,
   pinBuf: '',
 };
 
@@ -899,6 +1051,10 @@ function persist() {
   lsSet('rl_dnperfect',S.dnperfect);
   lsSet('rl_mathgames', S.mathgames);
   lsSet('rl_mathperfect',S.mathperfect);
+  lsSet('rl_sblevel',   S.sbLevel);
+  lsSet('rl_sblevelprog', S.sbLevelProg);
+  lsSet('rl_sbgames',   S.sbgames);
+  lsSet('rl_sbperfect', S.sbperfect);
   lsSet('rl_topics',   S.topics);
   lsSet('rl_pin',      S.pin);
   lsSet('rl_apikey',   S.apiKey);
@@ -934,6 +1090,7 @@ function refreshHome() {
   document.getElementById('home-sw-level').textContent      = `Lv. ${S.swLevel}`;
   document.getElementById('home-dn-level').textContent      = `Lv. ${S.dnLevel}`;
   document.getElementById('home-math-level').textContent    = `Lv. ${S.mathLevel}`;
+  document.getElementById('home-sb-level').textContent      = `Lv. ${S.sbLevel}`;
   document.getElementById('sc-badges-count').textContent = `${S.badges.length} earned`;
 
   const lock = mathLockState();
@@ -1428,6 +1585,7 @@ function renderParentCorner() {
   document.getElementById('pc-sw-level').textContent   = `Lv. ${S.swLevel}`;
   document.getElementById('pc-dn-level').textContent   = `Lv. ${S.dnLevel}`;
   document.getElementById('pc-math-level').textContent  = `Lv. ${S.mathLevel}`;
+  document.getElementById('pc-sb-level').textContent   = `Lv. ${S.sbLevel}`;
   document.getElementById('pc-unlock-req').textContent  = S.dnUnlockReq === 0 ? 'Off' : S.dnUnlockReq;
   document.getElementById('pc-break-every').textContent = S.mathBreakEvery === 0 ? 'Off' : S.mathBreakEvery;
   document.getElementById('api-key-input').value    = S.apiKey;
@@ -1458,7 +1616,7 @@ function setGameLevel(levelKey, progKey, delta) {
   refreshHome();
   document.getElementById({
     level: 'pc-level', swLevel: 'pc-sw-level',
-    dnLevel: 'pc-dn-level', mathLevel: 'pc-math-level'
+    dnLevel: 'pc-dn-level', mathLevel: 'pc-math-level', sbLevel: 'pc-sb-level'
   }[levelKey]).textContent = `Lv. ${next}`;
 }
 
@@ -2211,6 +2369,133 @@ function spawnConfetti() {
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 3200);
   }
+}
+
+// ─── SOUND BOXES ─────────────────────────────────────────────────────────────
+
+function startSbGame() {
+  const lv = Math.min(S.sbLevel, 5);
+  const pool = SB_WORDS.filter(w => w.lv <= lv);
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  S.sbWords    = shuffled.slice(0, 8);
+  S.sbIdx      = 0;
+  S.sbScore    = 0;
+  S.sbSelected = null;
+  S.sbBoxes    = [];
+  S.sbTileOrder= [];
+  S.sbWordPerfect = true;
+  showScreen('screen-sbgame');
+  renderSbRound();
+}
+
+function renderSbRound() {
+  const w = S.sbWords[S.sbIdx];
+  S.sbSelected    = null;
+  S.sbWordPerfect = true;
+  S.sbBoxes       = new Array(w.phonemes.length).fill(null);
+  S.sbTileOrder   = [...w.phonemes].sort(() => Math.random() - 0.5);
+
+  document.getElementById('sb-prog').textContent         = `Word ${S.sbIdx + 1} of ${S.sbWords.length}`;
+  document.getElementById('sb-score-pill').textContent   = `${S.sbScore} ✓`;
+  document.getElementById('sb-progress-fill').style.width= `${(S.sbIdx / S.sbWords.length) * 100}%`;
+  document.getElementById('sb-feedback').textContent     = '';
+  document.getElementById('sb-feedback').className       = 'dn-feedback';
+  document.getElementById('sb-word-display').textContent = w.word;
+
+  document.getElementById('sb-boxes-row').innerHTML = w.phonemes.map((_,i) =>
+    `<div class="sb-box" id="sb-box-${i}" onclick="assignSbBox(${i})"></div>`
+  ).join('');
+
+  document.getElementById('sb-tiles-row').innerHTML = S.sbTileOrder.map((p,i) =>
+    `<button class="sb-tile" id="sb-tile-${i}" onclick="selectSbTile(${i})">${p}</button>`
+  ).join('');
+
+  speakSbWord();
+}
+
+function speakSbWord() {
+  const w = S.sbWords[S.sbIdx];
+  if (!w) return;
+  const u = new SpeechSynthesisUtterance(w.word);
+  u.rate = 0.75;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+function selectSbTile(idx) {
+  if (S.sbSelected === idx) {
+    S.sbSelected = null;
+    document.querySelectorAll('.sb-tile').forEach(t => t.classList.remove('sb-selected'));
+    return;
+  }
+  S.sbSelected = idx;
+  document.querySelectorAll('.sb-tile').forEach(t => t.classList.remove('sb-selected'));
+  const el = document.getElementById(`sb-tile-${idx}`);
+  if (el) el.classList.add('sb-selected');
+}
+
+function assignSbBox(boxIdx) {
+  if (S.sbSelected === null) return;
+  if (S.sbBoxes[boxIdx] !== null) return;
+
+  const w             = S.sbWords[S.sbIdx];
+  const placed        = S.sbTileOrder[S.sbSelected];
+  const correct       = w.phonemes[boxIdx];
+  const box           = document.getElementById(`sb-box-${boxIdx}`);
+  const tile          = document.getElementById(`sb-tile-${S.sbSelected}`);
+
+  if (placed === correct) {
+    S.sbBoxes[boxIdx] = placed;
+    box.textContent   = placed;
+    box.classList.add('sb-correct');
+    if (tile) { tile.classList.add('sb-used'); tile.classList.remove('sb-selected'); }
+    S.sbSelected = null;
+    burstReward(box, ['⭐','✨','🔤','💫','🎵']);
+
+    if (S.sbBoxes.every(b => b !== null)) {
+      setTimeout(() => {
+        if (S.sbWordPerfect) S.sbScore++;
+        S.sbIdx++;
+        if (S.sbIdx >= S.sbWords.length) showSbResult();
+        else renderSbRound();
+      }, 700);
+    }
+  } else {
+    S.sbWordPerfect = false;
+    box.textContent = placed;
+    box.classList.add('sb-wrong');
+    if (tile) tile.classList.remove('sb-selected');
+    S.sbSelected = null;
+    const fb = document.getElementById('sb-feedback');
+    fb.textContent = 'Not quite — try another box!';
+    fb.className   = 'dn-feedback wrong';
+    setTimeout(() => {
+      box.textContent = '';
+      box.classList.remove('sb-wrong');
+      fb.textContent  = '';
+      fb.className    = 'dn-feedback';
+    }, 750);
+  }
+}
+
+function showSbResult() {
+  S.sbgames++;
+  const total = S.sbWords.length;
+  if (S.sbScore === total) S.sbperfect++;
+  const pct       = S.sbScore / total;
+  const prevLevel = advanceLevel('sbLevel', 'sbLevelProg', pct);
+  const newB      = awardAll();
+  persist();
+  document.getElementById('sb-result-stars').textContent = pct >= 0.875 ? '⭐⭐⭐' : pct >= 0.625 ? '⭐⭐' : '⭐';
+  document.getElementById('sb-result-score').textContent = `${S.sbScore} / ${total}`;
+  document.getElementById('sb-result-msg').textContent   =
+    pct === 1 ? 'Sound star! 🌟' : pct >= 0.875 ? 'Amazing work!' : pct >= 0.625 ? 'Good effort!' : 'Keep practicing!';
+  document.getElementById('sb-level-msg').innerHTML      = levelChangeMsg('sbLevel', 'sbLevelProg', prevLevel);
+  document.getElementById('sb-new-badges').innerHTML     = newB.map(b =>
+    `<div class="new-badge"><span class="nb-emoji">${b.icon}</span><div><div class="nb-name">${b.name}</div><div class="nb-desc">${b.desc}</div></div></div>`
+  ).join('');
+  refreshHome();
+  showScreen('screen-sbresult');
 }
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────

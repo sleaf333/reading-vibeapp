@@ -1345,7 +1345,7 @@ function renderParentCorner() {
 }
 
 function setGameLevel(levelKey, progKey, delta) {
-  const maxLv = levelKey === 'mathLevel' ? 8 : 5;
+  const maxLv = levelKey === 'mathLevel' ? 10 : 5;
   const next = Math.min(maxLv, Math.max(1, S[levelKey] + delta));
   if (next === S[levelKey]) return;
   S[levelKey] = next;
@@ -1722,12 +1722,12 @@ const MATH_CONTEXTS = [
 function randInt(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
 
 function generateMathRound() {
-  const lv = Math.min(S.mathLevel, 8);
+  const lv = Math.min(S.mathLevel, 10);
   const ctx = MATH_CONTEXTS[randInt(0, MATH_CONTEXTS.length - 1)];
   const name = ctx.names[randInt(0, ctx.names.length - 1)];
   let a, b, op;
 
-  // L1 — K Starter: add within 6, emoji visual
+  // L1 — K Starter: add within 6, emoji visual only
   if (lv === 1) {
     a = randInt(1, 3); b = randInt(1, Math.min(3, 6 - a)); op = '+';
     return { type:'standard', a, b, op, answer:a+b, showVisual:true, showWord:false, ctx, name };
@@ -1737,23 +1737,23 @@ function generateMathRound() {
     a = randInt(1, 5); b = randInt(1, Math.min(5, 10 - a)); op = '+';
     return { type:'standard', a, b, op, answer:a+b, showVisual:true, showWord:true, ctx, name };
   }
-  // L3 — Gr 1 Early: add/sub within 10
+  // L3 — Gr 1 Early: add/sub within 10, word problems
   if (lv === 3) {
     op = Math.random() < 0.5 ? '-' : '+';
     if (op==='+') { a=randInt(1,8); b=randInt(1,Math.min(8,10-a)); }
     else          { a=randInt(3,10); b=randInt(1,a); }
     return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
   }
-  // L4 — Gr 1 Mid: add/sub within 20
+  // L4 — Gr 1 Mid: add/sub within 20, word problems
   if (lv === 4) {
     op = Math.random() < 0.5 ? '-' : '+';
     if (op==='+') { a=randInt(5,14); b=randInt(2,Math.min(10,20-a)); }
     else          { a=randInt(8,20); b=randInt(2,Math.min(a,10)); }
     return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
   }
-  // L5 — Gr 1 Late: add/sub within 20 + missing addend (?+b=c)
+  // L5 — Gr 1 Late: missing addend (? + b = c) mixed with add/sub within 20
   if (lv === 5) {
-    if (Math.random() < 0.45) {
+    if (Math.random() < 0.5) {
       const total = randInt(8, 18);
       const known = randInt(2, total - 2);
       return { type:'missing_addend', known, total, answer:total-known, ctx, name };
@@ -1763,9 +1763,9 @@ function generateMathRound() {
     else          { a=randInt(8,20); b=randInt(2,Math.min(a,10)); }
     return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
   }
-  // L6 — Gr 2 Early: add/sub within 50 + skip counting (2s, 5s, 10s)
+  // L6 — Gr 2 Early-A: skip counting by 2s, 5s, 10s + add/sub within 50
   if (lv === 6) {
-    if (Math.random() < 0.45) {
+    if (Math.random() < 0.5) {
       const step = [2,5,10][randInt(0,2)];
       const start = randInt(1,8) * step;
       const terms = [start, start+step, start+2*step];
@@ -1776,22 +1776,39 @@ function generateMathRound() {
     else          { a=randInt(20,50); b=randInt(5,Math.min(a-1,25)); }
     return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
   }
-  // L7 — Gr 2 Mid: two-digit add/sub within 100
+  // L7 — Gr 2 Early-B: two-digit + one-digit within 50 (bridging step)
   if (lv === 7) {
+    op = Math.random() < 0.5 ? '-' : '+';
+    if (op==='+') { a=randInt(11,45); b=randInt(2,Math.min(9,50-a)); }
+    else          { a=randInt(13,50); b=randInt(2,Math.min(9,a-1)); }
+    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+  }
+  // L8 — Gr 2 Mid: two-digit + two-digit within 100
+  if (lv === 8) {
     op = Math.random() < 0.5 ? '-' : '+';
     if (op==='+') { a=randInt(15,55); b=randInt(10,Math.min(44,99-a)); }
     else          { a=randInt(30,99); b=randInt(10,Math.min(a-1,50)); }
     return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
   }
-  // L8 — Gr 2 Late: two-digit add/sub within 100 + grouping/arrays (early ×)
-  if (Math.random() < 0.5) {
-    const rows = randInt(2,5), cols = randInt(2,6);
-    return { type:'groups', rows, cols, answer:rows*cols, ctx, name };
+  // L9 — Gr 2 Late: grouping/arrays (informal × with word problems) + two-digit within 100
+  if (lv === 9) {
+    if (Math.random() < 0.5) {
+      const rows = randInt(2,5), cols = randInt(2,8);
+      return { type:'groups', rows, cols, answer:rows*cols, ctx, name };
+    }
+    op = Math.random() < 0.5 ? '-' : '+';
+    if (op==='+') { a=randInt(20,55); b=randInt(15,Math.min(44,99-a)); }
+    else          { a=randInt(40,99); b=randInt(15,Math.min(a-1,55)); }
+    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
   }
-  op = Math.random() < 0.5 ? '-' : '+';
-  if (op==='+') { a=randInt(20,55); b=randInt(15,Math.min(44,99-a)); }
-  else          { a=randInt(40,99); b=randInt(15,Math.min(a-1,50)); }
-  return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+  // L10 — Gr 2-3 Bridge: multiplication facts (×2–5) + division intro (÷2–5)
+  if (Math.random() < 0.5) {
+    const factor = randInt(2,5), other = randInt(2,10);
+    return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
+  }
+  const divisor = randInt(2,5);
+  const quotient = randInt(2,10);
+  return { type:'division', dividend:divisor*quotient, divisor, answer:quotient, ctx, name };
 }
 
 function mathWordProblem(r) {
@@ -1815,6 +1832,24 @@ function mathWordProblem(r) {
       `There are ${rows} bags. Each bag has ${cols} ${per}. How many ${ctx.plural} in all?`,
       `${name} made ${rows} equal groups with ${cols} ${per} in each. How many ${ctx.plural} altogether?`,
       `${rows} friends each have ${cols} ${per}. How many ${ctx.plural} are there in total?`,
+    ][randInt(0, 2)];
+  }
+  if (r.type === 'multiply') {
+    const { a, b, ctx, name } = r;
+    const thing = ctx.plural;
+    return [
+      `${name} has ${a} bags with ${b} ${thing} in each bag. How many ${thing} in all?`,
+      `There are ${a} rows of ${b} ${thing}. How many ${thing} total?`,
+      `${a} friends each collect ${b} ${thing}. How many ${thing} altogether?`,
+    ][randInt(0, 2)];
+  }
+  if (r.type === 'division') {
+    const { dividend, divisor, ctx, name } = r;
+    const thing = ctx.plural;
+    return [
+      `${name} has ${dividend} ${thing} and shares them equally among ${divisor} friends. How many does each friend get?`,
+      `${dividend} ${thing} are put into ${divisor} equal groups. How many in each group?`,
+      `${name} wants to put ${dividend} ${thing} into bags with ${divisor} in each bag. How many bags are needed?`,
     ][randInt(0, 2)];
   }
   const { a, b, op, ctx, name } = r;
@@ -1874,10 +1909,12 @@ function renderMathRound() {
 
   // Equation
   let equation = '';
-  if (r.type === 'standard')        equation = `${r.a} ${r.op} ${r.b} = ?`;
+  if (r.type === 'standard')            equation = `${r.a} ${r.op} ${r.b} = ?`;
   else if (r.type === 'missing_addend') equation = `${r.known} + ? = ${r.total}`;
-  else if (r.type === 'groups')     equation = `${r.rows} × ${r.cols} = ?`;
-  else if (r.type === 'skip_count') equation = '';
+  else if (r.type === 'groups')         equation = `${r.rows} × ${r.cols} = ?`;
+  else if (r.type === 'multiply')       equation = `${r.a} × ${r.b} = ?`;
+  else if (r.type === 'division')       equation = `${r.dividend} ÷ ${r.divisor} = ?`;
+  else if (r.type === 'skip_count')     equation = '';
   document.getElementById('math-equation').textContent = equation;
 
   renderMathNumpad(r);
@@ -1939,7 +1976,7 @@ function showMathResult() {
   S.mathgames++;
   if (S.mathScore === 10) S.mathperfect++;
   const pct = S.mathScore / 10;
-  const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct, 8);
+  const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct, 10);
   const newB = awardAll();
   persist();
   document.getElementById('math-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';

@@ -2451,12 +2451,15 @@ function assignSbBox(boxIdx) {
     burstReward(box, ['⭐','✨','🔤','💫','🎵']);
 
     if (S.sbBoxes.every(b => b !== null)) {
+      const fb = document.getElementById('sb-feedback');
+      fb.innerHTML = `That spells <strong style="font-size:1.3em">${w.word}</strong>! ${S.sbWordPerfect ? '🌟' : '👍'}`;
+      fb.className = 'dn-feedback correct';
       setTimeout(() => {
         if (S.sbWordPerfect) S.sbScore++;
         S.sbIdx++;
         if (S.sbIdx >= S.sbWords.length) showSbResult();
         else renderSbRound();
-      }, 700);
+      }, 1400);
     }
   } else {
     S.sbWordPerfect = false;
@@ -2478,6 +2481,8 @@ function assignSbBox(boxIdx) {
 
 function showSbResult() {
   S.sbgames++;
+  S.readingToday++;
+  S.mathSinceRead = 0;
   const total = S.sbWords.length;
   if (S.sbScore === total) S.sbperfect++;
   const pct       = S.sbScore / total;

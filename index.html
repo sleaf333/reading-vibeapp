@@ -1050,9 +1050,10 @@ function advanceRead() {
 
 // ─── LEVEL PROGRESSION ───────────────────────────────────────────────────────
 
-function advanceLevel(levelKey, progKey, pct) {
+function advanceLevel(levelKey, progKey, pct, maxLv) {
+  maxLv = maxLv || 5;
   const prev = S[levelKey];
-  if (pct >= 0.9 && S[levelKey] < 5) {
+  if (pct >= 0.9 && S[levelKey] < maxLv) {
     S[progKey]++;
     if (S[progKey] >= 3) { S[levelKey]++; S[progKey] = 0; }
   } else if (pct < 0.5 && S[levelKey] > 1) {
@@ -1344,7 +1345,8 @@ function renderParentCorner() {
 }
 
 function setGameLevel(levelKey, progKey, delta) {
-  const next = Math.min(5, Math.max(1, S[levelKey] + delta));
+  const maxLv = levelKey === 'mathLevel' ? 8 : 5;
+  const next = Math.min(maxLv, Math.max(1, S[levelKey] + delta));
   if (next === S[levelKey]) return;
   S[levelKey] = next;
   S[progKey]  = 0;
@@ -1720,53 +1722,114 @@ const MATH_CONTEXTS = [
 function randInt(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
 
 function generateMathRound() {
-  const lv = Math.min(S.mathLevel, 5);
-  let a, b, op;
-  if (lv === 1) {
-    a = randInt(1, 5); b = randInt(1, Math.min(5, 10 - a)); op = '+';
-  } else if (lv === 2) {
-    op = Math.random() < 0.4 ? '-' : '+';
-    if (op === '+') { a = randInt(1, 8); b = randInt(1, Math.min(8, 10 - a)); }
-    else             { a = randInt(3, 10); b = randInt(1, a); }
-  } else if (lv === 3) {
-    op = Math.random() < 0.5 ? '-' : '+';
-    if (op === '+') { a = randInt(5, 14); b = randInt(2, Math.min(10, 20 - a)); }
-    else             { a = randInt(8, 20); b = randInt(2, Math.min(a, 10)); }
-  } else if (lv === 4) {
-    op = Math.random() < 0.5 ? '-' : '+';
-    if (op === '+') { a = randInt(10, 22); b = randInt(5, Math.min(12, 30 - a)); }
-    else             { a = randInt(15, 30); b = randInt(5, Math.min(a, 15)); }
-  } else {
-    op = Math.random() < 0.5 ? '-' : '+';
-    if (op === '+') { a = randInt(12, 30); b = randInt(10, Math.min(20, 50 - a)); }
-    else             { a = randInt(20, 50); b = randInt(10, Math.min(a, 25)); }
-  }
-  const answer = op === '+' ? a + b : a - b;
+  const lv = Math.min(S.mathLevel, 8);
   const ctx = MATH_CONTEXTS[randInt(0, MATH_CONTEXTS.length - 1)];
   const name = ctx.names[randInt(0, ctx.names.length - 1)];
-  const showVisual = lv <= 2;
-  return { a, b, op, answer, ctx, name, showVisual };
+  let a, b, op;
+
+  // L1 — K Starter: add within 6, emoji visual
+  if (lv === 1) {
+    a = randInt(1, 3); b = randInt(1, Math.min(3, 6 - a)); op = '+';
+    return { type:'standard', a, b, op, answer:a+b, showVisual:true, showWord:false, ctx, name };
+  }
+  // L2 — K: add within 10, emoji visual + word problem
+  if (lv === 2) {
+    a = randInt(1, 5); b = randInt(1, Math.min(5, 10 - a)); op = '+';
+    return { type:'standard', a, b, op, answer:a+b, showVisual:true, showWord:true, ctx, name };
+  }
+  // L3 — Gr 1 Early: add/sub within 10
+  if (lv === 3) {
+    op = Math.random() < 0.5 ? '-' : '+';
+    if (op==='+') { a=randInt(1,8); b=randInt(1,Math.min(8,10-a)); }
+    else          { a=randInt(3,10); b=randInt(1,a); }
+    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+  }
+  // L4 — Gr 1 Mid: add/sub within 20
+  if (lv === 4) {
+    op = Math.random() < 0.5 ? '-' : '+';
+    if (op==='+') { a=randInt(5,14); b=randInt(2,Math.min(10,20-a)); }
+    else          { a=randInt(8,20); b=randInt(2,Math.min(a,10)); }
+    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+  }
+  // L5 — Gr 1 Late: add/sub within 20 + missing addend (?+b=c)
+  if (lv === 5) {
+    if (Math.random() < 0.45) {
+      const total = randInt(8, 18);
+      const known = randInt(2, total - 2);
+      return { type:'missing_addend', known, total, answer:total-known, ctx, name };
+    }
+    op = Math.random() < 0.5 ? '-' : '+';
+    if (op==='+') { a=randInt(5,14); b=randInt(2,Math.min(10,20-a)); }
+    else          { a=randInt(8,20); b=randInt(2,Math.min(a,10)); }
+    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+  }
+  // L6 — Gr 2 Early: add/sub within 50 + skip counting (2s, 5s, 10s)
+  if (lv === 6) {
+    if (Math.random() < 0.45) {
+      const step = [2,5,10][randInt(0,2)];
+      const start = randInt(1,8) * step;
+      const terms = [start, start+step, start+2*step];
+      return { type:'skip_count', step, terms, answer:start+3*step };
+    }
+    op = Math.random() < 0.5 ? '-' : '+';
+    if (op==='+') { a=randInt(10,30); b=randInt(5,Math.min(20,50-a)); }
+    else          { a=randInt(20,50); b=randInt(5,Math.min(a-1,25)); }
+    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+  }
+  // L7 — Gr 2 Mid: two-digit add/sub within 100
+  if (lv === 7) {
+    op = Math.random() < 0.5 ? '-' : '+';
+    if (op==='+') { a=randInt(15,55); b=randInt(10,Math.min(44,99-a)); }
+    else          { a=randInt(30,99); b=randInt(10,Math.min(a-1,50)); }
+    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+  }
+  // L8 — Gr 2 Late: two-digit add/sub within 100 + grouping/arrays (early ×)
+  if (Math.random() < 0.5) {
+    const rows = randInt(2,5), cols = randInt(2,6);
+    return { type:'groups', rows, cols, answer:rows*cols, ctx, name };
+  }
+  op = Math.random() < 0.5 ? '-' : '+';
+  if (op==='+') { a=randInt(20,55); b=randInt(15,Math.min(44,99-a)); }
+  else          { a=randInt(40,99); b=randInt(15,Math.min(a-1,50)); }
+  return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
 }
 
 function mathWordProblem(r) {
+  if (r.type === 'missing_addend') {
+    const { known, total, ctx, name } = r;
+    const kThing = known === 1 ? ctx.singular : ctx.plural;
+    const tThing = total === 1 ? ctx.singular : ctx.plural;
+    return [
+      `${name} had some ${ctx.plural}. ${name} got ${known} more ${kThing}. Now ${name} has ${total} ${tThing}. How many did ${name} start with?`,
+      `There are ${total} ${tThing} in all. ${known} are in one box. How many are in the other box?`,
+      `${name} needs ${total} ${tThing}. ${name} already has ${known} ${kThing}. How many more does ${name} need?`,
+    ][randInt(0, 2)];
+  }
+  if (r.type === 'skip_count') {
+    return `Count by ${r.step}s — what number comes next?`;
+  }
+  if (r.type === 'groups') {
+    const { rows, cols, ctx, name } = r;
+    const per = cols === 1 ? ctx.singular : ctx.plural;
+    return [
+      `There are ${rows} bags. Each bag has ${cols} ${per}. How many ${ctx.plural} in all?`,
+      `${name} made ${rows} equal groups with ${cols} ${per} in each. How many ${ctx.plural} altogether?`,
+      `${rows} friends each have ${cols} ${per}. How many ${ctx.plural} are there in total?`,
+    ][randInt(0, 2)];
+  }
   const { a, b, op, ctx, name } = r;
   const thingA = a === 1 ? ctx.singular : ctx.plural;
   const thingB = b === 1 ? ctx.singular : ctx.plural;
-  if (op === '+') {
-    const templates = [
-      `${name} has ${a} ${thingA}. ${name} gets ${b} more ${thingB}. How many in all?`,
-      `There are ${a} ${thingA} in one group and ${b} ${thingB} in another. How many total?`,
-      `${name} finds ${a} ${thingA}, then finds ${b} more ${thingB}. How many altogether?`,
-    ];
-    return templates[randInt(0, templates.length - 1)];
-  } else {
-    const templates = [
-      `${name} has ${a} ${thingA}. ${name} gives away ${b} ${thingB}. How many are left?`,
-      `There are ${a} ${thingA}. ${b} ${thingB} go away. How many remain?`,
-      `${name} starts with ${a} ${thingA} and uses ${b} ${thingB}. How many are left?`,
-    ];
-    return templates[randInt(0, templates.length - 1)];
-  }
+  if (op === '+') return [
+    `${name} has ${a} ${thingA}. ${name} gets ${b} more ${thingB}. How many in all?`,
+    `There are ${a} ${thingA} in one group and ${b} ${thingB} in another. How many total?`,
+    `${name} finds ${a} ${thingA}, then finds ${b} more ${thingB}. How many altogether?`,
+  ][randInt(0, 2)];
+  return [
+    `${name} has ${a} ${thingA}. ${name} gives away ${b} ${thingB}. How many are left?`,
+    `There are ${a} ${thingA}. ${b} ${thingB} go away. How many remain?`,
+    `${name} starts with ${a} ${thingA} and uses ${b} ${thingB}. How many are left?`,
+  ][randInt(0, 2)];
 }
 
 function startMathGame() {
@@ -1792,14 +1855,30 @@ function renderMathRound() {
   card.offsetWidth;
   card.style.animation = 'dnArticleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both';
 
-  if (r.showVisual) {
-    document.getElementById('math-visual').textContent =
-      r.ctx.emoji.repeat(r.a) + '  ' + r.op + '  ' + r.ctx.emoji.repeat(r.b);
-  } else {
-    document.getElementById('math-visual').textContent = '';
+  // Visual
+  let visual = '';
+  if (r.type === 'standard' && r.showVisual) {
+    visual = r.ctx.emoji.repeat(r.a) + '  ' + r.op + '  ' + r.ctx.emoji.repeat(r.b);
+  } else if (r.type === 'groups') {
+    visual = Array(r.rows).fill(r.ctx.emoji.repeat(r.cols)).join('\n');
+  } else if (r.type === 'skip_count') {
+    visual = r.terms.join('  →  ') + '  →  ?';
   }
-  document.getElementById('math-word-problem').textContent = mathWordProblem(r);
-  document.getElementById('math-equation').textContent = `${r.a} ${r.op} ${r.b} = ?`;
+  const visEl = document.getElementById('math-visual');
+  visEl.textContent = visual;
+  visEl.style.fontSize = r.type === 'skip_count' ? '36px' : '';
+
+  // Word problem (hidden for L1 visual-only)
+  const wpEl = document.getElementById('math-word-problem');
+  wpEl.textContent = (r.type === 'standard' && !r.showWord) ? '' : mathWordProblem(r);
+
+  // Equation
+  let equation = '';
+  if (r.type === 'standard')        equation = `${r.a} ${r.op} ${r.b} = ?`;
+  else if (r.type === 'missing_addend') equation = `${r.known} + ? = ${r.total}`;
+  else if (r.type === 'groups')     equation = `${r.rows} × ${r.cols} = ?`;
+  else if (r.type === 'skip_count') equation = '';
+  document.getElementById('math-equation').textContent = equation;
 
   renderMathNumpad(r);
 }
@@ -1807,8 +1886,12 @@ function renderMathRound() {
 function renderMathNumpad(r) {
   const ans = r.answer;
   const set = new Set([ans]);
-  for (let n = Math.max(0, ans - 4); n <= ans + 5 && set.size < 8; n++) set.add(n);
-  while (set.size < 8) set.add(Math.max(0, ans + set.size));
+  const spread = ans > 50 ? 10 : ans > 20 ? 6 : 4;
+  for (let n = Math.max(0, ans - spread); set.size < 8; n++) {
+    if (n !== ans) set.add(n);
+    if (n > ans + spread * 2) break;
+  }
+  while (set.size < 8) set.add(ans + set.size);
   const nums = [...set].sort((a, b) => a - b);
   const pad = document.getElementById('math-numpad');
   pad.style.gridTemplateColumns = 'repeat(4, 1fr)';
@@ -1856,7 +1939,7 @@ function showMathResult() {
   S.mathgames++;
   if (S.mathScore === 10) S.mathperfect++;
   const pct = S.mathScore / 10;
-  const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct);
+  const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct, 8);
   const newB = awardAll();
   persist();
   document.getElementById('math-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';

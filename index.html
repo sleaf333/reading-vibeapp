@@ -813,6 +813,8 @@
       <button class="pc-lvl-btn" onclick="setMathRule('mathBreakEvery','rl_mathbreakevery',0,20,+1)">+</button>
     </div>
   </div>
+  <button class="btn btn-secondary btn-full" style="margin-top:14px" onclick="debugUnlockMath()">🔓 Unlock math now (testing)</button>
+  <div style="font-size:12px;color:var(--muted);font-weight:600;margin-top:6px">Clears the reading/break gate and opens the math game right away.</div>
 
   <div class="divider"></div>
   <div class="section-title">Recent sessions</div>
@@ -2199,6 +2201,15 @@ function mathWordProblem(r) {
     `There are ${a} ${thingA}. ${b} ${thingB} go away. How many remain?`,
     `${name} starts with ${a} ${thingA} and uses ${b} ${thingB}. How many are left?`,
   ][randInt(0, 2)];
+}
+
+function debugUnlockMath() {
+  S.readingToday = Math.max(S.readingToday, S.dnUnlockReq);
+  S.mathSinceRead = 0;
+  persist();
+  refreshParent();
+  refreshHome();
+  startMathGame();
 }
 
 function startMathGame() {

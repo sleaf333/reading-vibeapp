@@ -154,13 +154,7 @@
     .story-text { font-size: 19px; line-height: 2.2; padding: 4px 0 32px; font-weight: 600; }
     .word { cursor: pointer; display: inline; border-radius: 5px; padding: 0 2px; -webkit-tap-highlight-color: transparent; transition: background 0.1s; }
     .word.tapped { background: #ffe08299; }
-    .word.highlight { background: #ffe082; }
     .word.saved { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
-
-    .read-bar { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0 16px; border-top: 1px solid var(--border); }
-    .prog-wrap { height: 6px; background: var(--border); border-radius: 3px; margin-bottom: 10px; }
-    .prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #5ecb8e); border-radius: 3px; transition: width 0.3s; width: 0; }
-    .read-controls { display: flex; gap: 10px; align-items: center; justify-content: center; }
 
     /* ── BUTTONS ── */
     .btn { min-height: 50px; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; border: none; padding: 0 24px; -webkit-tap-highlight-color: transparent; display: inline-flex; align-items: center; gap: 6px; justify-content: center; transition: transform 0.1s, box-shadow 0.1s; }
@@ -624,18 +618,9 @@
   <div class="back-row">
     <button class="btn-icon" onclick="goHomeFromReading()">←</button>
     <span class="screen-label" id="reading-title">Story</span>
-    <div class="reading-actions">
-      <button class="btn-icon" id="btn-read-aloud" onclick="toggleReadAloud()" title="Read aloud">🔊</button>
-    </div>
   </div>
+  <div style="text-align:center;font-size:14px;color:var(--muted);font-weight:700;margin:4px 0 8px">Stuck on a word? Tap it to hear it 👂</div>
   <div class="story-text" id="story-text"></div>
-  <div class="read-bar" id="read-bar" style="display:none">
-    <div class="prog-wrap"><div class="prog-fill" id="prog-fill"></div></div>
-    <div class="read-controls">
-      <button class="btn btn-secondary" onclick="stopReadAloud()">Stop</button>
-      <button class="btn btn-primary" onclick="goToQuiz()">Quiz →</button>
-    </div>
-  </div>
   <div id="quiz-btn-wrap" style="padding:20px 0 8px">
     <button class="btn btn-primary btn-full" onclick="goToQuiz()" style="min-height:58px;font-size:18px">I'm ready for the quiz! 🌟</button>
   </div>
@@ -1066,7 +1051,7 @@ const S = {
   // transient
   topic: null, title: '', story: '', words: [], quiz: [],
   quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
-  readActive: false, readIdx: 0,
+
   swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
   dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false,
   mathRounds: [], mathIdx: 0, mathScore: 0, mathAnswered: false,
@@ -1302,10 +1287,8 @@ function renderReading() {
   const st = document.getElementById('story-text');
   st.style.fontSize   = S.level <= 2 ? '26px' : '23px';
   st.style.lineHeight = S.level <= 2 ? '2.5'  : '2.3';
-  document.getElementById('read-bar').style.display = 'none';
   document.getElementById('quiz-btn-wrap').style.display = '';
   document.getElementById('quiz-section').style.display = 'none';
-  document.getElementById('btn-read-aloud').textContent = '🔊';
   stopSpeech();
 }
 
@@ -1319,48 +1302,6 @@ function tapWord(el) {
 function goHomeFromReading() {
   stopSpeech();
   showScreen('screen-home');
-}
-
-// ─── READ ALOUD ───────────────────────────────────────────────────────────────
-
-function toggleReadAloud() {
-  S.readActive ? stopReadAloud() : startReadAloud();
-}
-
-function startReadAloud() {
-  S.readActive = true;
-  S.readIdx = 0;
-  document.getElementById('read-bar').style.display  = '';
-  document.getElementById('quiz-btn-wrap').style.display = 'none';
-  document.getElementById('btn-read-aloud').textContent = '🔇';
-  advanceRead();
-}
-
-function stopReadAloud() {
-  S.readActive = false;
-  stopSpeech();
-  document.querySelectorAll('#story-text .word.highlight').forEach(el => el.classList.remove('highlight'));
-  document.getElementById('read-bar').style.display  = 'none';
-  document.getElementById('quiz-btn-wrap').style.display = '';
-  document.getElementById('btn-read-aloud').textContent = '🔊';
-  document.getElementById('prog-fill').style.width = '0';
-}
-
-function advanceRead() {
-  if (!S.readActive) return;
-  const els = document.querySelectorAll('#story-text .word');
-  if (S.readIdx >= els.length) { stopReadAloud(); return; }
-  document.querySelectorAll('#story-text .word.highlight').forEach(el => el.classList.remove('highlight'));
-  const el = els[S.readIdx];
-  el.classList.add('highlight');
-  el.scrollIntoView({ behavior:'smooth', block:'nearest' });
-  document.getElementById('prog-fill').style.width = ((S.readIdx + 1) / els.length * 100) + '%';
-  const word = el.dataset.w || el.textContent.trim().replace(/\s/,'');
-  speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(word);
-  utt.rate = 0.85;
-  utt.onend = () => { S.readIdx++; setTimeout(advanceRead, 130); };
-  speechSynthesis.speak(utt);
 }
 
 // ─── LEVEL PROGRESSION ───────────────────────────────────────────────────────
@@ -1392,7 +1333,6 @@ function goToQuiz() {
   stopSpeech();
   S.quizIdx = 0; S.quizScore = 0; S.quizAnswered = false;
   document.getElementById('quiz-btn-wrap').style.display = 'none';
-  document.getElementById('read-bar').style.display = 'none';
   document.getElementById('quiz-section').style.display = '';
   document.getElementById('quiz-topic-banner').textContent = S.topic.icon;
   renderQuizQ();
@@ -1752,7 +1692,6 @@ function speak(word) {
 
 function stopSpeech() {
   if (window.speechSynthesis) speechSynthesis.cancel();
-  S.readActive = false;
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────

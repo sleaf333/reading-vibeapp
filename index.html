@@ -156,6 +156,11 @@
     .word.tapped { background: #ffe08299; }
     .word.saved { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
 
+    .quiz-sticky { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background: var(--bg); border-top: 2px solid var(--border); padding: 10px 16px 24px; box-shadow: 0 -6px 24px rgba(0,0,0,0.12); z-index: 100; max-height: 55vh; overflow-y: auto; }
+    .quiz-sticky .divider { display: none; }
+    .quiz-sticky .quiz-topic-banner { display: none; }
+    .quiz-sticky .quiz-header-title { margin-bottom: 6px; }
+
     /* ── BUTTONS ── */
     .btn { min-height: 50px; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; border: none; padding: 0 24px; -webkit-tap-highlight-color: transparent; display: inline-flex; align-items: center; gap: 6px; justify-content: center; transition: transform 0.1s, box-shadow 0.1s; }
     .btn-primary { background: linear-gradient(135deg, #ff7043, #ff9a3c); color: white; box-shadow: 0 4px 14px rgba(255,112,67,0.38); }
@@ -629,7 +634,7 @@
   <div id="quiz-section" style="display:none">
     <div class="divider"></div>
     <div class="quiz-topic-banner" id="quiz-topic-banner"></div>
-    <div style="font-size:20px;font-weight:700;margin-bottom:12px;text-align:center">Quiz time!</div>
+    <div class="quiz-header-title" style="font-size:20px;font-weight:700;margin-bottom:12px;text-align:center">Quiz time!</div>
     <div class="quiz-meta">
       <span class="quiz-prog" id="quiz-prog">1 / 3</span>
     </div>
@@ -1289,6 +1294,8 @@ function renderReading() {
   st.style.lineHeight = S.level <= 2 ? '2.5'  : '2.3';
   document.getElementById('quiz-btn-wrap').style.display = '';
   document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('quiz-section').classList.remove('quiz-sticky');
+  document.getElementById('screen-reading').style.paddingBottom = '';
   stopSpeech();
 }
 
@@ -1333,10 +1340,14 @@ function goToQuiz() {
   stopSpeech();
   S.quizIdx = 0; S.quizScore = 0; S.quizAnswered = false;
   document.getElementById('quiz-btn-wrap').style.display = 'none';
-  document.getElementById('quiz-section').style.display = '';
+  const qs = document.getElementById('quiz-section');
+  qs.style.display = '';
+  qs.classList.add('quiz-sticky');
   document.getElementById('quiz-topic-banner').textContent = S.topic.icon;
   renderQuizQ();
-  setTimeout(() => document.getElementById('quiz-section').scrollIntoView({ behavior: 'smooth' }), 50);
+  setTimeout(() => {
+    document.getElementById('screen-reading').style.paddingBottom = qs.offsetHeight + 'px';
+  }, 50);
 }
 
 function renderQuizQ() {

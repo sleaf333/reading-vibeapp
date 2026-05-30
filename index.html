@@ -801,7 +801,7 @@
   <div class="pc-level-row">
     <div>
       <span class="pc-level-label">📚 Stories to unlock math</span>
-      <div style="font-size:12px;color:var(--muted);font-weight:600;margin-top:2px">Reading games needed per day (story or Daily News)</div>
+      <div style="font-size:12px;color:var(--muted);font-weight:600;margin-top:2px">Reading games needed per day (story, Daily News, or Sound Boxes)</div>
     </div>
     <div class="pc-level-ctrl">
       <button class="pc-lvl-btn" onclick="setMathRule('dnUnlockReq','rl_dnunlockreq',0,5,-1)">−</button>
@@ -2220,7 +2220,7 @@ function startMathGame() {
     document.getElementById('mathbreak-emoji').textContent = '📖';
     document.getElementById('mathbreak-title').textContent = 'Reading break!';
     document.getElementById('mathbreak-msg').textContent =
-      `Amazing math work! Do one reading game (story or Daily News) to keep playing math.`;
+      `Amazing math work! Do one reading game (story, Daily News, or Sound Boxes) to keep playing math.`;
     showScreen('screen-mathbreak');
     return;
   }

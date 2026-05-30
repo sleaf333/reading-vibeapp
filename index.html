@@ -409,9 +409,10 @@
   <div class="home-header">
     <div>
       <div class="page-title">Juliana Reads! 🌟</div>
-      <div style="font-size:15px;color:var(--muted);margin-top:4px">Pick a topic and start reading.</div>
+      <div style="font-size:15px;color:var(--muted);margin-top:4px">Tap a game to start playing! 🎉</div>
     </div>
     <div class="header-pills">
+      <span id="home-streak-pill" class="pill" style="background:#fff1e0;color:#c2570c;display:none">🔥 0 days</span>
       <button class="lock-btn" onclick="showScreen('screen-parent-entry')">🔒 Parent</button>
     </div>
   </div>
@@ -596,7 +597,9 @@
     <div style="font-size:28px;font-weight:900;margin-bottom:12px" id="mathbreak-title">Reading time!</div>
     <div style="font-size:18px;color:var(--muted);font-weight:700;line-height:1.6;margin-bottom:32px" id="mathbreak-msg">Great math work! Do a reading game to keep going.</div>
   </div>
-  <button class="btn btn-primary btn-full" onclick="showScreen('screen-home')">📚 Go read a story</button>
+  <button class="btn btn-primary btn-full" onclick="startSbGame()">📦 Play Sound Boxes</button>
+  <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="startDnGame()">📰 Daily News</button>
+  <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="showScreen('screen-topics')">📖 Read a Story</button>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">🏠 Home</button>
 </div>
 
@@ -902,6 +905,18 @@ const SB_WORDS = [
   {lv:1,word:'log', phonemes:['l','o','g']},
   {lv:1,word:'mud', phonemes:['m','u','d']},
   {lv:1,word:'hen', phonemes:['h','e','n']},
+  {lv:1,word:'map', phonemes:['m','a','p']},
+  {lv:1,word:'top', phonemes:['t','o','p']},
+  {lv:1,word:'bed', phonemes:['b','e','d']},
+  {lv:1,word:'fan', phonemes:['f','a','n']},
+  {lv:1,word:'jam', phonemes:['j','a','m']},
+  {lv:1,word:'lid', phonemes:['l','i','d']},
+  {lv:1,word:'mop', phonemes:['m','o','p']},
+  {lv:1,word:'net', phonemes:['n','e','t']},
+  {lv:1,word:'pig', phonemes:['p','i','g']},
+  {lv:1,word:'rug', phonemes:['r','u','g']},
+  {lv:1,word:'van', phonemes:['v','a','n']},
+  {lv:1,word:'web', phonemes:['w','e','b']},
   // L2: CVC + digraphs (sh/ch/th) — 3 phonemes
   {lv:2,word:'ship', phonemes:['sh','i','p']},
   {lv:2,word:'chip', phonemes:['ch','i','p']},
@@ -918,6 +933,16 @@ const SB_WORDS = [
   {lv:2,word:'math', phonemes:['m','a','th']},
   {lv:2,word:'bath', phonemes:['b','a','th']},
   {lv:2,word:'path', phonemes:['p','a','th']},
+  {lv:2,word:'shed', phonemes:['sh','e','d']},
+  {lv:2,word:'dash', phonemes:['d','a','sh']},
+  {lv:2,word:'with', phonemes:['w','i','th']},
+  {lv:2,word:'moth', phonemes:['m','o','th']},
+  {lv:2,word:'cash', phonemes:['c','a','sh']},
+  {lv:2,word:'dish', phonemes:['d','i','sh']},
+  {lv:2,word:'such', phonemes:['s','u','ch']},
+  {lv:2,word:'shut', phonemes:['sh','u','t']},
+  {lv:2,word:'whiz', phonemes:['wh','i','z']},
+  {lv:2,word:'thud', phonemes:['th','u','d']},
   // L3: CCVC / CVCC — 4 phonemes
   {lv:3,word:'flag', phonemes:['f','l','a','g']},
   {lv:3,word:'frog', phonemes:['f','r','o','g']},
@@ -934,6 +959,14 @@ const SB_WORDS = [
   {lv:3,word:'fast', phonemes:['f','a','s','t']},
   {lv:3,word:'nest', phonemes:['n','e','s','t']},
   {lv:3,word:'soft', phonemes:['s','o','f','t']},
+  {lv:3,word:'plan', phonemes:['p','l','a','n']},
+  {lv:3,word:'spin', phonemes:['s','p','i','n']},
+  {lv:3,word:'gift', phonemes:['g','i','f','t']},
+  {lv:3,word:'milk', phonemes:['m','i','l','k']},
+  {lv:3,word:'desk', phonemes:['d','e','s','k']},
+  {lv:3,word:'sled', phonemes:['s','l','e','d']},
+  {lv:3,word:'swim', phonemes:['s','w','i','m']},
+  {lv:3,word:'gram', phonemes:['g','r','a','m']},
   // L4: vowel digraphs — 3 phonemes, vowel pair as one tile
   {lv:4,word:'boat', phonemes:['b','oa','t']},
   {lv:4,word:'rain', phonemes:['r','ai','n']},
@@ -950,6 +983,12 @@ const SB_WORDS = [
   {lv:4,word:'wait', phonemes:['w','ai','t']},
   {lv:4,word:'read', phonemes:['r','ea','d']},
   {lv:4,word:'leaf', phonemes:['l','ea','f']},
+  {lv:4,word:'road', phonemes:['r','oa','d']},
+  {lv:4,word:'soap', phonemes:['s','oa','p']},
+  {lv:4,word:'meat', phonemes:['m','ea','t']},
+  {lv:4,word:'beach', phonemes:['b','ea','ch']},
+  {lv:4,word:'gray', phonemes:['g','r','ay']},
+  {lv:4,word:'paint', phonemes:['p','ai','n','t']},
   // L5: complex — igh trigraph, consonant blends as units
   {lv:5,word:'night',  phonemes:['n','igh','t']},
   {lv:5,word:'light',  phonemes:['l','igh','t']},
@@ -1111,6 +1150,13 @@ function refreshHome() {
   document.getElementById('home-dn-level').textContent      = `Lv. ${S.dnLevel}`;
   document.getElementById('home-math-level').textContent    = `Lv. ${S.mathLevel}`;
   document.getElementById('home-sb-level').textContent      = `Lv. ${S.sbLevel}`;
+  const streakPill = document.getElementById('home-streak-pill');
+  if (S.streak >= 1) {
+    streakPill.textContent = `🔥 ${S.streak} day${S.streak !== 1 ? 's' : ''}`;
+    streakPill.style.display = '';
+  } else {
+    streakPill.style.display = 'none';
+  }
   const lock = mathLockState();
   const card = document.getElementById('math-home-card');
   const badge = document.getElementById('math-lock-badge');

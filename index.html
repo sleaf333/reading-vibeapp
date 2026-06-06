@@ -1048,6 +1048,7 @@ const S = {
   mathLevelProg: parseInt(lsGet('rl_mathlevelprog','0')),
   sessions: lsJson('rl_sessions', []),
   stories:  parseInt(lsGet('rl_stories','0')),
+  totalGames: parseInt(lsGet('rl_totalgames','0')),
   streak:   parseInt(lsGet('rl_streak','0')),
   lastdate: lsGet('rl_lastdate',''),
   badges:   lsJson('rl_badges', []),
@@ -1107,7 +1108,8 @@ function persist() {
   lsSet('rl_mathlevel', S.mathLevel);
   lsSet('rl_mathlevelprog', S.mathLevelProg);
   lsSet('rl_sessions', S.sessions);
-  lsSet('rl_stories',  S.stories);
+  lsSet('rl_stories',    S.stories);
+  lsSet('rl_totalgames', S.totalGames);
   lsSet('rl_streak',   S.streak);
   lsSet('rl_lastdate', S.lastdate);
   lsSet('rl_badges',   S.badges);
@@ -1431,7 +1433,7 @@ function showResult() {
   const score = S.quizScore;
   const pct   = score / total;
 
-  S.stories++;
+  S.stories++; S.totalGames++;
   S.readingToday++;
   S.mathSinceRead = 0;
   const tid = S.topic.id;
@@ -1547,7 +1549,7 @@ function answerSw(el, idx) {
 }
 
 function showSwResult() {
-  S.swgames++;
+  S.swgames++; S.totalGames++;
   if (S.swScore === 10) S.swperfect++;
   const pct = S.swScore / 10;
   const prevLevel = advanceLevel('swLevel', 'swLevelProg', pct);
@@ -1634,7 +1636,7 @@ function renderHeatmap() {
 }
 
 function renderParentCorner() {
-  document.getElementById('pc-total-games').textContent = S.stories + S.swgames + S.dngames + S.mathgames + S.sbgames;
+  document.getElementById('pc-total-games').textContent = S.totalGames;
   document.getElementById('pc-badges').textContent    = `${S.badges.length} / 14`;
   document.getElementById('pc-streak').textContent    = `${S.streak} day${S.streak !== 1 ? 's' : ''}`;
   document.getElementById('pc-level').textContent      = `Lv. ${S.level}`;
@@ -2012,7 +2014,7 @@ function dnBurst(anchorEl) {
 }
 
 function showDnResult() {
-  S.dngames++;
+  S.dngames++; S.totalGames++;
   S.readingToday++;
   S.mathSinceRead = 0;
   if (S.dnScore === 9) S.dnperfect++;
@@ -2404,7 +2406,7 @@ function answerMath(num) {
 }
 
 function showMathResult() {
-  S.mathgames++;
+  S.mathgames++; S.totalGames++;
   S.mathSinceRead++;
   if (S.mathScore === 10) S.mathperfect++;
   const pct = S.mathScore / 10;
@@ -2552,7 +2554,7 @@ function assignSbBox(boxIdx) {
 }
 
 function showSbResult() {
-  S.sbgames++;
+  S.sbgames++; S.totalGames++;
   S.readingToday++;
   S.mathSinceRead = 0;
   const total = S.sbWords.length;

@@ -1535,6 +1535,8 @@ function showSwResult() {
   const pct = S.swScore / 10;
   const prevLevel = advanceLevel('swLevel', 'swLevelProg', pct);
   const news = awardAll();
+  S.sessions.unshift({ topic: 'Sight Words', score: `${S.swScore}/10`, date: new Date().toLocaleDateString(), level: S.swLevel });
+  if (S.sessions.length > 20) S.sessions.pop();
   persist();
 
   document.getElementById('sw-score-display').textContent = `${S.swScore} / 10`;
@@ -1973,6 +1975,8 @@ function showDnResult() {
   const pct = S.dnScore / 9;
   const prevLevel = advanceLevel('dnLevel', 'dnLevelProg', pct);
   const newB = awardAll();
+  S.sessions.unshift({ topic: 'Daily News', score: `${S.dnScore}/9`, date: new Date().toLocaleDateString(), level: S.dnLevel });
+  if (S.sessions.length > 20) S.sessions.pop();
   persist();
   document.getElementById('dn-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
   document.getElementById('dn-result-score').textContent = `${S.dnScore} / 9`;
@@ -2512,6 +2516,8 @@ function showSbResult() {
   const pct       = S.sbScore / total;
   const prevLevel = advanceLevel('sbLevel', 'sbLevelProg', pct);
   const newB      = awardAll();
+  S.sessions.unshift({ topic: 'Sound Boxes', score: `${S.sbScore}/${total}`, date: new Date().toLocaleDateString(), level: S.sbLevel });
+  if (S.sessions.length > 20) S.sessions.pop();
   persist();
   document.getElementById('sb-result-stars').textContent = pct >= 0.875 ? '⭐⭐⭐' : pct >= 0.625 ? '⭐⭐' : '⭐';
   document.getElementById('sb-result-score').textContent = `${S.sbScore} / ${total}`;

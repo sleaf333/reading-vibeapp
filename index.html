@@ -1609,7 +1609,7 @@ function renderParentCorner() {
   if (!S.sessions.length) {
     sessEl.innerHTML = '<div class="empty" style="padding:16px 0"><i class="ti ti-history"></i>No sessions yet</div>';
   } else {
-    sessEl.innerHTML = S.sessions.slice(0, 10).map(s =>
+    sessEl.innerHTML = S.sessions.slice(0, 20).map(s =>
       `<div class="session-item">
         <div class="si-topic">${s.topic}</div>
         <div class="si-meta">${s.date} · Score: ${s.score} · Level ${s.level}</div>
@@ -2361,6 +2361,8 @@ function showMathResult() {
   if (S.mathScore === 10) S.mathperfect++;
   const pct = S.mathScore / 10;
   const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct, 10);
+  S.sessions.unshift({ topic: 'Math Time', score: `${S.mathScore}/10`, date: new Date().toLocaleDateString(), level: S.mathLevel });
+  if (S.sessions.length > 20) S.sessions.pop();
   const newB = awardAll();
   persist();
   document.getElementById('math-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';

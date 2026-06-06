@@ -744,7 +744,7 @@
   </div>
 
   <div class="section-title">Stats</div>
-  <div class="stat-row"><span class="stat-label">Stories read</span><span class="stat-val" id="pc-stories">0</span></div>
+  <div class="stat-row"><span class="stat-label">Games played</span><span class="stat-val" id="pc-total-games">0</span></div>
   <div class="stat-row"><span class="stat-label">Badges earned</span><span class="stat-val" id="pc-badges">0 / 14</span></div>
   <div class="stat-row"><span class="stat-label">Day streak</span><span class="stat-val" id="pc-streak">0</span></div>
 
@@ -1634,7 +1634,7 @@ function renderHeatmap() {
 }
 
 function renderParentCorner() {
-  document.getElementById('pc-stories').textContent   = S.stories;
+  document.getElementById('pc-total-games').textContent = S.stories + S.swgames + S.dngames + S.mathgames + S.sbgames;
   document.getElementById('pc-badges').textContent    = `${S.badges.length} / 14`;
   document.getElementById('pc-streak').textContent    = `${S.streak} day${S.streak !== 1 ? 's' : ''}`;
   document.getElementById('pc-level').textContent      = `Lv. ${S.level}`;

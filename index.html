@@ -1713,11 +1713,12 @@ function checkPin() {
 // ─── PARENT CORNER ────────────────────────────────────────────────────────────
 
 const HM_GAMES = [
-  { label: '📖 Stories',    test: s => !['Sight Words','Daily News','Math Time','Sound Boxes'].includes(s.topic) },
+  { label: '📖 Stories',    test: s => !['Sight Words','Daily News','Math Time','Sound Boxes','Clock Time'].includes(s.topic) },
   { label: '🔤 Sight Words', test: s => s.topic === 'Sight Words' },
   { label: '📰 Daily News',  test: s => s.topic === 'Daily News'  },
   { label: '🔢 Math Time',   test: s => s.topic === 'Math Time'   },
   { label: '🔊 Sound Boxes', test: s => s.topic === 'Sound Boxes' },
+  { label: '🕐 Clock Time',  test: s => s.topic === 'Clock Time'  },
 ];
 
 function renderHeatmap() {

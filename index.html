@@ -3027,7 +3027,6 @@ function answerClock(num) {
     fb.textContent = 'Not quite — try again!';
     fb.className = 'dn-feedback wrong';
     if (chosen) chosen.classList.add('dn-wrong');
-    if (correctBtn) correctBtn.classList.add('dn-correct');
     btns.forEach(b => { if (b !== chosen) b.disabled = false; });
     S.clockAnswered = false;
   }

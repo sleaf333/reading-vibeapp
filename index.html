@@ -161,6 +161,13 @@
     .quiz-sticky .quiz-topic-banner { display: none; }
     .quiz-sticky .quiz-header-title { margin-bottom: 6px; }
 
+    /* ── MATH INTRO CARD ── */
+    .mi-banner { background:#fef3c7; color:#92400e; font-size:14px; font-weight:800; padding:6px 18px; border-radius:20px; letter-spacing:.5px; }
+    .mi-subtitle { font-size:13px; color:var(--muted); font-weight:600; margin-top:-8px; }
+    .mi-headline { font-size:26px; font-weight:900; color:var(--text); text-align:center; }
+    .mi-visual { font-size:28px; background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:16px 24px; text-align:center; min-width:200px; font-family:monospace; font-weight:700; line-height:1.6; }
+    .mi-body { font-size:16px; font-weight:600; color:var(--muted); text-align:center; line-height:1.55; }
+
     /* ── BUTTONS ── */
     .btn { min-height: 50px; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; border: none; padding: 0 24px; -webkit-tap-highlight-color: transparent; display: inline-flex; align-items: center; gap: 6px; justify-content: center; transition: transform 0.1s, box-shadow 0.1s; }
     .btn-primary { background: linear-gradient(135deg, #ff7043, #ff9a3c); color: white; box-shadow: 0 4px 14px rgba(255,112,67,0.38); }
@@ -559,6 +566,19 @@
   <div id="math-new-badges" style="margin-bottom:16px"></div>
   <button class="btn btn-primary btn-full" onclick="startMathGame()">Play again</button>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ MATH INTRO CARD ═══ -->
+<div id="screen-mathintro" class="screen">
+  <div style="max-width:420px;margin:0 auto;padding:28px 20px 32px;display:flex;flex-direction:column;align-items:center;gap:16px">
+    <div class="mi-banner">✨ Something New!</div>
+    <div class="mi-subtitle">No need to answer — just read!</div>
+    <div id="mi-emoji" style="font-size:52px;line-height:1.2"></div>
+    <div id="mi-headline" class="mi-headline"></div>
+    <div id="mi-visual" class="mi-visual"></div>
+    <div id="mi-body" class="mi-body"></div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px;font-size:18px" onclick="dismissMathIntro()">Got it! Let's go →</button>
+  </div>
 </div>
 
 <!-- ═══ SOUND BOXES GAME ═══ -->
@@ -1073,6 +1093,8 @@ const S = {
   mathLastDate:  lsGet('rl_mathlastdate',''),
   dnUnlockReq:   parseInt(lsGet('rl_dnunlockreq','2')),
   mathBreakEvery:parseInt(lsGet('rl_mathbreakevery','5')),
+  mathIntroSeen: lsJson('rl_mathintroseen', []),
+  mathWarmupDone:lsJson('rl_mathwarmupdone', []),
   // transient
   topic: null, title: '', story: '', words: [], quiz: [],
   quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
@@ -1134,6 +1156,8 @@ function persist() {
   lsSet('rl_mathlastdate',   S.mathLastDate);
   lsSet('rl_dnunlockreq',    S.dnUnlockReq);
   lsSet('rl_mathbreakevery', S.mathBreakEvery);
+  lsSet('rl_mathintroseen',  S.mathIntroSeen);
+  lsSet('rl_mathwarmupdone', S.mathWarmupDone);
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
@@ -1727,7 +1751,8 @@ function changePIN() {
 function confirmReset() {
   if (!confirm('Reset ALL progress? This cannot be undone.')) return;
   ['rl_level','rl_levelprog','rl_sessions','rl_stories','rl_streak','rl_lastdate',
-   'rl_badges','rl_perfect','rl_maxlevel','rl_swgames','rl_swperfect','rl_dngames','rl_dnperfect','rl_topics','rl_pin']
+   'rl_badges','rl_perfect','rl_maxlevel','rl_swgames','rl_swperfect','rl_dngames','rl_dnperfect','rl_topics','rl_pin',
+   'rl_mathintroseen','rl_mathwarmupdone']
     .forEach(k => localStorage.removeItem(k));
   location.reload();
 }
@@ -2098,10 +2123,18 @@ function buildMathDeck(lv) {
   if (lv===4)  return deck(t('near_double',3), t('teen_decomp',4), t('std_l4',3));
   if (lv===5)  return deck(t('missing_addend',5), t('std_l5',5));
   if (lv===6)  return deck(t('skip_small',5), t('std_l6',5));
-  if (lv===7)  return deck(t('std_l7',10));
-  if (lv===8)  return deck(t('std_l8',10));
-  if (lv===9)  return deck(t('groups',5), t('std_l9',5));
-  if (lv===10) return deck(t('multiply_l10',5), t('division_l10',5));
+  const warmup7  = lv===7  && !S.mathWarmupDone.includes(7);
+  const warmup8  = lv===8  && !S.mathWarmupDone.includes(8);
+  const warmup9  = lv===9  && !S.mathWarmupDone.includes(9);
+  const warmup10 = lv===10 && !S.mathWarmupDone.includes(10);
+  if (lv===7)  return warmup7  ? deck(t('std_l7_warm',10))
+                               : deck(t('std_l7',10));
+  if (lv===8)  return warmup8  ? deck(t('std_l8_tens',5), t('std_l8',5))
+                               : deck(t('std_l8',10));
+  if (lv===9)  return warmup9  ? deck(t('groups_warm',5), t('groups',5))
+                               : deck(t('groups',5), t('std_l9',5));
+  if (lv===10) return warmup10 ? deck(t('mul2',6), t('div2',4))
+                               : deck(t('multiply_l10',5), t('division_l10',5));
   if (lv===11) return deck(t('place_value',7), t('multiply_lo',3));
   if (lv===12) return deck(t('compare',4), t('skip_large',3), t('place_value',2), t('multiply_lo',1));
   if (lv===13) return deck(t('regroup_add',5), t('compare',2), t('place_value',2), t('multiply_lo',1));
@@ -2216,13 +2249,39 @@ function generateMathRound(cat) {
       if (op==='+'){a=randInt(11,45);b=randInt(2,Math.min(9,50-a));}
       else         {a=randInt(13,50);b=randInt(2,Math.min(9,a-1));}
       return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+    case 'std_l7_warm': {
+      // No bridging across tens: (a%10 + b) < 10 for add; (a%10 - b) >= 0 for sub
+      let guard2 = 0;
+      do {
+        op = Math.random() < 0.5 ? '-' : '+';
+        if (op === '+') { a = randInt(11, 45); b = randInt(1, 9); }
+        else            { a = randInt(13, 50); b = randInt(1, 9); }
+        guard2++;
+      } while (guard2 < 30 && (op === '+' ? (a % 10) + b >= 10 : (a % 10) < b));
+      if (op === '+' && (a % 10) + b >= 10) { a = 31; b = 4; }
+      if (op === '-' && (a % 10) < b)        { a = 35; b = 3; }
+      return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+    }
     case 'std_l8':
       op=Math.random()<0.5?'-':'+';
       if (op==='+'){a=randInt(15,55);b=randInt(10,Math.min(44,99-a));}
       else         {a=randInt(30,99);b=randInt(10,Math.min(a-1,50));}
       return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+    case 'std_l8_tens': {
+      // Multiples of 10 only — no carrying/borrowing needed
+      op = Math.random() < 0.5 ? '-' : '+';
+      a = randInt(1,8)*10; b = randInt(1,7)*10;
+      if (op === '+') { while (a+b > 100) b -= 10; }
+      else            { while (b >= a)    b -= 10; if (b < 10) b = 10; }
+      return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+    }
     case 'groups': {
       const rows=randInt(2,5), cols=randInt(2,8);
+      return { type:'groups', rows, cols, answer:rows*cols, ctx, name };
+    }
+    case 'groups_warm': {
+      // Small arrays only: 2–3 rows × 2–4 cols (max 12 total, easy to count)
+      const rows=randInt(2,3), cols=randInt(2,4);
       return { type:'groups', rows, cols, answer:rows*cols, ctx, name };
     }
     case 'std_l9':
@@ -2237,6 +2296,14 @@ function generateMathRound(cat) {
     case 'division_l10': {
       const divisor=randInt(2,5), quotient=randInt(2,10);
       return { type:'division', dividend:divisor*quotient, divisor, answer:quotient, ctx, name };
+    }
+    case 'mul2': {
+      const other=randInt(2,10);
+      return { type:'multiply', a:2, b:other, answer:2*other, ctx, name };
+    }
+    case 'div2': {
+      const quotient=randInt(2,10);
+      return { type:'division', dividend:2*quotient, divisor:2, answer:quotient, ctx, name };
     }
     case 'place_value':   return makePlaceValue();
     case 'compare':       return makeCompare();
@@ -2434,6 +2501,70 @@ function debugUnlockMath() {
   startMathGame();
 }
 
+const MATH_LEVEL_INTROS = {
+  7:  { emoji:'🔢', headline:'Bigger Numbers!',
+        visual:'37 + 6 = ?',
+        body:'You\'ll add and subtract numbers that jump across a ten. Try counting up to the nearest 10 first!' },
+  8:  { emoji:'💪', headline:'Two Big Numbers!',
+        visual:'23 + 45 = ?',
+        body:'Both numbers are big now! Try adding the tens first, then the ones.' },
+  9:  { emoji:'🐟', headline:'Equal Groups!',
+        visual:null,  // generated as emoji grid
+        body:'You\'ll see rows of things and count them all. Each row has the same amount!' },
+  10: { emoji:'✖️', headline:'Times and Divide!',
+        visual:'3 × 4 = 12\n12 ÷ 3 = 4',
+        body:'× means equal groups added together. ÷ means sharing equally. You already know groups — this is the same idea!' },
+  11: { emoji:'🏛️', headline:'Hundreds, Tens & Ones!',
+        visual:'342 = 300 + 40 + 2',
+        body:'Big 3-digit numbers are built from hundreds, tens, and ones. You\'ll take them apart and put them back together.' },
+  12: { emoji:'⚖️', headline:'Comparing Big Numbers!',
+        visual:'456  ?  789\n< = >',
+        body:'Which number is bigger? You\'ll compare 3-digit numbers using <, =, and >.' },
+  13: { emoji:'➕', headline:'Carrying Numbers!',
+        visual:'47 + 38 = ?',
+        body:'When ones add up past 9, you carry the extra ten over! This is called regrouping.' },
+  14: { emoji:'➖', headline:'Borrowing Numbers!',
+        visual:'83 − 47 = ?',
+        body:'When the ones aren\'t enough to subtract, you borrow a ten from next door!' },
+  15: { emoji:'🕐', headline:'Telling Time + Two Steps!',
+        visual:null,  // generated as SVG clock
+        body:'You\'ll read clocks and solve problems with two steps. Do one part at a time!' },
+  16: { emoji:'🌟', headline:'Big Times Tables!',
+        visual:'7 × 8 = ?',
+        body:'You\'ve mastered ×2–5. Now you\'ll tackle ×6 through ×10 — the big ones!' },
+};
+
+function showMathIntro(lv) {
+  const d = MATH_LEVEL_INTROS[lv];
+  if (!d) { startMathGameNow(); return; }
+  document.getElementById('mi-emoji').textContent    = d.emoji;
+  document.getElementById('mi-headline').textContent = d.headline;
+  document.getElementById('mi-body').textContent     = d.body;
+  const vis = document.getElementById('mi-visual');
+  if (lv === 9) {
+    vis.style.fontFamily = '';
+    vis.innerHTML = '🐟🐟🐟🐟<br>🐟🐟🐟🐟<br>🐟🐟🐟🐟';
+    vis.style.fontSize = '24px';
+  } else if (lv === 15) {
+    vis.style.fontFamily = '';
+    vis.innerHTML = svgClock(3, 25);
+    vis.style.fontSize = '';
+  } else {
+    vis.style.fontFamily = 'monospace';
+    vis.style.fontSize = '28px';
+    vis.textContent = d.visual;
+  }
+  showScreen('screen-mathintro');
+}
+
+function dismissMathIntro() {
+  if (!S.mathIntroSeen.includes(S.mathLevel)) {
+    S.mathIntroSeen.push(S.mathLevel);
+    persist();
+  }
+  startMathGameNow();
+}
+
 function startMathGame() {
   const lock = mathLockState();
   if (lock === 'daily') {
@@ -2453,6 +2584,13 @@ function startMathGame() {
     showScreen('screen-mathbreak');
     return;
   }
+  if (S.mathLevel >= 7 && !S.mathIntroSeen.includes(S.mathLevel)) {
+    return showMathIntro(S.mathLevel);
+  }
+  startMathGameNow();
+}
+
+function startMathGameNow() {
   const deck = buildMathDeck(Math.min(S.mathLevel, 16));
   S.mathRounds  = deck.map(cat => generateMathRound(cat));
   S.mathIdx     = 0;
@@ -2648,6 +2786,9 @@ function showMathResult() {
   S.mathgames++; S.totalGames++;
   S.mathSinceRead++;
   if (S.mathScore === 10) S.mathperfect++;
+  if (!S.mathWarmupDone.includes(S.mathLevel)) {
+    S.mathWarmupDone.push(S.mathLevel);
+  }
   const pct = S.mathScore / 10;
   const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct, 16, 0.8, 0.4);
   S.sessions.unshift({ topic: 'Math Time', score: `${S.mathScore}/10`, date: new Date().toLocaleDateString(), level: S.mathLevel });

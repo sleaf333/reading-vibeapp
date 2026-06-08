@@ -2167,7 +2167,7 @@ function fmtTime(totalMin) {
   return h + ':' + (m < 10 ? '0' : '') + m;
 }
 
-function svgClock(h, m, size=100) {
+function svgClock(h, m, size=100, labels=false) {
   const mAngle = (m / 60) * 2 * Math.PI;
   const hAngle = ((h % 12) + m / 60) / 12 * 2 * Math.PI;
   const mx = 50 + 38 * Math.sin(mAngle), my = 50 - 38 * Math.cos(mAngle);
@@ -2177,9 +2177,14 @@ function svgClock(h, m, size=100) {
     const r1 = i % 3 === 0 ? 38 : 40, r2 = 45;
     return `<line x1="${(50+r1*Math.sin(a)).toFixed(1)}" y1="${(50-r1*Math.cos(a)).toFixed(1)}" x2="${(50+r2*Math.sin(a)).toFixed(1)}" y2="${(50-r2*Math.cos(a)).toFixed(1)}" stroke="#94a3b8" stroke-width="${i%3===0?2:1}"/>`;
   }).join('');
+  const nums = labels
+    ? [[12,50,19],[3,81,50],[6,50,81],[9,19,50]].map(([n,x,y]) =>
+        `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#475569" font-family="sans-serif">${n}</text>`
+      ).join('')
+    : '';
   return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" style="display:block;margin:0 auto">` +
     `<circle cx="50" cy="50" r="47" fill="white" stroke="#cbd5e1" stroke-width="2"/>` +
-    ticks +
+    ticks + nums +
     `<line x1="50" y1="50" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>` +
     `<line x1="50" y1="50" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>` +
     `<circle cx="50" cy="50" r="3" fill="#1e293b"/>` +
@@ -2960,7 +2965,7 @@ function renderClockRound() {
   document.getElementById('clock-progress-fill').style.width = `${(S.clockIdx / 10) * 100}%`;
   const card = document.getElementById('clock-problem-card');
   card.style.animation = 'none'; card.offsetWidth; card.style.animation = '';
-  document.getElementById('clock-visual').innerHTML = svgClock(r.h, r.m, 160);
+  document.getElementById('clock-visual').innerHTML = svgClock(r.h, r.m, 160, S.clockLevel <= 3);
   document.getElementById('clock-word-problem').textContent = 'What time does the clock show?';
   renderClockNumpad(r);
 }

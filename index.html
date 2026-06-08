@@ -1666,7 +1666,7 @@ function renderParentCorner() {
 }
 
 function setGameLevel(levelKey, progKey, delta) {
-  const maxLv = levelKey === 'mathLevel' ? 10 : 5;
+  const maxLv = levelKey === 'mathLevel' ? 16 : 5;
   const next = Math.min(maxLv, Math.max(1, S[levelKey] + delta));
   if (next === S[levelKey]) return;
   S[levelKey] = next;
@@ -2055,8 +2055,33 @@ const MATH_CONTEXTS = [
 
 function randInt(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
 
+function fmtTime(totalMin) {
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return h + ':' + (m < 10 ? '0' : '') + m;
+}
+
+function svgClock(h, m) {
+  const mAngle = (m / 60) * 2 * Math.PI;
+  const hAngle = ((h % 12) + m / 60) / 12 * 2 * Math.PI;
+  const mx = 50 + 38 * Math.sin(mAngle), my = 50 - 38 * Math.cos(mAngle);
+  const hx = 50 + 28 * Math.sin(hAngle), hy = 50 - 28 * Math.cos(hAngle);
+  const ticks = Array.from({length:12}, (_,i) => {
+    const a = i / 12 * 2 * Math.PI;
+    const r1 = i % 3 === 0 ? 38 : 40, r2 = 45;
+    return `<line x1="${(50+r1*Math.sin(a)).toFixed(1)}" y1="${(50-r1*Math.cos(a)).toFixed(1)}" x2="${(50+r2*Math.sin(a)).toFixed(1)}" y2="${(50-r2*Math.cos(a)).toFixed(1)}" stroke="#94a3b8" stroke-width="${i%3===0?2:1}"/>`;
+  }).join('');
+  return `<svg width="100" height="100" viewBox="0 0 100 100" style="display:block;margin:0 auto">` +
+    `<circle cx="50" cy="50" r="47" fill="white" stroke="#cbd5e1" stroke-width="2"/>` +
+    ticks +
+    `<line x1="50" y1="50" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>` +
+    `<line x1="50" y1="50" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>` +
+    `<circle cx="50" cy="50" r="3" fill="#1e293b"/>` +
+    `</svg>`;
+}
+
 function generateMathRound() {
-  const lv = Math.min(S.mathLevel, 10);
+  const lv = Math.min(S.mathLevel, 16);
   const ctx = MATH_CONTEXTS[randInt(0, MATH_CONTEXTS.length - 1)];
   const name = ctx.names[randInt(0, ctx.names.length - 1)];
   let a, b, op;
@@ -2157,16 +2182,206 @@ function generateMathRound() {
     return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
   }
   // L10 — Gr 2-3 Bridge: multiplication facts (×2–5) + division intro (÷2–5)
-  if (Math.random() < 0.5) {
-    const factor = randInt(2,5), other = randInt(2,10);
+  if (lv === 10) {
+    if (Math.random() < 0.5) {
+      const factor = randInt(2,5), other = randInt(2,10);
+      return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
+    }
+    const divisor = randInt(2,5);
+    const quotient = randInt(2,10);
+    return { type:'division', dividend:divisor*quotient, divisor, answer:quotient, ctx, name };
+  }
+
+  // ── helpers shared across L11–L16 ──────────────────────────────────────────
+  function makePlaceValue() {
+    const subtype = ['expand','digit_value','compose'][randInt(0,2)];
+    if (subtype === 'expand') {
+      const h=randInt(1,6), t=randInt(1,9), o=randInt(0,9);
+      return { type:'place_value', subtype, number:h*100+t*10+o, h, t, o, answer:t*10 };
+    }
+    if (subtype === 'digit_value') {
+      const pos=randInt(0,2), digit=randInt(1,9), x=randInt(0,9), y=randInt(0,9);
+      let number, answer;
+      if (pos===0)      { number=digit*100+x*10+y; answer=digit*100; }
+      else if (pos===1) { number=x*100+digit*10+y; answer=digit*10; }
+      else              { number=x*100+y*10+digit; answer=digit; }
+      return { type:'place_value', subtype, number, digit, pos, answer };
+    }
+    const h=randInt(1,6), t=randInt(0,9), o=randInt(0,9);
+    return { type:'place_value', subtype:'compose', number:h*100+t*10+o, h, t, o, answer:h*100+t*10+o };
+  }
+  function makeCompare() {
+    const a=randInt(100,999), b=randInt(100,999);
+    return { type:'compare', a, b, answer: a>b ? 1 : a<b ? -1 : 0 };
+  }
+  function makeRegroupAdd() {
+    const aa = randInt(20,90);
+    const aOnes = aa % 10;
+    const bOnes = aOnes > 0 ? randInt(10-aOnes, 9) : randInt(1,9);
+    const bTens = randInt(1, Math.max(1, Math.floor((Math.min(199,aa+99)-aa)/10)));
+    const bb = bTens*10 + bOnes;
+    return { type:'standard', a:aa, b:bb, op:'+', answer:aa+bb, regroup:true, showVisual:false, showWord:true, ctx, name };
+  }
+  function makeRegroupSub() {
+    const aa = randInt(31,199);
+    const aOnes = aa % 10;
+    const bOnes = aOnes < 9 ? randInt(aOnes+1, 9) : randInt(1,9);
+    const bTens = randInt(1, Math.max(1, Math.floor(aa/10)-1));
+    let bb = bTens*10 + bOnes;
+    if (bb >= aa) bb = Math.max(10, aa - randInt(5,20));
+    return { type:'standard', a:aa, b:bb, op:'-', answer:aa-bb, borrow:true, showVisual:false, showWord:true, ctx, name };
+  }
+
+  // L11 — Gr 3 Early-A: place value (70%) + multiply ×2–5 (30%)
+  if (lv === 11) {
+    if (Math.random() < 0.70) return makePlaceValue();
+    const factor=randInt(2,5), other=randInt(2,10);
     return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
   }
-  const divisor = randInt(2,5);
-  const quotient = randInt(2,10);
-  return { type:'division', dividend:divisor*quotient, divisor, answer:quotient, ctx, name };
+
+  // L12 — Gr 3 Early-B: compare (35%) + skip_count large (25%) + place_value (25%) + multiply (15%)
+  if (lv === 12) {
+    const r12 = Math.random();
+    if (r12 < 0.35) return makeCompare();
+    if (r12 < 0.60) {
+      const step=[5,10,100][randInt(0,2)];
+      const start = step===100 ? randInt(1,7)*100 : step===10 ? randInt(5,15)*10 : randInt(4,18)*5;
+      return { type:'skip_count', step, terms:[start,start+step,start+2*step], answer:start+3*step };
+    }
+    if (r12 < 0.85) return makePlaceValue();
+    const factor=randInt(2,5), other=randInt(2,10);
+    return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
+  }
+
+  // L13 — Gr 3 Mid-A: regroup-add (50%) + compare (15%) + place_value (15%) + multiply (20%)
+  if (lv === 13) {
+    const r13 = Math.random();
+    if (r13 < 0.50) return makeRegroupAdd();
+    if (r13 < 0.65) return makeCompare();
+    if (r13 < 0.80) return makePlaceValue();
+    const factor=randInt(2,5), other=randInt(2,10);
+    return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
+  }
+
+  // L14 — Gr 3 Mid-B: regroup-sub (40%) + regroup-add (25%) + mental-math (20%) + multiply (15%)
+  if (lv === 14) {
+    const r14 = Math.random();
+    if (r14 < 0.40) return makeRegroupSub();
+    if (r14 < 0.65) return makeRegroupAdd();
+    if (r14 < 0.85) {
+      // mental math sprint within 20
+      op = Math.random() < 0.5 ? '+' : '-';
+      if (op==='+') { a=randInt(5,14); b=randInt(2,Math.min(10,20-a)); }
+      else          { a=randInt(8,20);  b=randInt(2,Math.min(a,10)); }
+      return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+    }
+    const factor=randInt(2,5), other=randInt(2,10);
+    return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
+  }
+
+  // L15 — Gr 3 Late-A: time_read (35%) + two_step scaffolded (25%) + regroup-add (20%) + regroup-sub (20%)
+  if (lv === 15) {
+    const r15 = Math.random();
+    if (r15 < 0.35) {
+      const h=randInt(1,12), m=[0,5,10,15,20,25,30,35,40,45,50,55][randInt(0,11)];
+      return { type:'time_read', h, m, answer:h*60+m };
+    }
+    if (r15 < 0.60) {
+      const op1=Math.random()<0.5?'+':'-', op2=Math.random()<0.5?'+':'-';
+      const aa=randInt(15,60), bb=randInt(5,25);
+      const inter=op1==='+'?aa+bb:aa-bb;
+      if (inter<5||inter>100) {
+        const h=randInt(1,12), m=[0,5,10,15,20,25,30,35,40,45,50,55][randInt(0,11)];
+        return { type:'time_read', h, m, answer:h*60+m };
+      }
+      const cc=randInt(5,Math.min(20,op2==='-'?inter-1:100-inter));
+      const ans2=op2==='+'?inter+cc:inter-cc;
+      return { type:'two_step', a:aa, op1, b:bb, intermediate:inter, op2, c:cc, answer:ans2, scaffolded:true, ctx, name };
+    }
+    if (r15 < 0.80) return makeRegroupAdd();
+    return makeRegroupSub();
+  }
+
+  // L16 — Gr 3 Achievement: multiply ×2–10 (35%) + two_step unscaffolded (25%) + time_read (20%) + mixed (20%)
+  {
+    const r16 = Math.random();
+    if (r16 < 0.35) {
+      if (Math.random() < 0.6) {
+        const f=randInt(2,10), o=randInt(2,10);
+        return { type:'multiply', a:f, b:o, answer:f*o, ctx, name };
+      }
+      const div=randInt(2,10), quot=randInt(2,10);
+      return { type:'division', dividend:div*quot, divisor:div, answer:quot, ctx, name };
+    }
+    if (r16 < 0.60) {
+      const op1=Math.random()<0.5?'+':'-', op2=Math.random()<0.5?'+':'-';
+      const aa=randInt(30,80), bb=randInt(10,40);
+      const inter=op1==='+'?aa+bb:aa-bb;
+      if (inter<5||inter>150) {
+        const f=randInt(2,10), o=randInt(2,10);
+        return { type:'multiply', a:f, b:o, answer:f*o, ctx, name };
+      }
+      const cc=randInt(10,Math.min(40,op2==='-'?inter-1:150-inter));
+      const ans2=op2==='+'?inter+cc:inter-cc;
+      return { type:'two_step', a:aa, op1, b:bb, intermediate:inter, op2, c:cc, answer:ans2, scaffolded:false, ctx, name };
+    }
+    if (r16 < 0.80) {
+      const h=randInt(1,12), m=[0,5,10,15,20,25,30,35,40,45,50,55][randInt(0,11)];
+      return { type:'time_read', h, m, answer:h*60+m };
+    }
+    // mixed prior: pick from place_value / compare / regroup-add / regroup-sub
+    const pick = randInt(0,3);
+    if (pick===0) return makePlaceValue();
+    if (pick===1) return makeCompare();
+    if (pick===2) return makeRegroupAdd();
+    return makeRegroupSub();
+  }
 }
 
 function mathWordProblem(r) {
+  if (r.type === 'place_value') {
+    const { subtype, number, h, t, o, digit, pos } = r;
+    if (subtype === 'expand') return [
+      `The number ${number} has ${h} hundreds, some tens, and ${o} ones. What is the tens value?`,
+      `${number} = ${h*100} + ___ + ${o}. What is the missing tens?`,
+      `In ${number}, how many tens are there? What is their total value?`,
+    ][randInt(0,2)];
+    if (subtype === 'digit_value') {
+      const posName = ['hundreds','tens','ones'][pos];
+      return [
+        `Look at the number ${number}. What is the value of the digit ${digit} in the ${posName} place?`,
+        `In ${number}, the digit ${digit} is in the ${posName} place. What is it worth?`,
+        `Find the digit ${digit} in ${number}. What is its place value?`,
+      ][randInt(0,2)];
+    }
+    return [
+      `${h} hundreds, ${t} tens, and ${o} ones — what number is that?`,
+      `Put together ${h} hundreds, ${t} tens, and ${o} ones. What is the full number?`,
+      `Can you build the number with ${h} hundreds, ${t} tens, and ${o} ones?`,
+    ][randInt(0,2)];
+  }
+  if (r.type === 'compare') return [
+    `Which number is bigger — ${r.a} or ${r.b}? Choose <, =, or >.`,
+    `Compare ${r.a} and ${r.b}. Is the first less than, equal to, or greater than the second?`,
+    `Look at ${r.a} and ${r.b}. Are they the same, or is one greater?`,
+  ][randInt(0,2)];
+  if (r.type === 'two_step') {
+    const { a, op1, b, op2, c, intermediate, scaffolded, ctx, name } = r;
+    const thing = ctx.plural;
+    const ev1 = op1==='+' ? `gets ${b} more` : `gives away ${b}`;
+    const ev2 = op2==='+' ? `then gets ${c} more` : `then gives away ${c}`;
+    if (scaffolded) return [
+      `${name} has ${a} ${thing}. ${name} ${ev1}. ${name} ${ev2}. How many are there now? (Hint: first find ${a} ${op1} ${b} = ${intermediate})`,
+      `There are ${a} ${thing}. First ${b} are ${op1==='+'?'added':'taken away'}. Then ${c} more are ${op2==='+'?'added':'taken away'}. How many now? (Step 1: ${a} ${op1} ${b} = ${intermediate})`,
+      `${name} starts with ${a} ${thing}, ${op1==='+'?'finds':'loses'} ${b}, then ${op2==='+'?'collects':'loses'} ${c} more. How many in all? (Hint: ${a} ${op1} ${b} = ${intermediate})`,
+    ][randInt(0,2)];
+    return [
+      `${name} has ${a} ${thing}. ${name} ${ev1}. ${name} ${ev2}. How many are there now?`,
+      `There are ${a} ${thing}. First ${b} are ${op1==='+'?'added':'taken away'}. Then ${c} more are ${op2==='+'?'added':'taken away'}. How many now?`,
+      `${name} starts with ${a} ${thing}, ${op1==='+'?'finds':'loses'} ${b}, then ${op2==='+'?'collects':'loses'} ${c} more. How many in all?`,
+    ][randInt(0,2)];
+  }
+  if (r.type === 'time_read') return 'What time does the clock show?';
   if (r.type === 'missing_addend') {
     const { known, total, ctx, name } = r;
     const kThing = known === 1 ? ctx.singular : ctx.plural;
@@ -2328,6 +2543,11 @@ function renderMathRound() {
   } else if (r.type === 'skip_count') {
     visEl.style.fontSize = '36px';
     visEl.textContent = r.terms.join('  →  ') + '  →  ?';
+  } else if (r.type === 'time_read') {
+    visEl.innerHTML = svgClock(r.h, r.m);
+  } else if (r.type === 'compare') {
+    visEl.style.fontSize = '32px';
+    visEl.textContent = `${r.a}   ?   ${r.b}`;
   } else {
     visEl.textContent = '';
   }
@@ -2346,22 +2566,60 @@ function renderMathRound() {
   else if (r.type === 'multiply')       equation = `${r.a} × ${r.b} = ?`;
   else if (r.type === 'division')       equation = `${r.dividend} ÷ ${r.divisor} = ?`;
   else if (r.type === 'skip_count')     equation = '';
+  else if (r.type === 'place_value') {
+    if (r.subtype === 'expand')       equation = `${r.h*100} + ___ + ${r.o} = ${r.number}`;
+    else if (r.subtype === 'digit_value') equation = `Value of ${r.digit} in ${r.number} = ?`;
+    else                              equation = `${r.h} hundreds + ${r.t} tens + ${r.o} ones = ?`;
+  }
+  else if (r.type === 'compare')      equation = '';
+  else if (r.type === 'two_step')     equation = `${r.a} ${r.op1} ${r.b} ${r.op2} ${r.c} = ?`;
+  else if (r.type === 'time_read')    equation = '';
   document.getElementById('math-equation').textContent = equation;
 
   renderMathNumpad(r);
 }
 
 function renderMathNumpad(r) {
+  const pad = document.getElementById('math-numpad');
+
+  if (r.type === 'compare') {
+    pad.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    pad.innerHTML = [['&lt;',-1],['=',0],['&gt;',1]].map(([sym,val]) =>
+      `<button class="dn-num-btn" onclick="answerMath(${val})" style="font-size:26px">${sym}</button>`
+    ).join('');
+    return;
+  }
+
+  if (r.type === 'time_read') {
+    const ans = r.answer;
+    const offsets = [-10,-5,5,10,60,-60];
+    const raw = [ans, ...offsets.map(d => { let v=ans+d; if(v<60)v+=720; if(v>779)v-=720; return v; })];
+    const unique = [...new Set(raw)].slice(0,4);
+    while (unique.length < 4) unique.push(ans + (unique.length+1)*5);
+    for (let i=unique.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[unique[i],unique[j]]=[unique[j],unique[i]];}
+    pad.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    pad.innerHTML = unique.map(v =>
+      `<button class="dn-num-btn" onclick="answerMath(${v})">${fmtTime(v)}</button>`
+    ).join('');
+    return;
+  }
+
   const ans = r.answer;
   const set = new Set([ans]);
   const spread = ans > 50 ? 10 : ans > 20 ? 6 : 4;
+
+  // For digit_value, force place-confusion distractors (e.g. 5 and 50 alongside 500)
+  if (r.type === 'place_value' && r.subtype === 'digit_value') {
+    set.add(r.digit);
+    const confusor = r.pos===0 ? r.digit*10 : r.pos===1 ? r.digit*100 : r.digit*10;
+    if (confusor !== ans) set.add(confusor);}
+
   for (let n = Math.max(0, ans - spread); set.size < 8; n++) {
     if (n !== ans) set.add(n);
     if (n > ans + spread * 2) break;
   }
   while (set.size < 8) set.add(ans + set.size);
   const nums = [...set].sort((a, b) => a - b);
-  const pad = document.getElementById('math-numpad');
   pad.style.gridTemplateColumns = 'repeat(4, 1fr)';
   pad.innerHTML = nums.map(n =>
     `<button class="dn-num-btn" onclick="answerMath(${n})">${n}</button>`
@@ -2410,7 +2668,7 @@ function showMathResult() {
   S.mathSinceRead++;
   if (S.mathScore === 10) S.mathperfect++;
   const pct = S.mathScore / 10;
-  const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct, 10);
+  const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct, 16);
   S.sessions.unshift({ topic: 'Math Time', score: `${S.mathScore}/10`, date: new Date().toLocaleDateString(), level: S.mathLevel });
   if (S.sessions.length > 100) S.sessions.pop();
   const newB = awardAll();

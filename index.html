@@ -1334,13 +1334,15 @@ function goHomeFromReading() {
 
 // ─── LEVEL PROGRESSION ───────────────────────────────────────────────────────
 
-function advanceLevel(levelKey, progKey, pct, maxLv) {
-  maxLv = maxLv || 5;
+function advanceLevel(levelKey, progKey, pct, maxLv, upThresh, downThresh) {
+  maxLv     = maxLv     || 5;
+  upThresh  = upThresh  || 0.9;
+  downThresh= downThresh|| 0.5;
   const prev = S[levelKey];
-  if (pct >= 0.9 && S[levelKey] < maxLv) {
+  if (pct >= upThresh && S[levelKey] < maxLv) {
     S[progKey]++;
     if (S[progKey] >= 3) { S[levelKey]++; S[progKey] = 0; }
-  } else if (pct < 0.5 && S[levelKey] > 1) {
+  } else if (pct < downThresh && S[levelKey] > 1) {
     S[levelKey]--; S[progKey] = 0;
   }
   if (S[levelKey] > S.maxlevel) S.maxlevel = S[levelKey];
@@ -2080,119 +2082,41 @@ function svgClock(h, m) {
     `</svg>`;
 }
 
-function generateMathRound() {
+// Returns a shuffled array of 10 category strings for the given level.
+// Pre-allocating the deck ensures each session has a balanced type distribution
+// rather than leaving it to chance across 10 independent rolls.
+function buildMathDeck(lv) {
+  function shuffle(a) {
+    for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+    return a;
+  }
+  const t = (cat, n) => Array(n).fill(cat);
+  const deck = (...spec) => shuffle([].concat(...spec));
+  if (lv===1)  return deck(t('std_l1',10));
+  if (lv===2)  return deck(t('std_l2',10));
+  if (lv===3)  return deck(t('doubles',3), t('teen_decomp',3), t('std_l3',4));
+  if (lv===4)  return deck(t('near_double',3), t('teen_decomp',4), t('std_l4',3));
+  if (lv===5)  return deck(t('missing_addend',5), t('std_l5',5));
+  if (lv===6)  return deck(t('skip_small',5), t('std_l6',5));
+  if (lv===7)  return deck(t('std_l7',10));
+  if (lv===8)  return deck(t('std_l8',10));
+  if (lv===9)  return deck(t('groups',5), t('std_l9',5));
+  if (lv===10) return deck(t('multiply_l10',5), t('division_l10',5));
+  if (lv===11) return deck(t('place_value',7), t('multiply_lo',3));
+  if (lv===12) return deck(t('compare',4), t('skip_large',3), t('place_value',2), t('multiply_lo',1));
+  if (lv===13) return deck(t('regroup_add',5), t('compare',2), t('place_value',2), t('multiply_lo',1));
+  if (lv===14) return deck(t('regroup_sub',4), t('regroup_add',3), t('mental',2), t('multiply_lo',1));
+  if (lv===15) return deck(t('time_read',4), t('two_step_sc',3), t('regroup_add',2), t('regroup_sub',1));
+  return         deck(t('multiply_div_l16',4), t('two_step_nosc',3), t('time_read',2), t('mixed_l16',1));
+}
+
+function generateMathRound(cat) {
   const lv = Math.min(S.mathLevel, 16);
   const ctx = MATH_CONTEXTS[randInt(0, MATH_CONTEXTS.length - 1)];
   const name = ctx.names[randInt(0, ctx.names.length - 1)];
   let a, b, op;
 
-  // L1 — K Starter: add within 6, emoji visual only
-  if (lv === 1) {
-    a = randInt(1, 3); b = randInt(1, Math.min(3, 6 - a)); op = '+';
-    return { type:'standard', a, b, op, answer:a+b, showVisual:true, showWord:false, ctx, name };
-  }
-  // L2 — K: add within 10, emoji visual + word problem
-  if (lv === 2) {
-    a = randInt(1, 5); b = randInt(1, Math.min(5, 10 - a)); op = '+';
-    return { type:'standard', a, b, op, answer:a+b, showVisual:true, showWord:true, ctx, name };
-  }
-  // L3 — Gr 1 Early: add/sub within 10 + doubles (1-5) + teen decomp (11-14)
-  if (lv === 3) {
-    const r3 = Math.random();
-    if (r3 < 0.30) {
-      const base = randInt(1, 5);
-      return { type:'doubles', a:base, b:base, isNearDouble:false, answer:base*2, ctx, name };
-    }
-    if (r3 < 0.60) {
-      const ones = randInt(1, 4);
-      const sub = Math.random() < 0.5 ? 'build' : 'break';
-      return { type:'teen_decomp', ones, total:10+ones, sub, answer: sub==='build' ? 10+ones : ones, ctx, name };
-    }
-    op = Math.random() < 0.5 ? '-' : '+';
-    if (op==='+') { a=randInt(1,8); b=randInt(1,Math.min(8,10-a)); }
-    else          { a=randInt(3,10); b=randInt(1,a); }
-    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
-  }
-  // L4 — Gr 1 Mid: add/sub within 20 + near-doubles (5-9) + teen decomp (11-19)
-  if (lv === 4) {
-    const r4 = Math.random();
-    if (r4 < 0.28) {
-      const base = randInt(4, 9);
-      const b2 = base + 1;
-      return { type:'doubles', a:base, b:b2, isNearDouble:true, answer:base+b2, ctx, name };
-    }
-    if (r4 < 0.56) {
-      const ones = randInt(1, 9);
-      const sub = Math.random() < 0.5 ? 'build' : 'break';
-      return { type:'teen_decomp', ones, total:10+ones, sub, answer: sub==='build' ? 10+ones : ones, ctx, name };
-    }
-    op = Math.random() < 0.5 ? '-' : '+';
-    if (op==='+') { a=randInt(5,14); b=randInt(2,Math.min(10,20-a)); }
-    else          { a=randInt(8,20); b=randInt(2,Math.min(a,10)); }
-    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
-  }
-  // L5 — Gr 1 Late: missing addend (? + b = c) mixed with add/sub within 20
-  if (lv === 5) {
-    if (Math.random() < 0.5) {
-      const total = randInt(8, 18);
-      const known = randInt(2, total - 2);
-      return { type:'missing_addend', known, total, answer:total-known, ctx, name };
-    }
-    op = Math.random() < 0.5 ? '-' : '+';
-    if (op==='+') { a=randInt(5,14); b=randInt(2,Math.min(10,20-a)); }
-    else          { a=randInt(8,20); b=randInt(2,Math.min(a,10)); }
-    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
-  }
-  // L6 — Gr 2 Early-A: skip counting by 2s, 5s, 10s + add/sub within 50
-  if (lv === 6) {
-    if (Math.random() < 0.5) {
-      const step = [2,5,10][randInt(0,2)];
-      const start = randInt(1,8) * step;
-      const terms = [start, start+step, start+2*step];
-      return { type:'skip_count', step, terms, answer:start+3*step };
-    }
-    op = Math.random() < 0.5 ? '-' : '+';
-    if (op==='+') { a=randInt(10,30); b=randInt(5,Math.min(20,50-a)); }
-    else          { a=randInt(20,50); b=randInt(5,Math.min(a-1,25)); }
-    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
-  }
-  // L7 — Gr 2 Early-B: two-digit + one-digit within 50 (bridging step)
-  if (lv === 7) {
-    op = Math.random() < 0.5 ? '-' : '+';
-    if (op==='+') { a=randInt(11,45); b=randInt(2,Math.min(9,50-a)); }
-    else          { a=randInt(13,50); b=randInt(2,Math.min(9,a-1)); }
-    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
-  }
-  // L8 — Gr 2 Mid: two-digit + two-digit within 100
-  if (lv === 8) {
-    op = Math.random() < 0.5 ? '-' : '+';
-    if (op==='+') { a=randInt(15,55); b=randInt(10,Math.min(44,99-a)); }
-    else          { a=randInt(30,99); b=randInt(10,Math.min(a-1,50)); }
-    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
-  }
-  // L9 — Gr 2 Late: grouping/arrays (informal × with word problems) + two-digit within 100
-  if (lv === 9) {
-    if (Math.random() < 0.5) {
-      const rows = randInt(2,5), cols = randInt(2,8);
-      return { type:'groups', rows, cols, answer:rows*cols, ctx, name };
-    }
-    op = Math.random() < 0.5 ? '-' : '+';
-    if (op==='+') { a=randInt(20,55); b=randInt(15,Math.min(44,99-a)); }
-    else          { a=randInt(40,99); b=randInt(15,Math.min(a-1,55)); }
-    return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
-  }
-  // L10 — Gr 2-3 Bridge: multiplication facts (×2–5) + division intro (÷2–5)
-  if (lv === 10) {
-    if (Math.random() < 0.5) {
-      const factor = randInt(2,5), other = randInt(2,10);
-      return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
-    }
-    const divisor = randInt(2,5);
-    const quotient = randInt(2,10);
-    return { type:'division', dividend:divisor*quotient, divisor, answer:quotient, ctx, name };
-  }
-
-  // ── helpers shared across L11–L16 ──────────────────────────────────────────
+  // ── helpers ─────────────────────────────────────────────────────────────────
   function makePlaceValue() {
     const subtype = ['expand','digit_value','compose'][randInt(0,2)];
     if (subtype === 'expand') {
@@ -2223,118 +2147,152 @@ function generateMathRound() {
     return { type:'standard', a:aa, b:bb, op:'+', answer:aa+bb, regroup:true, showVisual:false, showWord:true, ctx, name };
   }
   function makeRegroupSub() {
-    const aa = randInt(31,199);
-    const aOnes = aa % 10;
-    const bOnes = aOnes < 9 ? randInt(aOnes+1, 9) : randInt(1,9);
-    const bTens = randInt(1, Math.max(1, Math.floor(aa/10)-1));
-    let bb = bTens*10 + bOnes;
-    if (bb >= aa) bb = Math.max(10, aa - randInt(5,20));
+    // Loop until we get aa, bb where: bb < aa, bb ones > aa ones (forces borrowing),
+    // bb has at least one ten. Avoids aa with ones=9 (can't force borrowing there).
+    let aa, bb;
+    let guard = 0;
+    do {
+      aa = randInt(31, 199);
+      const aOnes = aa % 10;
+      if (aOnes === 9) continue;
+      const bOnes = randInt(aOnes + 1, 9);
+      const maxBTens = Math.floor((aa - bOnes) / 10);
+      if (maxBTens < 1) continue;
+      const bTens = randInt(1, maxBTens);
+      bb = bTens * 10 + bOnes;
+    } while ((!bb || bb >= aa) && ++guard < 40);
+    if (!bb || bb >= aa) { aa = 52; bb = 17; }  // safe fallback
     return { type:'standard', a:aa, b:bb, op:'-', answer:aa-bb, borrow:true, showVisual:false, showWord:true, ctx, name };
   }
 
-  // L11 — Gr 3 Early-A: place value (70%) + multiply ×2–5 (30%)
-  if (lv === 11) {
-    if (Math.random() < 0.70) return makePlaceValue();
-    const factor=randInt(2,5), other=randInt(2,10);
-    return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
-  }
-
-  // L12 — Gr 3 Early-B: compare (35%) + skip_count large (25%) + place_value (25%) + multiply (15%)
-  if (lv === 12) {
-    const r12 = Math.random();
-    if (r12 < 0.35) return makeCompare();
-    if (r12 < 0.60) {
-      const step=[5,10,100][randInt(0,2)];
-      const start = step===100 ? randInt(1,7)*100 : step===10 ? randInt(5,15)*10 : randInt(4,18)*5;
+  // ── category dispatch ───────────────────────────────────────────────────────
+  switch (cat) {
+    case 'std_l1':
+      a=randInt(1,3); b=randInt(1,Math.min(3,6-a)); op='+';
+      return { type:'standard', a, b, op, answer:a+b, showVisual:true, showWord:false, ctx, name };
+    case 'std_l2':
+      a=randInt(1,5); b=randInt(1,Math.min(5,10-a)); op='+';
+      return { type:'standard', a, b, op, answer:a+b, showVisual:true, showWord:true, ctx, name };
+    case 'doubles': {
+      const base=randInt(1,5);
+      return { type:'doubles', a:base, b:base, isNearDouble:false, answer:base*2, ctx, name };
+    }
+    case 'near_double': {
+      const base=randInt(4,9), b2=base+1;
+      return { type:'doubles', a:base, b:b2, isNearDouble:true, answer:base+b2, ctx, name };
+    }
+    case 'teen_decomp': {
+      // L3 uses ones 1–4; L4+ opens to 1–9
+      const ones=randInt(1, lv<=3 ? 4 : 9);
+      const sub=Math.random()<0.5?'build':'break';
+      return { type:'teen_decomp', ones, total:10+ones, sub, answer:sub==='build'?10+ones:ones, ctx, name };
+    }
+    case 'std_l3':
+      op=Math.random()<0.5?'-':'+';
+      if (op==='+'){a=randInt(1,8);b=randInt(1,Math.min(8,10-a));}
+      else         {a=randInt(3,10);b=randInt(1,a);}
+      return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+    case 'std_l4':
+    case 'std_l5':
+      op=Math.random()<0.5?'-':'+';
+      if (op==='+'){a=randInt(5,14);b=randInt(2,Math.min(10,20-a));}
+      else         {a=randInt(8,20);b=randInt(2,Math.min(a,10));}
+      return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+    case 'missing_addend': {
+      const total=randInt(8,18), known=randInt(2,total-2);
+      return { type:'missing_addend', known, total, answer:total-known, ctx, name };
+    }
+    case 'skip_small': {
+      const step=[2,5,10][randInt(0,2)], start=randInt(1,8)*step;
       return { type:'skip_count', step, terms:[start,start+step,start+2*step], answer:start+3*step };
     }
-    if (r12 < 0.85) return makePlaceValue();
-    const factor=randInt(2,5), other=randInt(2,10);
-    return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
-  }
-
-  // L13 — Gr 3 Mid-A: regroup-add (50%) + compare (15%) + place_value (15%) + multiply (20%)
-  if (lv === 13) {
-    const r13 = Math.random();
-    if (r13 < 0.50) return makeRegroupAdd();
-    if (r13 < 0.65) return makeCompare();
-    if (r13 < 0.80) return makePlaceValue();
-    const factor=randInt(2,5), other=randInt(2,10);
-    return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
-  }
-
-  // L14 — Gr 3 Mid-B: regroup-sub (40%) + regroup-add (25%) + mental-math (20%) + multiply (15%)
-  if (lv === 14) {
-    const r14 = Math.random();
-    if (r14 < 0.40) return makeRegroupSub();
-    if (r14 < 0.65) return makeRegroupAdd();
-    if (r14 < 0.85) {
-      // mental math sprint within 20
-      op = Math.random() < 0.5 ? '+' : '-';
-      if (op==='+') { a=randInt(5,14); b=randInt(2,Math.min(10,20-a)); }
-      else          { a=randInt(8,20);  b=randInt(2,Math.min(a,10)); }
+    case 'std_l6':
+      op=Math.random()<0.5?'-':'+';
+      if (op==='+'){a=randInt(10,30);b=randInt(5,Math.min(20,50-a));}
+      else         {a=randInt(20,50);b=randInt(5,Math.min(a-1,25));}
       return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+    case 'std_l7':
+      op=Math.random()<0.5?'-':'+';
+      if (op==='+'){a=randInt(11,45);b=randInt(2,Math.min(9,50-a));}
+      else         {a=randInt(13,50);b=randInt(2,Math.min(9,a-1));}
+      return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+    case 'std_l8':
+      op=Math.random()<0.5?'-':'+';
+      if (op==='+'){a=randInt(15,55);b=randInt(10,Math.min(44,99-a));}
+      else         {a=randInt(30,99);b=randInt(10,Math.min(a-1,50));}
+      return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+    case 'groups': {
+      const rows=randInt(2,5), cols=randInt(2,8);
+      return { type:'groups', rows, cols, answer:rows*cols, ctx, name };
     }
-    const factor=randInt(2,5), other=randInt(2,10);
-    return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
-  }
-
-  // L15 — Gr 3 Late-A: time_read (35%) + two_step scaffolded (25%) + regroup-add (20%) + regroup-sub (20%)
-  if (lv === 15) {
-    const r15 = Math.random();
-    if (r15 < 0.35) {
+    case 'std_l9':
+      op=Math.random()<0.5?'-':'+';
+      if (op==='+'){a=randInt(20,55);b=randInt(15,Math.min(44,99-a));}
+      else         {a=randInt(40,99);b=randInt(15,Math.min(a-1,55));}
+      return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+    case 'multiply_l10': {
+      const factor=randInt(2,5), other=randInt(2,10);
+      return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
+    }
+    case 'division_l10': {
+      const divisor=randInt(2,5), quotient=randInt(2,10);
+      return { type:'division', dividend:divisor*quotient, divisor, answer:quotient, ctx, name };
+    }
+    case 'place_value':   return makePlaceValue();
+    case 'compare':       return makeCompare();
+    case 'regroup_add':   return makeRegroupAdd();
+    case 'regroup_sub':   return makeRegroupSub();
+    case 'multiply_lo': {  // ×2–5 (L11–L14)
+      const factor=randInt(2,5), other=randInt(2,10);
+      return { type:'multiply', a:factor, b:other, answer:factor*other, ctx, name };
+    }
+    case 'skip_large': {
+      const step=[5,10,100][randInt(0,2)];
+      const start=step===100?randInt(1,7)*100:step===10?randInt(5,15)*10:randInt(4,18)*5;
+      return { type:'skip_count', step, terms:[start,start+step,start+2*step], answer:start+3*step };
+    }
+    case 'mental':
+      op=Math.random()<0.5?'+':'-';
+      if (op==='+'){a=randInt(5,14);b=randInt(2,Math.min(10,20-a));}
+      else         {a=randInt(8,20);b=randInt(2,Math.min(a,10));}
+      return { type:'standard', a, b, op, answer:op==='+'?a+b:a-b, showVisual:false, showWord:true, ctx, name };
+    case 'time_read': {
       const h=randInt(1,12), m=[0,5,10,15,20,25,30,35,40,45,50,55][randInt(0,11)];
       return { type:'time_read', h, m, answer:h*60+m };
     }
-    if (r15 < 0.60) {
+    case 'two_step_sc': {
       const op1=Math.random()<0.5?'+':'-', op2=Math.random()<0.5?'+':'-';
       const aa=randInt(15,60), bb=randInt(5,25);
       const inter=op1==='+'?aa+bb:aa-bb;
-      if (inter<5||inter>100) {
-        const h=randInt(1,12), m=[0,5,10,15,20,25,30,35,40,45,50,55][randInt(0,11)];
-        return { type:'time_read', h, m, answer:h*60+m };
-      }
+      if (inter<5||inter>100) return generateMathRound('time_read');
       const cc=randInt(5,Math.min(20,op2==='-'?inter-1:100-inter));
       const ans2=op2==='+'?inter+cc:inter-cc;
       return { type:'two_step', a:aa, op1, b:bb, intermediate:inter, op2, c:cc, answer:ans2, scaffolded:true, ctx, name };
     }
-    if (r15 < 0.80) return makeRegroupAdd();
-    return makeRegroupSub();
-  }
-
-  // L16 — Gr 3 Achievement: multiply ×2–10 (35%) + two_step unscaffolded (25%) + time_read (20%) + mixed (20%)
-  {
-    const r16 = Math.random();
-    if (r16 < 0.35) {
-      if (Math.random() < 0.6) {
-        const f=randInt(2,10), o=randInt(2,10);
-        return { type:'multiply', a:f, b:o, answer:f*o, ctx, name };
-      }
-      const div=randInt(2,10), quot=randInt(2,10);
-      return { type:'division', dividend:div*quot, divisor:div, answer:quot, ctx, name };
-    }
-    if (r16 < 0.60) {
+    case 'two_step_nosc': {
       const op1=Math.random()<0.5?'+':'-', op2=Math.random()<0.5?'+':'-';
       const aa=randInt(30,80), bb=randInt(10,40);
       const inter=op1==='+'?aa+bb:aa-bb;
-      if (inter<5||inter>150) {
-        const f=randInt(2,10), o=randInt(2,10);
-        return { type:'multiply', a:f, b:o, answer:f*o, ctx, name };
-      }
+      if (inter<5||inter>150) return generateMathRound('multiply_div_l16');
       const cc=randInt(10,Math.min(40,op2==='-'?inter-1:150-inter));
       const ans2=op2==='+'?inter+cc:inter-cc;
       return { type:'two_step', a:aa, op1, b:bb, intermediate:inter, op2, c:cc, answer:ans2, scaffolded:false, ctx, name };
     }
-    if (r16 < 0.80) {
-      const h=randInt(1,12), m=[0,5,10,15,20,25,30,35,40,45,50,55][randInt(0,11)];
-      return { type:'time_read', h, m, answer:h*60+m };
+    case 'multiply_div_l16': {
+      if (Math.random()<0.6){const f=randInt(2,10),o=randInt(2,10);return{type:'multiply',a:f,b:o,answer:f*o,ctx,name};}
+      const div=randInt(2,10),quot=randInt(2,10);
+      return { type:'division', dividend:div*quot, divisor:div, answer:quot, ctx, name };
     }
-    // mixed prior: pick from place_value / compare / regroup-add / regroup-sub
-    const pick = randInt(0,3);
-    if (pick===0) return makePlaceValue();
-    if (pick===1) return makeCompare();
-    if (pick===2) return makeRegroupAdd();
-    return makeRegroupSub();
+    case 'mixed_l16': {
+      const pick=randInt(0,3);
+      if (pick===0) return makePlaceValue();
+      if (pick===1) return makeCompare();
+      if (pick===2) return makeRegroupAdd();
+      return makeRegroupSub();
+    }
+    default:
+      // Fallback: generate a basic standard round at the current level's range
+      return generateMathRound('std_l' + Math.min(lv, 9));
   }
 }
 
@@ -2495,7 +2453,8 @@ function startMathGame() {
     showScreen('screen-mathbreak');
     return;
   }
-  S.mathRounds  = Array.from({ length: 10 }, generateMathRound);
+  const deck = buildMathDeck(Math.min(S.mathLevel, 16));
+  S.mathRounds  = deck.map(cat => generateMathRound(cat));
   S.mathIdx     = 0;
   S.mathScore   = 0;
   S.mathAnswered = false;
@@ -2606,14 +2565,31 @@ function renderMathNumpad(r) {
 
   const ans = r.answer;
   const set = new Set([ans]);
+
+  if (r.type === 'place_value') {
+    if (r.subtype === 'digit_value') {
+      // digit itself + one place-confusion confusor (e.g. 5 → 50 → 500)
+      set.add(r.digit);
+      const confusor = r.pos===0 ? r.digit*10 : r.pos===1 ? r.digit*100 : r.digit*10;
+      if (confusor !== ans) set.add(confusor);
+    } else if (r.subtype === 'expand') {
+      // ans = t*10; add raw digit, hundreds version, and adjacent tens
+      const {t} = r;
+      set.add(t);
+      if (t*100 !== ans) set.add(t*100);
+      if ((t+1)*10 !== ans) set.add((t+1)*10);
+      if (t > 1 && (t-1)*10 !== ans) set.add((t-1)*10);
+    } else {
+      // compose: ans = h*100+t*10+o — use digit-position-swap distractors
+      const {h, t, o} = r;
+      set.add(h*100 + o*10 + t);                               // swap tens/ones position
+      set.add(h > 1 ? (h-1)*100 + t*10 + o : (h+1)*100 + t*10 + o); // off by 1 hundred
+      for (const d of [-10, 10, -20, 20, -30, 30])
+        if (set.size < 8 && ans + d > 0) set.add(ans + d);
+    }
+  }
+
   const spread = ans > 50 ? 10 : ans > 20 ? 6 : 4;
-
-  // For digit_value, force place-confusion distractors (e.g. 5 and 50 alongside 500)
-  if (r.type === 'place_value' && r.subtype === 'digit_value') {
-    set.add(r.digit);
-    const confusor = r.pos===0 ? r.digit*10 : r.pos===1 ? r.digit*100 : r.digit*10;
-    if (confusor !== ans) set.add(confusor);}
-
   for (let n = Math.max(0, ans - spread); set.size < 8; n++) {
     if (n !== ans) set.add(n);
     if (n > ans + spread * 2) break;
@@ -2633,7 +2609,10 @@ function answerMath(num) {
   const correct = num === r.answer;
   const btns = [...document.querySelectorAll('#math-numpad .dn-num-btn')];
   btns.forEach(b => { b.disabled = true; });
-  const chosen = btns.find(b => +b.textContent === num);
+  // Match by onclick value so compare (<,=,> with numeric values -1/0/1) and
+  // time_read (formatted text with numeric answer) are found correctly.
+  const chosen     = btns.find(b => b.getAttribute('onclick') === `answerMath(${num})`);
+  const correctBtn = btns.find(b => b.getAttribute('onclick') === `answerMath(${r.answer})`);
   const fb = document.getElementById('math-feedback');
 
   if (correct) {
@@ -2652,6 +2631,8 @@ function answerMath(num) {
   } else {
     r.retried = true;
     if (chosen) chosen.classList.add('dn-wrong');
+    // Reveal the correct answer so the child can see it before retrying.
+    if (correctBtn) correctBtn.classList.add('dn-correct');
     fb.textContent = 'Not quite — try again!';
     fb.className = 'dn-feedback wrong';
     setTimeout(() => {
@@ -2668,7 +2649,7 @@ function showMathResult() {
   S.mathSinceRead++;
   if (S.mathScore === 10) S.mathperfect++;
   const pct = S.mathScore / 10;
-  const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct, 16);
+  const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct, 16, 0.8, 0.4);
   S.sessions.unshift({ topic: 'Math Time', score: `${S.mathScore}/10`, date: new Date().toLocaleDateString(), level: S.mathLevel });
   if (S.sessions.length > 100) S.sessions.pop();
   const newB = awardAll();

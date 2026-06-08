@@ -400,6 +400,8 @@
     .doubles-extra { background: #fef08a; border-radius: 4px; padding: 0 1px; }
     .sb-home-card { background: linear-gradient(145deg, #f0fdf4, #dcfce7); border: 1.5px solid #86efac; border-radius: var(--r); padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.12s; box-shadow: var(--shadow); margin-top: 12px; }
     .sb-home-card:active { transform: scale(0.97); }
+    .clock-home-card { background: linear-gradient(145deg, #faf5ff, #ede9fe); border: 1.5px solid #c4b5fd; border-radius: var(--r); padding: 16px 20px; margin-top: 12px; display: flex; align-items: center; gap: 16px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.12s; box-shadow: var(--shadow); }
+    .clock-home-card:active { transform: scale(0.97); }
     .sb-word-display { font-size: 52px; font-weight: 900; text-align: center; letter-spacing: 4px; color: var(--text); margin: 12px 0 4px; }
     .sb-boxes-row { display: flex; gap: 12px; justify-content: center; margin: 18px 0; flex-wrap: wrap; }
     .sb-box { width: 72px; height: 72px; border: 3px solid var(--border); border-radius: 14px; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; color: var(--text); cursor: pointer; box-shadow: var(--shadow-sm); transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
@@ -472,6 +474,15 @@
       <div id="home-sb-level" style="font-size:13px;font-weight:700;color:#166534;opacity:0.65;margin-top:2px">Lv. 1</div>
     </div>
     <div style="margin-left:auto;font-size:26px;color:#166534;opacity:0.4">›</div>
+  </div>
+
+  <div class="clock-home-card" onclick="startClockGame()">
+    <div style="font-size:42px;line-height:1">🕐</div>
+    <div>
+      <div style="font-size:22px;font-weight:900;color:#4c1d95">Clock Time</div>
+      <div id="home-clock-level" style="font-size:13px;font-weight:700;color:#4c1d95;opacity:0.65;margin-top:2px">Lv. 1</div>
+    </div>
+    <div style="margin-left:auto;font-size:26px;color:#4c1d95;opacity:0.4">›</div>
   </div>
 </div>
 
@@ -579,6 +590,51 @@
     <div id="mi-body" class="mi-body"></div>
     <button class="btn btn-primary btn-full" style="margin-top:8px;font-size:18px" onclick="dismissMathIntro()">Got it! Let's go →</button>
   </div>
+</div>
+
+<!-- ═══ CLOCK TIME INTRO ═══ -->
+<div id="screen-clockintro" class="screen">
+  <div style="max-width:420px;margin:0 auto;padding:28px 20px 32px;display:flex;flex-direction:column;align-items:center;gap:16px">
+    <div class="mi-banner">✨ Something New!</div>
+    <div class="mi-subtitle">No need to answer — just read!</div>
+    <div id="ci-emoji" style="font-size:52px;line-height:1.2"></div>
+    <div id="ci-headline" class="mi-headline"></div>
+    <div id="ci-visual" class="mi-visual"></div>
+    <div id="ci-body" class="mi-body"></div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px;font-size:18px" onclick="dismissClockIntro()">Got it! Let's go →</button>
+  </div>
+</div>
+
+<!-- ═══ CLOCK TIME GAME ═══ -->
+<div id="screen-clock" class="screen">
+  <div class="sw-header">
+    <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
+    <span class="sw-prog-text" id="clock-prog">1 of 10</span>
+    <span class="pill" style="background:#ede9fe;color:#5b21b6;font-weight:800" id="clock-score-pill">0 ✓</span>
+  </div>
+  <div class="dn-progress-bar"><div class="dn-progress-fill" id="clock-progress-fill" style="width:0%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div></div>
+  <div class="math-problem-card" id="clock-problem-card">
+    <div class="math-visual" id="clock-visual"></div>
+    <div class="math-word-problem" id="clock-word-problem"></div>
+  </div>
+  <div class="dn-numpad" id="clock-numpad"></div>
+  <div class="dn-feedback" id="clock-feedback"></div>
+</div>
+
+<!-- ═══ CLOCK TIME RESULT ═══ -->
+<div id="screen-clockresult" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="showScreen('screen-home')">🏠</button>
+    <span class="screen-label">Clock Time done! 🕐</span>
+  </div>
+  <div class="sw-result-center">
+    <div class="stars-row" id="clock-result-stars">⭐⭐⭐</div>
+    <div class="result-score" id="clock-result-score">10 / 10</div>
+    <div class="result-msg" id="clock-result-msg">Time expert!</div>
+    <div id="clock-level-msg" style="margin-top:10px"></div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="startClockGame()">Play again</button>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
 </div>
 
 <!-- ═══ SOUND BOXES GAME ═══ -->
@@ -810,6 +866,14 @@
       <button class="pc-lvl-btn" onclick="setGameLevel('sbLevel','sbLevelProg',-1)">−</button>
       <span class="pc-lvl-val" id="pc-sb-level">Lv. 1</span>
       <button class="pc-lvl-btn" onclick="setGameLevel('sbLevel','sbLevelProg',+1)">+</button>
+    </div>
+  </div>
+  <div class="pc-level-row">
+    <span class="pc-level-label">🕐 Clock</span>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setGameLevel('clockLevel','clockLevelProg',-1)">−</button>
+      <span class="pc-lvl-val" id="pc-clock-level">Lv. 1</span>
+      <button class="pc-lvl-btn" onclick="setGameLevel('clockLevel','clockLevelProg',+1)">+</button>
     </div>
   </div>
 
@@ -1095,6 +1159,11 @@ const S = {
   mathBreakEvery:parseInt(lsGet('rl_mathbreakevery','5')),
   mathIntroSeen: lsJson('rl_mathintroseen', []),
   mathWarmupDone:lsJson('rl_mathwarmupdone', []),
+  clockLevel:    parseInt(lsGet('rl_clocklevel','1')),
+  clockLevelProg:parseInt(lsGet('rl_clocklevelprog','0')),
+  clockgames:    parseInt(lsGet('rl_clockgames','0')),
+  clockperfect:  parseInt(lsGet('rl_clockperfect','0')),
+  clockIntroSeen:lsJson('rl_clockintroseen', []),
   // transient
   topic: null, title: '', story: '', words: [], quiz: [],
   quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
@@ -1102,6 +1171,7 @@ const S = {
   swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
   dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false,
   mathRounds: [], mathIdx: 0, mathScore: 0, mathAnswered: false,
+  clockRounds: [], clockIdx: 0, clockScore: 0, clockAnswered: false,
   sbWords: [], sbIdx: 0, sbScore: 0, sbSelected: null, sbBoxes: [], sbTileOrder: [], sbWordPerfect: true,
   pinBuf: '',
 };
@@ -1158,6 +1228,11 @@ function persist() {
   lsSet('rl_mathbreakevery', S.mathBreakEvery);
   lsSet('rl_mathintroseen',  S.mathIntroSeen);
   lsSet('rl_mathwarmupdone', S.mathWarmupDone);
+  lsSet('rl_clocklevel',     S.clockLevel);
+  lsSet('rl_clocklevelprog', S.clockLevelProg);
+  lsSet('rl_clockgames',     S.clockgames);
+  lsSet('rl_clockperfect',   S.clockperfect);
+  lsSet('rl_clockintroseen', S.clockIntroSeen);
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
@@ -1185,6 +1260,7 @@ function refreshHome() {
   document.getElementById('home-dn-level').textContent      = `Lv. ${S.dnLevel}`;
   document.getElementById('home-math-level').textContent    = `Lv. ${S.mathLevel}`;
   document.getElementById('home-sb-level').textContent      = `Lv. ${S.sbLevel}`;
+  document.getElementById('home-clock-level').textContent   = `Lv. ${S.clockLevel}`;
   const streakPill = document.getElementById('home-streak-pill');
   if (S.streak >= 1) {
     streakPill.textContent = `🔥 ${S.streak} day${S.streak !== 1 ? 's' : ''}`;
@@ -1670,6 +1746,7 @@ function renderParentCorner() {
   document.getElementById('pc-dn-level').textContent   = `Lv. ${S.dnLevel}`;
   document.getElementById('pc-math-level').textContent  = `Lv. ${S.mathLevel}`;
   document.getElementById('pc-sb-level').textContent   = `Lv. ${S.sbLevel}`;
+  document.getElementById('pc-clock-level').textContent = `Lv. ${S.clockLevel}`;
   document.getElementById('pc-unlock-req').textContent  = S.dnUnlockReq === 0 ? 'Off' : S.dnUnlockReq;
   document.getElementById('pc-break-every').textContent = S.mathBreakEvery === 0 ? 'Off' : S.mathBreakEvery;
   document.getElementById('api-key-input').value    = S.apiKey;
@@ -1692,7 +1769,7 @@ function renderParentCorner() {
 }
 
 function setGameLevel(levelKey, progKey, delta) {
-  const maxLv = levelKey === 'mathLevel' ? 16 : 5;
+  const maxLv = levelKey === 'mathLevel' ? 16 : levelKey === 'clockLevel' ? 4 : 5;
   const next = Math.min(maxLv, Math.max(1, S[levelKey] + delta));
   if (next === S[levelKey]) return;
   S[levelKey] = next;
@@ -1702,7 +1779,8 @@ function setGameLevel(levelKey, progKey, delta) {
   refreshHome();
   document.getElementById({
     level: 'pc-level', swLevel: 'pc-sw-level',
-    dnLevel: 'pc-dn-level', mathLevel: 'pc-math-level', sbLevel: 'pc-sb-level'
+    dnLevel: 'pc-dn-level', mathLevel: 'pc-math-level', sbLevel: 'pc-sb-level',
+    clockLevel: 'pc-clock-level'
   }[levelKey]).textContent = `Lv. ${next}`;
 }
 
@@ -1752,7 +1830,8 @@ function confirmReset() {
   if (!confirm('Reset ALL progress? This cannot be undone.')) return;
   ['rl_level','rl_levelprog','rl_sessions','rl_stories','rl_streak','rl_lastdate',
    'rl_badges','rl_perfect','rl_maxlevel','rl_swgames','rl_swperfect','rl_dngames','rl_dnperfect','rl_topics','rl_pin',
-   'rl_mathintroseen','rl_mathwarmupdone']
+   'rl_mathintroseen','rl_mathwarmupdone',
+   'rl_clocklevel','rl_clocklevelprog','rl_clockgames','rl_clockperfect','rl_clockintroseen']
     .forEach(k => localStorage.removeItem(k));
   location.reload();
 }
@@ -2088,7 +2167,7 @@ function fmtTime(totalMin) {
   return h + ':' + (m < 10 ? '0' : '') + m;
 }
 
-function svgClock(h, m) {
+function svgClock(h, m, size=100) {
   const mAngle = (m / 60) * 2 * Math.PI;
   const hAngle = ((h % 12) + m / 60) / 12 * 2 * Math.PI;
   const mx = 50 + 38 * Math.sin(mAngle), my = 50 - 38 * Math.cos(mAngle);
@@ -2098,7 +2177,7 @@ function svgClock(h, m) {
     const r1 = i % 3 === 0 ? 38 : 40, r2 = 45;
     return `<line x1="${(50+r1*Math.sin(a)).toFixed(1)}" y1="${(50-r1*Math.cos(a)).toFixed(1)}" x2="${(50+r2*Math.sin(a)).toFixed(1)}" y2="${(50-r2*Math.cos(a)).toFixed(1)}" stroke="#94a3b8" stroke-width="${i%3===0?2:1}"/>`;
   }).join('');
-  return `<svg width="100" height="100" viewBox="0 0 100 100" style="display:block;margin:0 auto">` +
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" style="display:block;margin:0 auto">` +
     `<circle cx="50" cy="50" r="47" fill="white" stroke="#cbd5e1" stroke-width="2"/>` +
     ticks +
     `<line x1="50" y1="50" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>` +
@@ -2807,6 +2886,163 @@ function showMathResult() {
     </div>`).join('');
   document.getElementById('math-progress-fill').style.width = '100%';
   showScreen('screen-mathresult');
+  if (pct === 1) setTimeout(spawnConfetti, 250);
+}
+
+// ─── CLOCK TIME ──────────────────────────────────────────────────────────────
+
+const CLOCK_LEVEL_INTROS = {
+  1: { emoji:'🕛', headline:"O'Clock Times!",
+       visual:'3:00',
+       body:"The short hand shows the HOUR. When the long hand points up to 12, it's o'clock!" },
+  2: { emoji:'🕧', headline:'Half Past!',
+       visual:'3:30',
+       body:"When the long hand points straight down to 6, add 30 minutes — that's half past!" },
+  3: { emoji:'🕒', headline:'Quarter Hours!',
+       visual:'3:15  /  3:45',
+       body:'Long hand at 3 = 15 min (quarter past). Long hand at 9 = 45 min (quarter to).' },
+  4: { emoji:'⏱️', headline:'Every 5 Minutes!',
+       visual:'1→5   2→10   3→15…',
+       body:'Count by 5s around the clock! Each number the long hand passes = 5 more minutes.' },
+};
+
+function showClockIntro(lv) {
+  const d = CLOCK_LEVEL_INTROS[lv];
+  if (!d) { startClockGameNow(); return; }
+  document.getElementById('ci-emoji').textContent    = d.emoji;
+  document.getElementById('ci-headline').textContent = d.headline;
+  document.getElementById('ci-body').textContent     = d.body;
+  document.getElementById('ci-visual').textContent   = d.visual;
+  showScreen('screen-clockintro');
+}
+
+function dismissClockIntro() {
+  if (!S.clockIntroSeen.includes(S.clockLevel)) {
+    S.clockIntroSeen.push(S.clockLevel);
+    persist();
+  }
+  startClockGameNow();
+}
+
+function startClockGame() {
+  if (!S.clockIntroSeen.includes(S.clockLevel)) {
+    return showClockIntro(S.clockLevel);
+  }
+  startClockGameNow();
+}
+
+function startClockGameNow() {
+  S.clockRounds   = Array.from({length: 10}, () => generateClockRound(S.clockLevel));
+  S.clockIdx      = 0;
+  S.clockScore    = 0;
+  S.clockAnswered = false;
+  showScreen('screen-clock');
+  renderClockRound();
+}
+
+function generateClockRound(lv) {
+  const h = randInt(1, 12);
+  const opts = lv === 1 ? [0]
+             : lv === 2 ? [0, 30]
+             : lv === 3 ? [0, 15, 30, 45]
+             : [0,5,10,15,20,25,30,35,40,45,50,55];
+  const m = opts[randInt(0, opts.length - 1)];
+  return { h, m, answer: h * 60 + m };
+}
+
+function renderClockRound() {
+  const r = S.clockRounds[S.clockIdx];
+  S.clockAnswered = false;
+  document.getElementById('clock-prog').textContent = `${S.clockIdx + 1} of 10`;
+  document.getElementById('clock-score-pill').textContent = `${S.clockScore} ✓`;
+  document.getElementById('clock-feedback').textContent = '';
+  document.getElementById('clock-feedback').className = 'dn-feedback';
+  document.getElementById('clock-progress-fill').style.width = `${(S.clockIdx / 10) * 100}%`;
+  const card = document.getElementById('clock-problem-card');
+  card.style.animation = 'none'; card.offsetWidth; card.style.animation = '';
+  document.getElementById('clock-visual').innerHTML = svgClock(r.h, r.m, 160);
+  document.getElementById('clock-word-problem').textContent = 'What time does the clock show?';
+  renderClockNumpad(r);
+}
+
+function renderClockNumpad(r) {
+  const pad = document.getElementById('clock-numpad');
+  const ans = r.answer;
+  let choices;
+  if (S.clockLevel === 1) {
+    const hrs = new Set([Math.floor(ans / 60)]);
+    const cands = [];
+    for (let d = 1; cands.length < 3; d++) {
+      const h1 = ((Math.floor(ans/60) - 1 + d)      % 12) + 1;
+      const h2 = ((Math.floor(ans/60) - 1 - d + 24) % 12) + 1;
+      if (!hrs.has(h1)) { hrs.add(h1); cands.push(h1 * 60); }
+      if (cands.length < 3 && !hrs.has(h2)) { hrs.add(h2); cands.push(h2 * 60); }
+    }
+    choices = [ans, ...cands.slice(0, 3)];
+  } else {
+    const offsets = S.clockLevel === 2 ? [30, -30, 60, -60] : [-10, -5, 5, 10, 60, -60];
+    const raw = [ans, ...offsets.map(d => {
+      let v = ans + d;
+      if (v < 60)  v += 720;
+      if (v > 779) v -= 720;
+      return v;
+    })];
+    choices = [...new Set(raw)].slice(0, 4);
+    while (choices.length < 4) choices.push(ans + choices.length * 5);
+  }
+  const shuffled = [...choices].sort(() => Math.random() - 0.5);
+  pad.style.gridTemplateColumns = 'repeat(2, 1fr)';
+  pad.innerHTML = shuffled.map(v =>
+    `<button class="dn-num-btn" onclick="answerClock(${v})">${fmtTime(v)}</button>`
+  ).join('');
+}
+
+function answerClock(num) {
+  if (S.clockAnswered) return;
+  S.clockAnswered = true;
+  const r = S.clockRounds[S.clockIdx];
+  const correct = num === r.answer;
+  const btns = [...document.querySelectorAll('#clock-numpad .dn-num-btn')];
+  btns.forEach(b => { b.disabled = true; });
+  const chosen     = btns.find(b => b.getAttribute('onclick') === `answerClock(${num})`);
+  const correctBtn = btns.find(b => b.getAttribute('onclick') === `answerClock(${r.answer})`);
+  const fb = document.getElementById('clock-feedback');
+  if (correct) {
+    if (!r.retried) S.clockScore++;
+    fb.textContent = r.retried ? 'Got it!' : '🎉 Correct!';
+    fb.className = 'dn-feedback correct';
+    if (chosen) { chosen.classList.add('dn-correct'); if (!r.retried) dnBurst(chosen); }
+    setTimeout(() => {
+      S.clockIdx++;
+      if (S.clockIdx >= 10) showClockResult();
+      else renderClockRound();
+    }, 1300);
+  } else {
+    r.retried = true;
+    fb.textContent = 'Not quite — try again!';
+    fb.className = 'dn-feedback wrong';
+    if (chosen) chosen.classList.add('dn-wrong');
+    if (correctBtn) correctBtn.classList.add('dn-correct');
+    S.clockAnswered = false;
+  }
+}
+
+function showClockResult() {
+  S.clockgames++; S.totalGames++;
+  if (S.clockScore === 10) S.clockperfect++;
+  if (!S.clockIntroSeen.includes(S.clockLevel)) S.clockIntroSeen.push(S.clockLevel);
+  const pct = S.clockScore / 10;
+  const prevLevel = advanceLevel('clockLevel', 'clockLevelProg', pct, 4);
+  S.sessions.unshift({ topic:'Clock Time', score:`${S.clockScore}/10`, date:new Date().toLocaleDateString(), level:S.clockLevel });
+  if (S.sessions.length > 100) S.sessions.pop();
+  persist();
+  document.getElementById('clock-result-stars').textContent  = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
+  document.getElementById('clock-result-score').textContent  = `${S.clockScore} / 10`;
+  document.getElementById('clock-result-msg').textContent    =
+    pct === 1 ? 'Perfect! Time expert! 🏅' : pct >= 0.8 ? 'Amazing work!' : pct >= 0.6 ? 'Good effort!' : 'Keep practicing!';
+  document.getElementById('clock-level-msg').innerHTML       = levelChangeMsg('clockLevel', 'clockLevelProg', prevLevel);
+  document.getElementById('clock-progress-fill').style.width = '100%';
+  showScreen('screen-clockresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
 

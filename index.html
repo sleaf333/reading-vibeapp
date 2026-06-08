@@ -2637,8 +2637,8 @@ function answerMath(num) {
   const fb = document.getElementById('math-feedback');
 
   if (correct) {
-    S.mathScore++;
-    fb.textContent = '🎉 Correct!';
+    if (!r.retried) S.mathScore++;
+    fb.textContent = r.retried ? 'Got it!' : '🎉 Correct!';
     fb.className = 'dn-feedback correct';
     setTimeout(() => {
       S.mathIdx++;
@@ -2647,10 +2647,10 @@ function answerMath(num) {
     }, 1300);
     if (chosen) {
       chosen.classList.add('dn-correct');
-      dnBurst(chosen);
-      burstReward(chosen, ['⭐','🎉','✨','💯','🌟','🎊']);
+      if (!r.retried) { dnBurst(chosen); burstReward(chosen, ['⭐','🎉','✨','💯','🌟','🎊']); }
     }
   } else {
+    r.retried = true;
     if (chosen) chosen.classList.add('dn-wrong');
     fb.textContent = 'Not quite — try again!';
     fb.className = 'dn-feedback wrong';

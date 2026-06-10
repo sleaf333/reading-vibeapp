@@ -482,7 +482,7 @@
 <div id="screen-dnews" class="screen">
   <div class="sw-header">
     <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
-    <span class="sw-prog-text" id="dn-prog">Article 1 of 5</span>
+    <span class="sw-prog-text" id="dn-prog">Article 1 of 3</span>
     <span class="pill pill-green" id="dn-score-pill">0 ✓</span>
   </div>
   <div class="dn-progress-bar"><div class="dn-progress-fill" id="dn-progress-fill" style="width:0%"></div></div>
@@ -492,6 +492,7 @@
     <div class="dn-step-dot" id="dn-dot-2"></div>
   </div>
   <div class="dn-article-card" id="dn-article-card">
+    <div style="text-align:right;margin-bottom:4px"><button class="btn btn-secondary btn-sm" onclick="speakDnArticle()">🔊 Read to me</button></div>
     <div class="dn-article-text" id="dn-article-text"></div>
   </div>
   <div class="dn-question-box" id="dn-question-box">
@@ -608,6 +609,7 @@
     <div class="result-score" id="clock-result-score">10 / 10</div>
     <div class="result-msg" id="clock-result-msg">Time expert!</div>
     <div id="clock-level-msg" style="margin-top:10px"></div>
+    <div id="clock-new-badges" style="margin-top:10px"></div>
   </div>
   <button class="btn btn-primary btn-full" onclick="startClockGame()">Play again</button>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
@@ -625,7 +627,7 @@
     <button class="btn btn-secondary btn-sm" onclick="speakSbWord()" style="margin-bottom:8px">🔊 Hear the word</button>
   </div>
   <div class="sb-boxes-row" id="sb-boxes-row"></div>
-  <div style="text-align:center;font-size:14px;color:var(--muted);font-weight:700;margin:4px 0 8px">Tap a sound tile, then tap a box ↑</div>
+  <div id="sb-hint" style="text-align:center;font-size:14px;color:var(--muted);font-weight:700;margin:4px 0 8px">Tap a sound tile, then tap a box ↑</div>
   <div class="sb-tiles-row" id="sb-tiles-row"></div>
   <div class="dn-feedback" id="sb-feedback"></div>
 </div>
@@ -697,6 +699,7 @@
       <span class="quiz-prog" id="quiz-prog">1 / 3</span>
     </div>
     <div class="quiz-q" id="quiz-question"></div>
+    <div style="text-align:center;margin-bottom:10px"><button class="btn btn-secondary btn-sm" onclick="speakQuizQ()">🔊 Hear the question</button></div>
     <div id="quiz-choices"></div>
   </div>
 </div>
@@ -797,7 +800,7 @@
 
   <div class="section-title">Stats</div>
   <div class="stat-row"><span class="stat-label">Games played</span><span class="stat-val" id="pc-total-games">0</span></div>
-  <div class="stat-row"><span class="stat-label">Badges earned</span><span class="stat-val" id="pc-badges">0 / 16</span></div>
+  <div class="stat-row"><span class="stat-label">Badges earned</span><span class="stat-val" id="pc-badges">0 / 22</span></div>
   <div class="stat-row"><span class="stat-label">Day streak</span><span class="stat-val" id="pc-streak">0</span></div>
 
   <div class="divider"></div>
@@ -912,6 +915,15 @@
   <input type="text" class="text-input" id="proxy-url-input" placeholder="https://my-proxy.username.workers.dev" oninput="saveProxyUrl(this.value)">
 
   <div class="divider"></div>
+  <div class="section-title">Backup</div>
+  <div style="display:flex;gap:10px;margin-bottom:8px">
+    <button class="btn btn-secondary" style="flex:1" onclick="copyBackup()">📋 Copy backup code</button>
+    <button class="btn btn-secondary" style="flex:1" onclick="restoreBackup()">📥 Restore</button>
+  </div>
+  <textarea id="backup-code" readonly style="display:none;width:100%;height:72px;font-size:11px;font-family:monospace;border:1.5px solid var(--border);border-radius:10px;padding:8px;margin-bottom:8px" onclick="this.select()"></textarea>
+
+  <div class="divider"></div>
+
   <div class="section-title">Change PIN</div>
   <input type="text" class="text-input" id="new-pin-input" placeholder="New 4-digit PIN" maxlength="4" inputmode="numeric">
   <button class="btn btn-secondary btn-full" onclick="changePIN()">Update PIN</button>
@@ -952,6 +964,12 @@ const BADGES = [
   { id:'dn_perfect',   icon:'🧮', name:'Math Whiz',        desc:'Perfect Daily News score (9/9)' },
   { id:'math_first',   icon:'➕', name:'Math Star',        desc:'Complete your first Math Time' },
   { id:'math_perfect', icon:'🏅', name:'Math Champion',    desc:'Perfect Math Time score (10/10)' },
+  { id:'sb_first',     icon:'📦', name:'Sound Builder',    desc:'Complete your first Sound Boxes' },
+  { id:'sb_perfect',   icon:'🔊', name:'Sound Master',     desc:'Perfect Sound Boxes score' },
+  { id:'clock_first',  icon:'🕐', name:'Time Keeper',      desc:'Complete your first Clock Time' },
+  { id:'clock_perfect',icon:'⏰', name:'Clock Champion',   desc:'Perfect Clock Time score (10/10)' },
+  { id:'streak_14',    icon:'🌈', name:'Two-Week Streak',  desc:'Read 14 days in a row' },
+  { id:'games_50',     icon:'💎', name:'Super Player',     desc:'Play 50 games in total' },
 ];
 
 const SW_EASY = ['the','a','is','it','in','on','at','up','do','go','he','she','we','my','no','so','to','of','or','as','be','by','am','an','if','me','us','him','not','and','but','for','you','can','had','was','are','all','one','two','out','get','see','big','run','fun','dog','cat','hat','red','sun'];
@@ -1147,7 +1165,7 @@ const S = {
   swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
   dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false,
   mathRounds: [], mathIdx: 0, mathScore: 0, mathAnswered: false,
-  clockRounds: [], clockIdx: 0, clockScore: 0, clockAnswered: false,
+  clockRounds: [], clockIdx: 0, clockScore: 0, clockAnswered: false, clockPhase: 'hour',
   sbWords: [], sbIdx: 0, sbScore: 0, sbSelected: null, sbBoxes: [], sbTileOrder: [], sbWordPerfect: true,
   pinBuf: '',
 };
@@ -1589,6 +1607,12 @@ function awardAll() {
   if (S.dnperfect >= 1) give('dn_perfect');
   if (S.mathgames  >= 1)  give('math_first');
   if (S.mathperfect >= 1) give('math_perfect');
+  if (S.sbgames    >= 1)  give('sb_first');
+  if (S.sbperfect  >= 1)  give('sb_perfect');
+  if (S.clockgames >= 1)  give('clock_first');
+  if (S.clockperfect >= 1) give('clock_perfect');
+  if (S.streak     >= 14) give('streak_14');
+  if (S.totalGames >= 50) give('games_50');
   return earned.filter(Boolean);
 }
 
@@ -1727,7 +1751,8 @@ function renderHeatmap() {
   function pct(scoreStr) { const [a,b] = scoreStr.split('/').map(Number); return b ? a/b : 0; }
   function color(p) { return p >= 0.8 ? '#4ade80' : p >= 0.6 ? '#fbbf24' : '#f87171'; }
   document.getElementById('pc-heatmap').innerHTML = HM_GAMES.map(g => {
-    const recent = S.sessions.filter(g.test).slice(0, CELLS).reverse();
+    const all = S.sessions.filter(g.test);
+    const recent = all.slice(0, CELLS).reverse();
     const empty = CELLS - recent.length;
     const cells =
       Array(empty).fill('<div class="hm-cell" style="background:var(--border);opacity:0.35"></div>').join('') +
@@ -1735,7 +1760,16 @@ function renderHeatmap() {
         const p = pct(s.score);
         return `<div class="hm-cell" style="background:${color(p)}" title="${s.topic} ${s.score} ${s.date}"></div>`;
       }).join('');
-    return `<div class="hm-row"><div class="hm-label">${g.label}</div><div class="hm-cells">${cells}</div></div>`;
+    // Trend: average of last 5 scores vs the 5 before them.
+    let trend = '';
+    if (all.length >= 6) {
+      const avg = arr => arr.reduce((sum, s) => sum + pct(s.score), 0) / arr.length;
+      const diff = avg(all.slice(0, 5)) - avg(all.slice(5, 10));
+      trend = diff > 0.08 ? ' <span title="Improving" style="color:#16a34a;font-weight:900">↑</span>'
+            : diff < -0.08 ? ' <span title="Needs practice" style="color:#d97706;font-weight:900">↓</span>'
+            : ' <span title="Steady" style="color:#94a3b8;font-weight:900">→</span>';
+    }
+    return `<div class="hm-row"><div class="hm-label">${g.label}${trend}</div><div class="hm-cells">${cells}</div></div>`;
   }).join('');
 }
 
@@ -1771,7 +1805,7 @@ function renderParentCorner() {
 }
 
 function setGameLevel(levelKey, progKey, delta) {
-  const maxLv = levelKey === 'mathLevel' ? 16 : levelKey === 'clockLevel' ? 4 : 5;
+  const maxLv = levelKey === 'mathLevel' ? 16 : levelKey === 'clockLevel' ? 4 : levelKey === 'sbLevel' ? 6 : 5;
   const next = Math.min(maxLv, Math.max(1, S[levelKey] + delta));
   if (next === S[levelKey]) return;
   S[levelKey] = next;
@@ -1828,6 +1862,44 @@ function changePIN() {
   showToast('PIN updated!');
 }
 
+// ─── BACKUP / RESTORE ────────────────────────────────────────────────────────
+
+function copyBackup() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('rl_')) data[k] = localStorage.getItem(k);
+  }
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  const ta = document.getElementById('backup-code');
+  ta.style.display = '';
+  ta.value = code;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code)
+      .then(() => showToast('Backup code copied! Save it somewhere safe.'))
+      .catch(() => { ta.select(); showToast('Tap the code below to copy it'); });
+  } else {
+    ta.select();
+    showToast('Tap the code below to copy it');
+  }
+}
+
+function restoreBackup() {
+  const code = prompt('Paste your backup code:');
+  if (!code) return;
+  try {
+    const data = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('bad');
+    const keys = Object.keys(data).filter(k => k.startsWith('rl_'));
+    if (!keys.length) throw new Error('empty');
+    if (!confirm(`Restore ${keys.length} saved settings? Current progress will be replaced.`)) return;
+    keys.forEach(k => localStorage.setItem(k, data[k]));
+    location.reload();
+  } catch (e) {
+    showToast("That code doesn't look right — nothing was changed.");
+  }
+}
+
 function confirmReset() {
   if (!confirm('Reset ALL progress? This cannot be undone.')) return;
   // Clears all progress keys. Settings (rl_apikey, rl_proxy, rl_dnunlockreq,
@@ -1867,6 +1939,17 @@ function speak(word) {
 
 function stopSpeech() {
   if (window.speechSynthesis) speechSynthesis.cancel();
+}
+
+function speakDnArticle() {
+  const r = S.dnRounds[S.dnRoundIdx];
+  if (!r) return;
+  speak(r.text || ((r.headline || '') + ' ' + (r.body || '')).trim());
+}
+
+function speakQuizQ() {
+  const q = S.quiz[S.quizIdx];
+  if (q) speak(q.q);
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
@@ -2960,7 +3043,10 @@ function generateClockRound(lv) {
              : lv === 3 ? [0, 15, 30, 45]
              : [0,5,10,15,20,25,30,35,40,45,50,55];
   const m = opts[randInt(0, opts.length - 1)];
-  return { h, m, answer: h * 60 + m };
+  // From L2 on, ~30% of rounds flip the task: she's shown a time and
+  // builds the clock by tapping where each hand points.
+  const kind = lv >= 2 && Math.random() < 0.3 ? 'set' : 'read';
+  return { h, m, answer: h * 60 + m, kind };
 }
 
 function renderClockRound() {
@@ -2973,9 +3059,81 @@ function renderClockRound() {
   document.getElementById('clock-progress-fill').style.width = `${(S.clockIdx / 10) * 100}%`;
   const card = document.getElementById('clock-problem-card');
   card.style.animation = 'none'; card.offsetWidth; card.style.animation = '';
-  document.getElementById('clock-visual').innerHTML = svgClock(r.h, r.m, 160, S.clockLevel <= 3);
-  document.getElementById('clock-word-problem').textContent = 'What time does the clock show?';
-  renderClockNumpad(r);
+  if (r.kind === 'set') {
+    S.clockPhase = 'hour';
+    document.getElementById('clock-visual').innerHTML =
+      `<div style="font-size:36px;font-weight:900;color:#4c1d95;margin-bottom:6px">${fmtTime(r.answer)}</div>` +
+      svgClockSet(r);
+    document.getElementById('clock-word-problem').textContent =
+      'Make the clock show this time! Tap the number the SHORT hour hand points to.';
+    document.getElementById('clock-numpad').innerHTML = '';
+  } else {
+    document.getElementById('clock-visual').innerHTML = svgClock(r.h, r.m, 160, S.clockLevel <= 3);
+    document.getElementById('clock-word-problem').textContent = 'What time does the clock show?';
+    renderClockNumpad(r);
+  }
+}
+
+// Tappable clock face for 'set' rounds: all 12 numbers are buttons.
+// Hands appear one at a time as the child places them.
+function svgClockSet(r) {
+  const showHour   = S.clockPhase === 'minute' || S.clockPhase === 'done';
+  const showMinute = S.clockPhase === 'done';
+  const hAngle = ((r.h % 12) + r.m / 60) / 12 * 2 * Math.PI;
+  const mAngle = (r.m / 60) * 2 * Math.PI;
+  const spots = Array.from({length:12}, (_,i) => {
+    const n = i === 0 ? 12 : i;
+    const a = i / 12 * 2 * Math.PI;
+    const x = (50 + 38 * Math.sin(a)).toFixed(1), y = (50 - 38 * Math.cos(a)).toFixed(1);
+    return `<g id="clock-pos-${n}" onclick="tapClockPos(${n})" style="cursor:pointer">` +
+      `<circle cx="${x}" cy="${y}" r="8" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1"/>` +
+      `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#4c1d95" font-family="sans-serif">${n}</text></g>`;
+  }).join('');
+  const hourHand = showHour
+    ? `<line x1="50" y1="50" x2="${(50+24*Math.sin(hAngle)).toFixed(1)}" y2="${(50-24*Math.cos(hAngle)).toFixed(1)}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>` : '';
+  const minHand = showMinute
+    ? `<line x1="50" y1="50" x2="${(50+30*Math.sin(mAngle)).toFixed(1)}" y2="${(50-30*Math.cos(mAngle)).toFixed(1)}" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>` : '';
+  return `<svg width="200" height="200" viewBox="0 0 100 100" style="display:block;margin:0 auto">` +
+    `<circle cx="50" cy="50" r="47" fill="white" stroke="#cbd5e1" stroke-width="2"/>` +
+    spots + hourHand + minHand +
+    `<circle cx="50" cy="50" r="3" fill="#1e293b"/>` +
+    `</svg>`;
+}
+
+function tapClockPos(n) {
+  if (S.clockAnswered) return;
+  const r = S.clockRounds[S.clockIdx];
+  if (!r || r.kind !== 'set') return;
+  const fb = document.getElementById('clock-feedback');
+  const target = S.clockPhase === 'hour' ? r.h : (r.m === 0 ? 12 : r.m / 5);
+  if (n !== target) {
+    r.retried = true;
+    fb.textContent = 'Not quite — try again!';
+    fb.className = 'dn-feedback wrong';
+    const spot = document.getElementById(`clock-pos-${n}`);
+    if (spot) spot.querySelector('circle').setAttribute('fill', '#fecaca');
+    return;
+  }
+  if (S.clockPhase === 'hour') {
+    S.clockPhase = 'minute';
+    document.querySelector('#clock-visual svg').outerHTML = svgClockSet(r);
+    document.getElementById('clock-word-problem').textContent =
+      'Now tap the number the LONG minute hand points to.';
+    fb.textContent = '✓ Hour hand placed!';
+    fb.className = 'dn-feedback correct';
+  } else {
+    S.clockAnswered = true;
+    S.clockPhase = 'done';
+    document.querySelector('#clock-visual svg').outerHTML = svgClockSet(r);
+    if (!r.retried) S.clockScore++;
+    fb.textContent = r.retried ? 'Got it!' : '🎉 Correct!';
+    fb.className = 'dn-feedback correct';
+    setAdvanceTimer(() => {
+      S.clockIdx++;
+      if (S.clockIdx >= 10) showClockResult();
+      else renderClockRound();
+    }, 1300);
+  }
 }
 
 function renderClockNumpad(r) {
@@ -3048,12 +3206,16 @@ function showClockResult() {
   const prevLevel = advanceLevel('clockLevel', 'clockLevelProg', pct, 4);
   S.sessions.unshift({ topic:'Clock Time', score:`${S.clockScore}/10`, date:new Date().toLocaleDateString(), level:S.clockLevel });
   if (S.sessions.length > 100) S.sessions.pop();
+  const newB = awardAll();
   persist();
   document.getElementById('clock-result-stars').textContent  = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
   document.getElementById('clock-result-score').textContent  = `${S.clockScore} / 10`;
   document.getElementById('clock-result-msg').textContent    =
     pct === 1 ? 'Perfect! Time expert! 🏅' : pct >= 0.8 ? 'Amazing work!' : pct >= 0.6 ? 'Good effort!' : 'Keep practicing!';
   document.getElementById('clock-level-msg').innerHTML       = levelChangeMsg('clockLevel', 'clockLevelProg', prevLevel);
+  document.getElementById('clock-new-badges').innerHTML      = newB.map(b =>
+    `<div class="new-badge"><span class="nb-emoji">${b.icon}</span><div><div class="nb-name">${b.name}</div><div class="nb-desc">${b.desc}</div></div></div>`
+  ).join('');
   document.getElementById('clock-progress-fill').style.width = '100%';
   showScreen('screen-clockresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
@@ -3076,6 +3238,7 @@ function spawnConfetti() {
 // ─── SOUND BOXES ─────────────────────────────────────────────────────────────
 
 function startSbGame() {
+  // L6 reuses the full word pool but adds distractor tiles in renderSbRound.
   const lv = Math.min(S.sbLevel, 5);
   const pool = SB_WORDS.filter(w => w.lv <= lv);
   const shuffled = [...pool].sort(() => Math.random() - 0.5);
@@ -3095,7 +3258,17 @@ function renderSbRound() {
   S.sbSelected    = null;
   S.sbWordPerfect = true;
   S.sbBoxes       = new Array(w.phonemes.length).fill(null);
-  S.sbTileOrder   = [...w.phonemes].sort(() => Math.random() - 0.5);
+  let tiles = [...w.phonemes];
+  if (S.sbLevel >= 6) {
+    // Spelling mode: mix in sounds that don't belong so she has to pick,
+    // not just arrange.
+    const inventory = ['s','t','p','n','m','d','b','f','l','r','g','w','k',
+                       'sh','ch','th','ai','ee','oa','ea','oo','igh'];
+    const wrong = inventory.filter(p => !w.phonemes.includes(p))
+                           .sort(() => Math.random() - 0.5).slice(0, 2);
+    tiles = tiles.concat(wrong);
+  }
+  S.sbTileOrder = tiles.sort(() => Math.random() - 0.5);
 
   document.getElementById('sb-prog').textContent         = `Word ${S.sbIdx + 1} of ${S.sbWords.length}`;
   document.getElementById('sb-score-pill').textContent   = `${S.sbScore} ✓`;
@@ -3110,6 +3283,10 @@ function renderSbRound() {
   document.getElementById('sb-tiles-row').innerHTML = S.sbTileOrder.map((p,i) =>
     `<button class="sb-tile" id="sb-tile-${i}" onclick="selectSbTile(${i})">${p}</button>`
   ).join('');
+
+  document.getElementById('sb-hint').textContent = S.sbLevel >= 6
+    ? "Careful — some tiles don't belong! Tap a tile, then a box ↑"
+    : 'Tap a sound tile, then tap a box ↑';
 
   speakSbWord();
 }
@@ -3157,6 +3334,7 @@ function assignSbBox(boxIdx) {
       const fb = document.getElementById('sb-feedback');
       fb.innerHTML = `That spells <strong style="font-size:1.3em">${w.word}</strong>! ${S.sbWordPerfect ? '🌟' : '👍'}`;
       fb.className = 'dn-feedback correct';
+      setTimeout(() => speak(w.word), 450);
       setAdvanceTimer(() => {
         if (S.sbWordPerfect) S.sbScore++;
         S.sbIdx++;
@@ -3189,7 +3367,7 @@ function showSbResult() {
   const total = S.sbWords.length;
   if (S.sbScore === total) S.sbperfect++;
   const pct       = S.sbScore / total;
-  const prevLevel = advanceLevel('sbLevel', 'sbLevelProg', pct);
+  const prevLevel = advanceLevel('sbLevel', 'sbLevelProg', pct, 6);
   const newB      = awardAll();
   S.sessions.unshift({ topic: 'Sound Boxes', score: `${S.sbScore}/${total}`, date: new Date().toLocaleDateString(), level: S.sbLevel });
   if (S.sessions.length > 100) S.sessions.pop();

@@ -50,6 +50,44 @@ Configuration lives in `%APPDATA%\WemoDuskDawn\config.json` (created on first ru
 Edit with Notepad while the app is closed; the scheduler picks changes up
 automatically. Activity is logged to `%APPDATA%\WemoDuskDawn\scheduler.log`.
 
+## Google Home integration (optional)
+
+The `matter-bridge` folder contains a bridge that makes your Wemo switches show
+up in **Google Home** as Matter smart plugs — app tiles, "Hey Google, turn on
+the porch light", routines. It runs locally on this PC; no Wemo cloud involved.
+
+**Requirements:**
+- A Matter-capable Google hub on your network: any Nest Hub, Nest Mini/Audio,
+  Nest Wifi Pro, or similar Google speaker/display.
+- [Node.js LTS](https://nodejs.org) installed on the PC (free, one time).
+- Your switches already discovered in the control app (the bridge reads the
+  same device list).
+
+**Setup:**
+1. Double-click **`Matter Bridge.bat`**. The first run downloads its library
+   (needs internet once), then prints a **QR code** in the console.
+2. In the Google Home app on your phone: **+ → Add device → Matter device**,
+   then scan the QR code (or type the printed manual pairing code). Your
+   switches appear as plugs — rename or move them to rooms as you like.
+3. Close the console window, then double-click **`Install Matter Bridge.bat`**.
+   From now on the bridge runs hidden in the background at every sign-in.
+   (`Remove Matter Bridge.bat` undoes this.)
+
+Google Home tiles stay in sync with reality — manual presses on the switch and
+the dusk/dawn scheduler are picked up within ~20 seconds. The dusk/dawn schedule
+keeps working independently; the bridge is purely additive.
+
+**Notes:**
+- Pairing only needs to be done once; the bridge remembers it in
+  `%APPDATA%\WemoDuskDawn\matter-storage`. The bridge log is
+  `%APPDATA%\WemoDuskDawn\matter-bridge.log`.
+- If you add or remove switches later, restart the bridge (sign out/in, or
+  run `Install Matter Bridge.bat` again) so Google Home sees the change.
+- If pairing fails, make sure the PC and the Google hub are on the same
+  network and that IPv6 isn't disabled on your router/Wi-Fi (Matter needs
+  local IPv6, which is on by default on home networks).
+- As with the scheduler, the PC must be running for Google control to work.
+
 ## Important notes
 
 - **The PC must be on (or asleep-then-woken) for switching to happen.** A PC that's

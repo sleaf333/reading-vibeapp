@@ -1105,6 +1105,11 @@ const LEVEL_DESC = [
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 
+// Escape API-generated text before inserting it into innerHTML.
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function lsGet(k, def) {
   const v = localStorage.getItem(k);
   if (v === null) return def;
@@ -1427,7 +1432,7 @@ function renderReading() {
   document.getElementById('reading-title').textContent = S.title;
   document.getElementById('story-text').innerHTML = S.words.map((w, i) => {
     const clean = w.replace(/[^a-zA-Z']/g, '').toLowerCase();
-    return `<span class="word" data-i="${i}" data-w="${clean}" onclick="tapWord(this)">${w} </span>`;
+    return `<span class="word" data-i="${i}" data-w="${clean}" onclick="tapWord(this)">${esc(w)} </span>`;
   }).join('');
   const st = document.getElementById('story-text');
   st.style.fontSize   = S.level <= 2 ? '26px' : '23px';
@@ -1497,7 +1502,7 @@ function renderQuizQ() {
   document.getElementById('quiz-prog').textContent = `${S.quizIdx + 1} / ${S.quiz.length}`;
   document.getElementById('quiz-question').textContent = q.q;
   document.getElementById('quiz-choices').innerHTML = q.choices.map((c, i) =>
-    `<button class="choice" onclick="answerQuiz(${i})">${c}</button>`).join('');
+    `<button class="choice" onclick="answerQuiz(${i})">${esc(c)}</button>`).join('');
   S.quizAnswered = false;
 }
 
@@ -1789,6 +1794,7 @@ function renderParentCorner() {
   document.getElementById('proxy-url-input').value  = S.proxyUrl;
   document.getElementById('pc-qr-btn').style.display = S.apiKey ? '' : 'none';
   document.getElementById('pc-qr-section').style.display = 'none';
+  document.getElementById('backup-code').style.display = 'none';
 
   renderHeatmap();
 
@@ -2092,7 +2098,7 @@ function renderDnRound() {
   document.getElementById('dn-article-text').innerHTML = clean.split('').map(ch =>
     target && /[a-zA-Z]/.test(ch) && ch.toLowerCase() === target
       ? `<span class="dn-letter-tap" onclick="toggleDnLetter(this)">${ch}</span>`
-      : ch
+      : esc(ch)
   ).join('');
 
   const card = document.getElementById('dn-article-card');
@@ -3068,6 +3074,7 @@ function renderClockRound() {
       'Make the clock show this time! Tap the number the SHORT hour hand points to.';
     document.getElementById('clock-numpad').innerHTML = '';
   } else {
+    S.clockPhase = 'hour';
     document.getElementById('clock-visual').innerHTML = svgClock(r.h, r.m, 160, S.clockLevel <= 3);
     document.getElementById('clock-word-problem').textContent = 'What time does the clock show?';
     renderClockNumpad(r);

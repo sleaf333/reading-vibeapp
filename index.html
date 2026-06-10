@@ -821,7 +821,7 @@
 
   <div class="section-title">Stats</div>
   <div class="stat-row"><span class="stat-label">Games played</span><span class="stat-val" id="pc-total-games">0</span></div>
-  <div class="stat-row"><span class="stat-label">Badges earned</span><span class="stat-val" id="pc-badges">0 / 14</span></div>
+  <div class="stat-row"><span class="stat-label">Badges earned</span><span class="stat-val" id="pc-badges">0 / 16</span></div>
   <div class="stat-row"><span class="stat-label">Day streak</span><span class="stat-val" id="pc-streak">0</span></div>
 
   <div class="divider"></div>
@@ -973,7 +973,7 @@ const BADGES = [
   { id:'sw_perfect',   icon:'🎖️', name:'Word Master',      desc:'Perfect word game score' },
   { id:'explorer',     icon:'🌍', name:'Explorer',         desc:'Read all 6 topics' },
   { id:'dn_first',     icon:'📰', name:'Daily Reporter',   desc:'Complete your first Daily News' },
-  { id:'dn_perfect',   icon:'🧮', name:'Math Whiz',        desc:'Perfect Daily News score (15/15)' },
+  { id:'dn_perfect',   icon:'🧮', name:'Math Whiz',        desc:'Perfect Daily News score (9/9)' },
   { id:'math_first',   icon:'➕', name:'Math Star',        desc:'Complete your first Math Time' },
   { id:'math_perfect', icon:'🏅', name:'Math Champion',    desc:'Perfect Math Time score (10/10)' },
 ];
@@ -1237,7 +1237,18 @@ function persist() {
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
 
+// Single pending round-advance timer shared by all games (only one game runs
+// at a time). Cleared on every navigation so exiting a game mid-feedback
+// can't advance rounds or pop a result screen over the home screen.
+let advanceTimer = null;
+function setAdvanceTimer(fn, ms) {
+  clearTimeout(advanceTimer);
+  advanceTimer = setTimeout(fn, ms);
+}
+
 function showScreen(id) {
+  clearTimeout(advanceTimer);
+  advanceTimer = null;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if (id === 'screen-home')          refreshHome();
@@ -1285,7 +1296,7 @@ function refreshHome() {
     card.style.opacity = '';
     icon.textContent = '🔢';
     if (S.mathBreakEvery > 0) {
-      const left = S.mathBreakEvery - S.mathSinceRead;
+      const left = Math.max(0, S.mathBreakEvery - S.mathSinceRead);
       badge.innerHTML = left <= 2
         ? `<span style="color:#b45309">${left} math left<br>before break</span>`
         : `<span style="opacity:0.4;font-size:26px">›</span>`;
@@ -1497,7 +1508,7 @@ function answerQuiz(chosen) {
   } else {
     btns[chosen].classList.add('wrong-shake');
   }
-  setTimeout(() => {
+  setAdvanceTimer(() => {
     S.quizIdx++;
     S.quizIdx < S.quiz.length ? renderQuizQ() : showResult();
   }, 1500);
@@ -1647,7 +1658,7 @@ function answerSw(el, idx) {
     el.classList.add('wrong');
     document.querySelectorAll('.sw-choice').forEach(b => { if (b.dataset.word === correct) b.classList.add('correct'); });
   }
-  setTimeout(() => { S.swIdx++; S.swIdx < 10 ? renderSwRound() : showSwResult(); }, 850);
+  setAdvanceTimer(() => { S.swIdx++; S.swIdx < 10 ? renderSwRound() : showSwResult(); }, 850);
 }
 
 function showSwResult() {
@@ -1740,7 +1751,7 @@ function renderHeatmap() {
 
 function renderParentCorner() {
   document.getElementById('pc-total-games').textContent = S.totalGames;
-  document.getElementById('pc-badges').textContent    = `${S.badges.length} / 14`;
+  document.getElementById('pc-badges').textContent    = `${S.badges.length} / ${BADGES.length}`;
   document.getElementById('pc-streak').textContent    = `${S.streak} day${S.streak !== 1 ? 's' : ''}`;
   document.getElementById('pc-level').textContent      = `Lv. ${S.level}`;
   document.getElementById('pc-sw-level').textContent   = `Lv. ${S.swLevel}`;
@@ -1829,8 +1840,14 @@ function changePIN() {
 
 function confirmReset() {
   if (!confirm('Reset ALL progress? This cannot be undone.')) return;
+  // Clears all progress keys. Settings (rl_apikey, rl_proxy, rl_dnunlockreq,
+  // rl_mathbreakevery) are intentionally kept.
   ['rl_level','rl_levelprog','rl_sessions','rl_stories','rl_streak','rl_lastdate',
    'rl_badges','rl_perfect','rl_maxlevel','rl_swgames','rl_swperfect','rl_dngames','rl_dnperfect','rl_topics','rl_pin',
+   'rl_swlevel','rl_swlevelprog','rl_dnlevel','rl_dnlevelprog',
+   'rl_mathlevel','rl_mathlevelprog','rl_mathgames','rl_mathperfect',
+   'rl_sblevel','rl_sblevelprog','rl_sbgames','rl_sbperfect',
+   'rl_totalgames','rl_readingtoday','rl_mathsinceread','rl_mathlastdate',
    'rl_mathintroseen','rl_mathwarmupdone',
    'rl_clocklevel','rl_clocklevelprog','rl_clockgames','rl_clockperfect','rl_clockintroseen']
     .forEach(k => localStorage.removeItem(k));
@@ -1983,7 +2000,7 @@ async function startDnGame() {
 function renderDnRound() {
   const r = S.dnRounds[S.dnRoundIdx];
   S.dnAnswered = false;
-  document.getElementById('dn-prog').textContent = `Article ${S.dnRoundIdx + 1} of 5`;
+  document.getElementById('dn-prog').textContent = `Article ${S.dnRoundIdx + 1} of 3`;
   document.getElementById('dn-score-pill').textContent = `${S.dnScore} ✓`;
   const fb = document.getElementById('dn-feedback');
   fb.textContent = ''; fb.className = 'dn-feedback';
@@ -2081,7 +2098,7 @@ function answerDn(num) {
     dnBurst(chosen);
     fb.textContent = S.dnStep === 2 ? '🎉 Correct!' : `✓ Yes, ${correctVal}!`;
     fb.className = 'dn-feedback correct';
-    setTimeout(() => {
+    setAdvanceTimer(() => {
       S.dnStep++;
       if (S.dnStep > 2) { S.dnStep = 0; S.dnRoundIdx++; }
       if (S.dnRoundIdx >= 3) showDnResult();
@@ -2091,7 +2108,7 @@ function answerDn(num) {
     if (chosen) chosen.classList.add('dn-wrong');
     fb.textContent = 'Not quite — try again!';
     fb.className = 'dn-feedback wrong';
-    setTimeout(() => {
+    setAdvanceTimer(() => {
       fb.textContent = '';
       fb.className = 'dn-feedback';
       S.dnAnswered = false;
@@ -2842,7 +2859,7 @@ function answerMath(num) {
     if (!r.retried) S.mathScore++;
     fb.textContent = r.retried ? 'Got it!' : '🎉 Correct!';
     fb.className = 'dn-feedback correct';
-    setTimeout(() => {
+    setAdvanceTimer(() => {
       S.mathIdx++;
       if (S.mathIdx >= 10) showMathResult();
       else renderMathRound();
@@ -2858,7 +2875,7 @@ function answerMath(num) {
     if (correctBtn) correctBtn.classList.add('dn-correct');
     fb.textContent = 'Not quite — try again!';
     fb.className = 'dn-feedback wrong';
-    setTimeout(() => {
+    setAdvanceTimer(() => {
       fb.textContent = '';
       fb.className = 'dn-feedback';
       S.mathAnswered = false;
@@ -3018,7 +3035,7 @@ function answerClock(num) {
     fb.textContent = r.retried ? 'Got it!' : '🎉 Correct!';
     fb.className = 'dn-feedback correct';
     if (chosen) { chosen.classList.add('dn-correct'); if (!r.retried) dnBurst(chosen); }
-    setTimeout(() => {
+    setAdvanceTimer(() => {
       S.clockIdx++;
       if (S.clockIdx >= 10) showClockResult();
       else renderClockRound();
@@ -3028,7 +3045,7 @@ function answerClock(num) {
     fb.textContent = 'Not quite — try again!';
     fb.className = 'dn-feedback wrong';
     if (chosen) chosen.classList.add('dn-wrong');
-    btns.forEach(b => { if (b !== chosen) b.disabled = false; });
+    btns.forEach(b => { if (!b.classList.contains('dn-wrong')) b.disabled = false; });
     S.clockAnswered = false;
   }
 }
@@ -3150,7 +3167,7 @@ function assignSbBox(boxIdx) {
       const fb = document.getElementById('sb-feedback');
       fb.innerHTML = `That spells <strong style="font-size:1.3em">${w.word}</strong>! ${S.sbWordPerfect ? '🌟' : '👍'}`;
       fb.className = 'dn-feedback correct';
-      setTimeout(() => {
+      setAdvanceTimer(() => {
         if (S.sbWordPerfect) S.sbScore++;
         S.sbIdx++;
         if (S.sbIdx >= S.sbWords.length) showSbResult();
@@ -3197,6 +3214,7 @@ function showSbResult() {
   ).join('');
   refreshHome();
   showScreen('screen-sbresult');
+  if (pct === 1) setTimeout(spawnConfetti, 250);
 }
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────

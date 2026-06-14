@@ -166,6 +166,23 @@
       #home-sky .sky-sun, #home-sky .sky-rays, #home-sky .sky-moon, #home-sky .sky-cloud, #home-sky .sky-star { animation: none; }
     }
 
+    /* ── AMBIENT FLOATING PARTICLES ── */
+    #home-particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    #home-particles .particle {
+      position: absolute; bottom: -44px; border-radius: 50%;
+      will-change: transform, translate, opacity;
+      animation: pFloat var(--dur) linear infinite;
+      transition: transform 0.5s ease-out;
+    }
+    @keyframes pFloat {
+      0%   { translate: 0 0;            opacity: 0; }
+      8%   {                            opacity: var(--op); }
+      50%  { translate: var(--sway) -52vh; }
+      92%  {                            opacity: var(--op); }
+      100% { translate: 0 -110vh;       opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) { #home-particles { display: none; } }
+
     /* ── TOPIC CARDS ── */
     #topic-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
     .topic-card {
@@ -473,6 +490,7 @@
 <!-- ═══ HOME ═══ -->
 <div id="screen-home" class="screen active">
   <div id="home-sky"></div>
+  <div id="home-particles"></div>
   <div class="home-header">
     <div>
       <div class="page-title">Juliana Reads! 🌟</div>
@@ -1436,6 +1454,54 @@ function initHomeFx() {
     card.addEventListener('pointerup', reset);
     card.addEventListener('pointerleave', reset);
     card.addEventListener('pointercancel', reset);
+  });
+}
+
+// Spawns a field of slow-drifting pastel bubbles behind the grid, and gives
+// them a gentle repel from the pointer. The drift uses the independent CSS
+// `translate` property so the JS-set `transform` repel composes cleanly.
+function initParticles() {
+  const layer = document.getElementById('home-particles');
+  if (!layer || window._particlesInit) return;
+  window._particlesInit = true;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const colors = ['#fbcfe8', '#bfdbfe', '#bbf7d0', '#ddd6fe', '#fde68a', '#a7f3d0', '#fecaca'];
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('span');
+    p.className = 'particle';
+    const sz = (8 + Math.random() * 20).toFixed(1);
+    const c = colors[Math.floor(Math.random() * colors.length)];
+    const dur = (15 + Math.random() * 15).toFixed(1);
+    const delay = (-Math.random() * parseFloat(dur)).toFixed(1);
+    const op = (0.3 + Math.random() * 0.4).toFixed(2);
+    const sway = ((Math.random() * 2 - 1) * 46).toFixed(0) + 'px';
+    p.style.cssText =
+      `left:${(Math.random() * 100).toFixed(1)}%;width:${sz}px;height:${sz}px;`
+      + `background:radial-gradient(circle at 32% 28%, #fff, ${c} 70%);box-shadow:0 0 8px ${c};`
+      + `--dur:${dur}s;--op:${op};--sway:${sway};animation-delay:${delay}s`;
+    layer.appendChild(p);
+  }
+  let pending = false, mx = 0, my = 0;
+  window.addEventListener('pointermove', e => {
+    if (!document.getElementById('screen-home').classList.contains('active')) return;
+    mx = e.clientX; my = e.clientY;
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(() => {
+      pending = false;
+      const R = 95;
+      layer.querySelectorAll('.particle').forEach(p => {
+        const r = p.getBoundingClientRect();
+        const dx = r.left + r.width / 2 - mx, dy = r.top + r.height / 2 - my;
+        const dist = Math.hypot(dx, dy);
+        if (dist < R && dist > 0.1) {
+          const f = (1 - dist / R) * 38;
+          p.style.transform = `translate(${(dx / dist * f).toFixed(1)}px, ${(dy / dist * f).toFixed(1)}px)`;
+        } else if (p.style.transform) {
+          p.style.transform = '';
+        }
+      });
+    });
   });
 }
 
@@ -3591,6 +3657,7 @@ if (location.hash.startsWith('#apikey=')) {
 
 refreshHome();
 initHomeFx();
+initParticles();
 </script>
 </body>
 </html>

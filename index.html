@@ -88,6 +88,19 @@
       transition: transform 0.13s, box-shadow 0.13s;
     }
     .home-card:active { transform: scale(0.96); box-shadow: none; }
+    .home-done-badge {
+      position: absolute; top: -7px; left: -7px;
+      width: 23px; height: 23px; border-radius: 50%;
+      background: #22c55e; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 900;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.22); z-index: 3;
+      animation: doneBadgePop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes doneBadgePop { 0%{transform:scale(0)} 100%{transform:scale(1)} }
+    .hc-dots { display: inline-block; margin-left: 5px; vertical-align: middle; white-space: nowrap; }
+    .hc-dots span { display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin-left: 3px; background: currentColor; }
     .hc-icon { font-size: 44px; line-height: 1; }
     .hc-name { font-size: 17px; font-weight: 900; line-height: 1.2; }
     .hc-sub { font-size: 12px; font-weight: 700; opacity: 0.65; }
@@ -418,6 +431,7 @@
 
   <div id="home-games">
     <div class="home-card hc-reading" onclick="showScreen('screen-topics')">
+      <span class="home-done-badge" id="done-reading" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">📖</div>
       <div class="hc-name">Reading Stories</div>
@@ -425,6 +439,7 @@
     </div>
 
     <div class="home-card hc-sw" onclick="startSwGame()">
+      <span class="home-done-badge" id="done-sw" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">🎮</div>
       <div class="hc-name">Sight Word Game</div>
@@ -432,6 +447,7 @@
     </div>
 
     <div class="home-card hc-dn" onclick="startDnGame()">
+      <span class="home-done-badge" id="done-dn" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">📰</div>
       <div class="hc-name">Daily News</div>
@@ -439,6 +455,7 @@
     </div>
 
     <div class="home-card hc-math" id="math-home-card" onclick="startMathGame()">
+      <span class="home-done-badge" id="done-math" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon" id="math-card-icon">🔢</div>
       <div class="hc-name">Math Time</div>
@@ -447,6 +464,7 @@
     </div>
 
     <div class="home-card hc-sb" onclick="startSbGame()">
+      <span class="home-done-badge" id="done-sb" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">📦</div>
       <div class="hc-name">Sound Boxes</div>
@@ -454,8 +472,9 @@
     </div>
 
     <div class="home-card hc-clock" onclick="startClockGame()">
+      <span class="home-done-badge" id="done-clock" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
-      <div class="hc-icon">🕐</div>
+      <div class="hc-icon" id="home-clock-icon">🕐</div>
       <div class="hc-name">Clock Time</div>
       <div class="hc-sub" id="home-clock-level">Lv. 1</div>
     </div>
@@ -1274,23 +1293,49 @@ function playedToday(topic) {
       : s.topic === topic)).length;
 }
 
-function homeSub(lv, topic) {
+// Three little progress dots showing wins toward the next level (0–2 filled of 3).
+function progDots(progKey) {
+  const prog = Math.max(0, Math.min(3, S[progKey] || 0));
+  let dots = '';
+  for (let i = 0; i < 3; i++) {
+    dots += `<span style="opacity:${i < prog ? '0.85' : '0.25'}"></span>`;
+  }
+  return `<span class="hc-dots">${dots}</span>`;
+}
+
+function homeSub(lv, topic, progKey) {
   const n = playedToday(topic);
-  return `Lv. ${lv}` + (n ? ` · ${n} today` : '');
+  return `Lv. ${lv}` + (n ? ` · ${n} today` : '') + progDots(progKey);
 }
 
 function refreshHome() {
   const hr = new Date().getHours();
-  document.getElementById('home-greeting').textContent =
+  const greet =
     hr < 12 ? 'Good morning, Juliana! ☀️'
     : hr < 18 ? 'Good afternoon, Juliana! 🌤️'
     : 'Good evening, Juliana! 🌙';
-  document.getElementById('home-reading-level').textContent = homeSub(S.level,      'Stories');
-  document.getElementById('home-sw-level').textContent      = homeSub(S.swLevel,    'Sight Words');
-  document.getElementById('home-dn-level').textContent      = homeSub(S.dnLevel,    'Daily News');
-  document.getElementById('home-math-level').textContent    = homeSub(S.mathLevel,  'Math Time');
-  document.getElementById('home-sb-level').textContent      = homeSub(S.sbLevel,    'Sound Boxes');
-  document.getElementById('home-clock-level').textContent   = homeSub(S.clockLevel, 'Clock Time');
+  // A notable streak gets celebrated in the greeting line, not just the corner pill.
+  document.getElementById('home-greeting').innerHTML =
+    S.streak >= 3 ? `🔥 <b>${S.streak}-day streak!</b> Keep it going, Juliana!` : greet;
+  document.getElementById('home-reading-level').innerHTML = homeSub(S.level,      'Stories',      'levelProgress');
+  document.getElementById('home-sw-level').innerHTML      = homeSub(S.swLevel,    'Sight Words',  'swLevelProg');
+  document.getElementById('home-dn-level').innerHTML      = homeSub(S.dnLevel,    'Daily News',   'dnLevelProg');
+  document.getElementById('home-math-level').innerHTML    = homeSub(S.mathLevel,  'Math Time',    'mathLevelProg');
+  document.getElementById('home-sb-level').innerHTML      = homeSub(S.sbLevel,    'Sound Boxes',  'sbLevelProg');
+  document.getElementById('home-clock-level').innerHTML   = homeSub(S.clockLevel, 'Clock Time',   'clockLevelProg');
+
+  // Live mini-clock of the current time, in place of the 🕐 emoji.
+  const now = new Date();
+  document.getElementById('home-clock-icon').innerHTML =
+    svgClock(now.getHours() % 12 || 12, now.getMinutes(), 44);
+
+  // "Done today" checkmark badges.
+  [['done-reading','Stories'], ['done-sw','Sight Words'], ['done-dn','Daily News'],
+   ['done-math','Math Time'], ['done-sb','Sound Boxes'], ['done-clock','Clock Time']]
+    .forEach(([id, topic]) => {
+      document.getElementById(id).style.display = playedToday(topic) ? '' : 'none';
+    });
+
   const streakPill = document.getElementById('home-streak-pill');
   if (S.streak >= 1) {
     streakPill.textContent = `🔥 ${S.streak} day${S.streak !== 1 ? 's' : ''}`;

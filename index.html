@@ -1347,6 +1347,8 @@ function refreshHome() {
   const card = document.getElementById('math-home-card');
   const badge = document.getElementById('math-lock-badge');
   const icon = document.getElementById('math-card-icon');
+  // A locked Math card is already busy (dim + lock text), so hide its done badge.
+  if (lock === 'daily' || lock === 'break') document.getElementById('done-math').style.display = 'none';
   if (lock === 'daily') {
     card.style.opacity = '0.55';
     icon.textContent = '🔒';

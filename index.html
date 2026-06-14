@@ -85,11 +85,24 @@
       cursor: pointer; border: 1.5px solid;
       backdrop-filter: blur(10px) saturate(1.3);
       -webkit-backdrop-filter: blur(10px) saturate(1.3);
-      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.7), inset 0 0 0 1px rgba(255,255,255,0.25);
+      box-shadow: var(--card-shadow, var(--shadow)), inset 0 1px 0 rgba(255,255,255,0.7), inset 0 0 0 1px rgba(255,255,255,0.25);
       -webkit-tap-highlight-color: transparent;
       transition: transform 0.13s, box-shadow 0.13s;
     }
     .home-card:active { transform: scale(0.96); box-shadow: none; }
+    /* Unified lighting: warm sheen toward the sun/moon, soft shade opposite it.
+       Driven by --lx/--ly/--hi/--hiS/--shS, set from the single light source. */
+    .home-card::before {
+      content: ''; position: absolute; inset: 0; border-radius: inherit;
+      pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(135% 125% at var(--lx,84%) var(--ly,10%),
+          rgba(var(--hi,255,250,232), calc(0.60 * var(--hiS,1))) 0%,
+          rgba(var(--hi,255,250,232), 0) 46%),
+        radial-gradient(125% 125% at calc(100% - var(--lx,84%)) calc(100% - var(--ly,10%)),
+          rgba(22,26,60, calc(0.13 * var(--shS,1))) 0%, rgba(22,26,60,0) 55%);
+    }
+    .hc-icon, .hc-name, .hc-sub { position: relative; z-index: 1; }
     .home-done-badge {
       position: absolute; top: -7px; left: -7px;
       width: 23px; height: 23px; border-radius: 50%;
@@ -1565,13 +1578,15 @@ function initMascot() {
     varying vec3 vNor; varying vec3 vPos;
     void main(){ gl_Position = uMVP * vec4(aPos,1.0); vNor = mat3(uModel)*aNor; vPos = aPos; }`;
   const fs = `precision mediump float;
-    varying vec3 vNor; varying vec3 vPos; uniform float uReact;
+    varying vec3 vNor; varying vec3 vPos;
+    uniform float uReact; uniform vec3 uLight; uniform vec3 uWarm; uniform float uAmb; uniform float uInt;
     void main(){
       vec3 n = normalize(vNor);
-      // Key light from upper-right-front.
-      float d = max(dot(n, normalize(vec3(0.5, 0.7, 1.0))), 0.0);
-      // Fill from below-left.
-      float f = max(dot(n, normalize(vec3(-0.4,-0.5, 0.6))), 0.0) * 0.28;
+      vec3 L = normalize(uLight);
+      // Key light from the shared sun/moon direction.
+      float d = max(dot(n, L), 0.0);
+      // Soft fill from the opposite side so shadowed facets aren't dead black.
+      float f = max(dot(n, normalize(vec3(-L.x, -L.y, 0.6))), 0.0) * 0.22;
       // Gold gradient: bright tip yellow → warm amber body.
       float ht = clamp(vPos.y * 0.9 + 0.5, 0.0, 1.0);
       vec3 colA = vec3(1.00, 0.92, 0.30);   // tip gold
@@ -1579,10 +1594,11 @@ function initMascot() {
       vec3 base = mix(colB, colA, ht);
       // React: flash to bright warm white.
       base = mix(base, vec3(1.0, 0.98, 0.88), uReact * 0.75);
-      vec3 col = base * (0.28 + 0.88*d + f);
-      // Front-face specular: shiny highlight.
-      float spec = pow(max(dot(n, vec3(0.0,0.0,1.0)),0.0), 18.0) * 0.45;
-      col += spec * mix(vec3(1.0,0.98,0.82), vec3(1.0), uReact);
+      // Diffuse tinted by the light's warmth (cool at night, warm by day).
+      vec3 col = base * (uAmb + uInt*d + f) * uWarm;
+      // Specular along the light's half-vector with the camera.
+      float spec = pow(max(dot(n, normalize(L + vec3(0.0,0.0,1.0))), 0.0), 18.0) * 0.5;
+      col += spec * mix(uWarm, vec3(1.0), uReact);
       gl_FragColor = vec4(min(col, vec3(1.0)), 1.0);
     }`;
   const compile = (type, src) => {
@@ -1610,6 +1626,10 @@ function initMascot() {
   const uMVP   = gl.getUniformLocation(prog, 'uMVP');
   const uModel = gl.getUniformLocation(prog, 'uModel');
   const uReact = gl.getUniformLocation(prog, 'uReact');
+  const uLight = gl.getUniformLocation(prog, 'uLight');
+  const uWarm  = gl.getUniformLocation(prog, 'uWarm');
+  const uAmb   = gl.getUniformLocation(prog, 'uAmb');
+  const uInt   = gl.getUniformLocation(prog, 'uInt');
 
   gl.enable(gl.DEPTH_TEST);
   gl.clearColor(0, 0, 0, 0);
@@ -1639,6 +1659,12 @@ function initMascot() {
     gl.uniformMatrix4fv(uMVP,   false, mvp);
     gl.uniformMatrix4fv(uModel, false, model);
     gl.uniform1f(uReact, react);
+    // Shared light: convert the sun/moon's screen position into a 3D direction.
+    const L = window.__light || getLight();
+    gl.uniform3f(uLight, (L.x - 0.5) * 2.0, (0.5 - L.y) * 2.0, 0.85);
+    gl.uniform3f(uWarm, L.warm[0], L.warm[1], L.warm[2]);
+    gl.uniform1f(uAmb, L.amb);
+    gl.uniform1f(uInt, L.intensity);
     react *= Math.pow(0.08, dt);
     if (react < 0.002) react = 0;
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -1647,8 +1673,6 @@ function initMascot() {
   requestAnimationFrame(frame);
 }
 function mascotReact(strength = 1) { if (mascot) mascot.trigger(strength); }
-
-// Spawns a field of slow-drifting pastel bubbles behind the grid, and gives
 
 // Spawns a field of slow-drifting pastel bubbles behind the grid, and gives
 // them a gentle repel from the pointer. The drift uses the independent CSS
@@ -1716,6 +1740,43 @@ function spawnShootingStar(sky) {
   setTimeout(() => s.remove(), dur * 1000 + 120);
 }
 
+// ── UNIFIED LIGHTING ─────────────────────────────────────────────────────────
+// One light source for the whole home scene, derived from the sun/moon's screen
+// position. Cards, their shadows, and the WebGL mascot all read from it, and it
+// shifts warm→cool and high→low as the day turns. window.__light is the shared
+// source of truth (the mascot's render loop reads it every frame).
+function getLight() {
+  const hr = new Date().getHours();
+  if (hr < 12)   // morning: warm, lower sun
+    return { x: 0.82, y: 0.13, hi: '255,238,205', hiS: 0.9, shS: 0.85, shadowA: 0.14,
+             warm: [1.0, 0.93, 0.78], amb: 0.30, intensity: 0.95 };
+  if (hr < 18)   // afternoon: bright, high sun
+    return { x: 0.86, y: 0.10, hi: '255,250,232', hiS: 1.0, shS: 1.0, shadowA: 0.16,
+             warm: [1.0, 0.97, 0.88], amb: 0.32, intensity: 1.1 };
+  // evening: cool moonlight
+  return { x: 0.80, y: 0.14, hi: '224,229,255', hiS: 0.7, shS: 0.7, shadowA: 0.20,
+           warm: [0.80, 0.85, 1.0], amb: 0.34, intensity: 0.72 };
+}
+
+// Pushes the current light into CSS custom properties (cards read these) and
+// stashes it on window.__light for the mascot. Called from refreshHome so it
+// tracks the time of day alongside the sky.
+function applyLighting() {
+  const L = getLight();
+  window.__light = L;
+  const s = document.documentElement.style;
+  s.setProperty('--lx', (L.x * 100).toFixed(0) + '%');
+  s.setProperty('--ly', (L.y * 100).toFixed(0) + '%');
+  s.setProperty('--hi', L.hi);
+  s.setProperty('--hiS', L.hiS);
+  s.setProperty('--shS', L.shS);
+  // Drop shadow falls opposite the light: light upper-right → shadow lower-left.
+  const k = 22;
+  const ox = (-(L.x - 0.5) * k).toFixed(1);
+  const oy = (-(L.y - 0.5) * k).toFixed(1);
+  s.setProperty('--card-shadow', `${ox}px ${oy}px 22px rgba(35,38,75,${L.shadowA})`);
+}
+
 // Ambient sky extras: periodic shooting stars (more frequent at night) plus a
 // gentle pointer parallax that drifts the sky and particle layers for depth.
 function initSkyExtras() {
@@ -1757,6 +1818,7 @@ function initSkyExtras() {
 
 function refreshHome() {
   renderSky();
+  applyLighting();
   const hr = new Date().getHours();
   const greet =
     hr < 12 ? 'Good morning, Juliana! ☀️'

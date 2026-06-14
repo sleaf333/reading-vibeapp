@@ -112,6 +112,60 @@
     .hc-sb      { background: linear-gradient(145deg, #f0fdf4, #dcfce7); border-color: #86efac; color: #166534; }
     .hc-clock   { background: linear-gradient(145deg, #faf5ff, #ede9fe); border-color: #c4b5fd; color: #4c1d95; }
 
+    /* ── 3D TILT CARDS ── */
+    .home-card { transform-style: preserve-3d; will-change: transform; }
+    .hc-icon, .hc-name, .hc-sub, .hc-chevron { transition: transform 0.18s ease; }
+    .home-card.tilt-active .hc-icon    { transform: translateZ(34px); }
+    .home-card.tilt-active .hc-name    { transform: translateZ(20px); }
+    .home-card.tilt-active .hc-sub     { transform: translateZ(14px); }
+    .home-card.tilt-active .hc-chevron { transform: translateZ(26px); }
+    .hc-gloss {
+      position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 2;
+      background: radial-gradient(circle at var(--gx,50%) var(--gy,0%), rgba(255,255,255,0.65), rgba(255,255,255,0) 55%);
+      opacity: 0; transition: opacity 0.2s ease;
+    }
+    .home-card.tilt-active .hc-gloss { opacity: 1; }
+
+    /* ── ANIMATED TIME-OF-DAY SKY ── */
+    .home-header, #home-games { position: relative; z-index: 1; }
+    #home-sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; transition: background 1.5s ease; }
+    #home-sky .sky-sun {
+      position: absolute; width: 96px; height: 96px; border-radius: 50%; top: 58px; right: 36px;
+      background: radial-gradient(circle, #fff7d4 0%, #ffe089 52%, rgba(255,204,90,0) 72%);
+      animation: skyFloat 7s ease-in-out infinite;
+    }
+    #home-sky .sky-rays {
+      position: absolute; width: 96px; height: 96px; top: 58px; right: 36px;
+      transform-origin: center; animation: skySpin 80s linear infinite;
+    }
+    #home-sky .sky-ray {
+      position: absolute; left: 50%; top: 50%; width: 3px; height: 64px; margin: -32px 0 0 -1.5px;
+      border-radius: 2px; transform-origin: center center;
+    }
+    #home-sky .sky-moon {
+      position: absolute; width: 66px; height: 66px; border-radius: 50%; top: 60px; right: 44px;
+      background: radial-gradient(circle at 66% 38%, #fffdf6 0%, #f3ecff 60%, rgba(232,222,255,0) 76%);
+      box-shadow: inset -11px -7px 0 -2px rgba(196,186,232,0.40);
+      animation: skyFloat 8s ease-in-out infinite;
+    }
+    #home-sky .sky-cloud {
+      position: absolute; width: 64px; height: 22px; background: #ffffff; border-radius: 20px;
+      box-shadow: 20px -11px 0 -2px #fff, -20px -7px 0 -5px #fff, 0 12px 26px rgba(120,140,170,0.10);
+      animation: skyDrift linear infinite;
+    }
+    #home-sky .sky-star {
+      position: absolute; border-radius: 50%; background: #fff7e6;
+      box-shadow: 0 0 6px 1px rgba(255,240,200,0.85);
+      animation: skyTwinkle 2.6s ease-in-out infinite;
+    }
+    @keyframes skyFloat  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+    @keyframes skySpin   { to { transform: rotate(360deg); } }
+    @keyframes skyTwinkle{ 0%,100%{opacity:0.25; transform:scale(0.7)} 50%{opacity:1; transform:scale(1)} }
+    @keyframes skyDrift  { from { transform: translateX(-180px); } to { transform: translateX(calc(100vw + 180px)); } }
+    @media (prefers-reduced-motion: reduce) {
+      #home-sky .sky-sun, #home-sky .sky-rays, #home-sky .sky-moon, #home-sky .sky-cloud, #home-sky .sky-star { animation: none; }
+    }
+
     /* ── TOPIC CARDS ── */
     #topic-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
     .topic-card {
@@ -418,6 +472,7 @@
 
 <!-- ═══ HOME ═══ -->
 <div id="screen-home" class="screen active">
+  <div id="home-sky"></div>
   <div class="home-header">
     <div>
       <div class="page-title">Juliana Reads! 🌟</div>
@@ -1308,7 +1363,84 @@ function homeSub(lv, topic, progKey) {
   return `Lv. ${lv}` + (n ? ` · ${n} today` : '') + progDots(progKey);
 }
 
+// ─── HOME VISUAL FX: animated sky + 3D tilt cards ───────────────────────────
+
+// Paints the time-of-day sky behind the home grid. Re-rendered each time the
+// home screen is shown so it tracks morning → afternoon → evening.
+function renderSky() {
+  const sky = document.getElementById('home-sky');
+  if (!sky) return;
+  const hr = new Date().getHours();
+  const rays = color => {
+    let r = '';
+    for (let i = 0; i < 12; i++)
+      r += `<div class="sky-ray" style="background:linear-gradient(${color},rgba(255,255,255,0));`
+         + `transform:rotate(${i * 30}deg) translateY(-30px);opacity:0.5"></div>`;
+    return r;
+  };
+  const clouds = specs => specs.map(o =>
+    `<div class="sky-cloud" style="top:${o.top}px;opacity:${o.op};`
+    + `animation-duration:${o.dur}s;animation-delay:${o.delay}s"></div>`).join('');
+  const stars = n => {
+    let s = '';
+    for (let i = 0; i < n; i++) {
+      const x = (8 + Math.random() * 84).toFixed(1);
+      const y = (6 + Math.random() * 64).toFixed(1);
+      const sz = (4 + Math.random() * 4).toFixed(1);
+      const d = (Math.random() * 2.6).toFixed(2);
+      s += `<div class="sky-star" style="left:${x}%;top:${y}%;width:${sz}px;height:${sz}px;animation-delay:${d}s"></div>`;
+    }
+    return s;
+  };
+  if (hr < 12) {            // morning — warm sunrise
+    sky.style.background = 'linear-gradient(165deg,#fff1d6 0%,#ffe2ec 48%,#e9f5ff 100%)';
+    sky.innerHTML = `<div class="sky-rays">${rays('#ffd97a')}</div><div class="sky-sun"></div>`
+      + clouds([{ top: 150, dur: 38, delay: -6, op: 0.85 }, { top: 250, dur: 50, delay: -24, op: 0.7 }]);
+  } else if (hr < 18) {     // afternoon — bright blue sky
+    sky.style.background = 'linear-gradient(165deg,#d6efff 0%,#eaf7ff 55%,#f5fbff 100%)';
+    sky.innerHTML = `<div class="sky-rays" style="top:44px;right:30px">${rays('#ffe7a0')}</div>`
+      + `<div class="sky-sun" style="top:44px;right:30px"></div>`
+      + clouds([{ top: 110, dur: 34, delay: -4, op: 0.92 }, { top: 220, dur: 46, delay: -20, op: 0.8 },
+                { top: 320, dur: 40, delay: -12, op: 0.75 }]);
+  } else {                  // evening — dusky lavender + stars + moon
+    sky.style.background = 'linear-gradient(165deg,#e7defb 0%,#efe6fb 50%,#fde8f4 100%)';
+    sky.innerHTML = `<div class="sky-moon"></div>` + stars(8);
+  }
+}
+
+// Wires pointer-driven 3D tilt + a light-follow gloss onto each home card.
+// Runs once; cards are static in the DOM so listeners survive screen switches.
+function initHomeFx() {
+  if (window._homeFxInit) return;
+  window._homeFxInit = true;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('#home-games .home-card').forEach(card => {
+    const gloss = document.createElement('i');
+    gloss.className = 'hc-gloss';
+    card.appendChild(gloss);
+    if (reduce) return;
+    const tilt = (e, maxDeg, scale) => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      const rx = (0.5 - py) * maxDeg;
+      const ry = (px - 0.5) * maxDeg;
+      card.style.transform = `perspective(600px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) scale(${scale})`;
+      gloss.style.setProperty('--gx', (px * 100).toFixed(1) + '%');
+      gloss.style.setProperty('--gy', (py * 100).toFixed(1) + '%');
+    };
+    const reset = () => { card.classList.remove('tilt-active'); card.style.transform = ''; };
+    card.addEventListener('pointerenter', () => card.classList.add('tilt-active'));
+    card.addEventListener('pointermove', e => { card.classList.add('tilt-active'); tilt(e, 16, 1.03); });
+    card.addEventListener('pointerdown', e => { card.classList.add('tilt-active'); tilt(e, 10, 0.97); });
+    card.addEventListener('pointerup', reset);
+    card.addEventListener('pointerleave', reset);
+    card.addEventListener('pointercancel', reset);
+  });
+}
+
 function refreshHome() {
+  renderSky();
   const hr = new Date().getHours();
   const greet =
     hr < 12 ? 'Good morning, Juliana! ☀️'
@@ -3458,6 +3590,7 @@ if (location.hash.startsWith('#apikey=')) {
 }
 
 refreshHome();
+initHomeFx();
 </script>
 </body>
 </html>

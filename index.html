@@ -494,7 +494,7 @@
   <div class="home-header">
     <div style="display:flex;align-items:center;gap:11px">
       <canvas id="mascot" width="128" height="128"
-        style="width:60px;height:60px;flex-shrink:0;cursor:pointer;filter:drop-shadow(0 4px 10px rgba(124,108,255,0.45))"></canvas>
+        style="width:60px;height:60px;flex-shrink:0;cursor:pointer;filter:drop-shadow(0 4px 12px rgba(255,180,30,0.55))"></canvas>
       <div>
         <div class="page-title">Juliana Reads! 🌟</div>
         <div id="home-greeting" style="font-size:15px;color:var(--muted);margin-top:4px">Tap a game to start playing! 🎉</div>
@@ -1485,24 +1485,42 @@ function mRotX(a) { const c=Math.cos(a), s=Math.sin(a), o=mIdent(); o[5]=c; o[6]
 function mScale(s) { const o = mIdent(); o[0]=o[5]=o[10]=s; return o; }
 
 // Unit icosahedron expanded to flat-shaded triangles (per-face outward normals).
-function buildGem() {
-  const t = (1 + Math.sqrt(5)) / 2;
-  let V = [[-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],[0,-1,t],[0,1,t],
-           [0,-1,-t],[0,1,-t],[t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]];
-  V = V.map(v => { const l = Math.hypot(v[0],v[1],v[2]); return [v[0]/l, v[1]/l, v[2]/l]; });
-  const F = [[0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],[1,5,9],[5,11,4],[11,10,2],
-             [10,7,6],[7,1,8],[3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],[4,9,5],
-             [2,4,11],[6,2,10],[8,6,7],[9,8,1]];
+// Extruded 5-pointed star — the same ★ from the title, now in 3D.
+// Returns an interleaved Float32Array of (x,y,z, nx,ny,nz) per vertex.
+function buildStar() {
+  const OUTER = 1.0, INNER = 0.40, DEPTH = 0.30, PTS = 5;
+  // 10 edge points alternating outer/inner tip, starting at top.
+  const edge = [];
+  for (let i = 0; i < PTS * 2; i++) {
+    const a = (i / (PTS * 2)) * Math.PI * 2 - Math.PI / 2;
+    const r = i % 2 === 0 ? OUTER : INNER;
+    edge.push([Math.cos(a) * r, Math.sin(a) * r]);
+  }
+  const zF = DEPTH / 2, zB = -DEPTH / 2;
   const data = [];
-  for (const f of F) {
-    const a = V[f[0]], b = V[f[1]], c = V[f[2]];
-    const u = [b[0]-a[0],b[1]-a[1],b[2]-a[2]], w = [c[0]-a[0],c[1]-a[1],c[2]-a[2]];
-    let n = [u[1]*w[2]-u[2]*w[1], u[2]*w[0]-u[0]*w[2], u[0]*w[1]-u[1]*w[0]];
-    const nl = Math.hypot(n[0],n[1],n[2]); n = [n[0]/nl, n[1]/nl, n[2]/nl];
-    // Force the normal to point outward (away from the centered origin).
-    const ctr = [(a[0]+b[0]+c[0])/3, (a[1]+b[1]+c[1])/3, (a[2]+b[2]+c[2])/3];
-    if (n[0]*ctr[0] + n[1]*ctr[1] + n[2]*ctr[2] < 0) n = [-n[0],-n[1],-n[2]];
-    for (const p of [a, b, c]) data.push(p[0],p[1],p[2], n[0],n[1],n[2]);
+  const addTri = (ax,ay,az, bx,by,bz, cx,cy,cz, nx,ny,nz) => {
+    data.push(ax,ay,az,nx,ny,nz, bx,by,bz,nx,ny,nz, cx,cy,cz,nx,ny,nz);
+  };
+  // Front face fan — N outward (0,0,1).
+  for (let i = 0; i < edge.length; i++) {
+    const j = (i + 1) % edge.length;
+    addTri(0,0,zF, edge[i][0],edge[i][1],zF, edge[j][0],edge[j][1],zF, 0,0,1);
+  }
+  // Back face fan — N outward (0,0,-1), reversed winding.
+  for (let i = 0; i < edge.length; i++) {
+    const j = (i + 1) % edge.length;
+    addTri(0,0,zB, edge[j][0],edge[j][1],zB, edge[i][0],edge[i][1],zB, 0,0,-1);
+  }
+  // Side walls — two tris per edge segment, per-face normals.
+  for (let i = 0; i < edge.length; i++) {
+    const j = (i + 1) % edge.length;
+    const [ax,ay] = edge[i], [bx,by] = edge[j];
+    // Outward normal: average the two edge positions, then normalize in XY.
+    const mx = (ax+bx)/2, my = (ay+by)/2;
+    const ml = Math.hypot(mx, my) || 1;
+    const nx = mx/ml, ny = my/ml;
+    addTri(ax,ay,zF, bx,by,zF, bx,by,zB, nx,ny,0);
+    addTri(ax,ay,zF, bx,by,zB, ax,ay,zB, nx,ny,0);
   }
   return new Float32Array(data);
 }
@@ -1518,25 +1536,32 @@ function initMascot() {
     gl = canvas.getContext('webgl', { alpha: true, antialias: true, premultipliedAlpha: false, preserveDrawingBuffer: true })
       || canvas.getContext('experimental-webgl', { alpha: true, preserveDrawingBuffer: true });
   } catch (e) { gl = null; }
-  if (!gl) { canvas.style.display = 'none'; return; }  // graceful fallback
+  if (!gl) { canvas.style.display = 'none'; return; }
 
   const vs = `attribute vec3 aPos; attribute vec3 aNor;
     uniform mat4 uMVP; uniform mat4 uModel;
-    varying vec3 vNor; varying float vY;
-    void main(){ gl_Position = uMVP * vec4(aPos,1.0); vNor = mat3(uModel)*aNor; vY = aPos.y; }`;
+    varying vec3 vNor; varying vec3 vPos;
+    void main(){ gl_Position = uMVP * vec4(aPos,1.0); vNor = mat3(uModel)*aNor; vPos = aPos; }`;
   const fs = `precision mediump float;
-    varying vec3 vNor; varying float vY; uniform float uReact;
+    varying vec3 vNor; varying vec3 vPos; uniform float uReact;
     void main(){
       vec3 n = normalize(vNor);
-      vec3 l = normalize(vec3(0.4,0.7,0.8));
-      float d = max(dot(n,l),0.0);
-      vec3 top = vec3(1.0,0.55,0.85), bot = vec3(0.42,0.38,0.95);
-      vec3 base = mix(bot, top, clamp(vY*0.5+0.5,0.0,1.0));
-      base = mix(base, vec3(1.0,0.92,0.55), uReact*0.6);
-      vec3 col = base * (0.35 + 0.8*d);
-      float rim = pow(1.0 - max(dot(n,vec3(0.0,0.0,1.0)),0.0), 2.0);
-      col += rim * 0.28 * vec3(0.85,0.92,1.0);
-      gl_FragColor = vec4(col,1.0);
+      // Key light from upper-right-front.
+      float d = max(dot(n, normalize(vec3(0.5, 0.7, 1.0))), 0.0);
+      // Fill from below-left.
+      float f = max(dot(n, normalize(vec3(-0.4,-0.5, 0.6))), 0.0) * 0.28;
+      // Gold gradient: bright tip yellow → warm amber body.
+      float ht = clamp(vPos.y * 0.9 + 0.5, 0.0, 1.0);
+      vec3 colA = vec3(1.00, 0.92, 0.30);   // tip gold
+      vec3 colB = vec3(1.00, 0.60, 0.10);   // body amber
+      vec3 base = mix(colB, colA, ht);
+      // React: flash to bright warm white.
+      base = mix(base, vec3(1.0, 0.98, 0.88), uReact * 0.75);
+      vec3 col = base * (0.28 + 0.88*d + f);
+      // Front-face specular: shiny highlight.
+      float spec = pow(max(dot(n, vec3(0.0,0.0,1.0)),0.0), 18.0) * 0.45;
+      col += spec * mix(vec3(1.0,0.98,0.82), vec3(1.0), uReact);
+      gl_FragColor = vec4(min(col, vec3(1.0)), 1.0);
     }`;
   const compile = (type, src) => {
     const sh = gl.createShader(type); gl.shaderSource(sh, src); gl.compileShader(sh);
@@ -1553,49 +1578,46 @@ function initMascot() {
   } catch (e) { canvas.style.display = 'none'; return; }
   gl.useProgram(prog);
 
-  const verts = buildGem();
+  const verts = buildStar();
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
   const aPos = gl.getAttribLocation(prog, 'aPos'), aNor = gl.getAttribLocation(prog, 'aNor');
   gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 24, 0);
   gl.enableVertexAttribArray(aNor); gl.vertexAttribPointer(aNor, 3, gl.FLOAT, false, 24, 12);
-  const uMVP = gl.getUniformLocation(prog, 'uMVP');
+  const uMVP   = gl.getUniformLocation(prog, 'uMVP');
   const uModel = gl.getUniformLocation(prog, 'uModel');
   const uReact = gl.getUniformLocation(prog, 'uReact');
 
   gl.enable(gl.DEPTH_TEST);
   gl.clearColor(0, 0, 0, 0);
   gl.viewport(0, 0, canvas.width, canvas.height);
-  const proj = mPersp(40 * Math.PI/180, 1, 0.1, 100);
+  const proj = mPersp(38 * Math.PI/180, 1, 0.1, 100);
 
   let react = 0, ry = 0, t0 = performance.now();
-  mascot = {
-    trigger: (s = 1) => { react = Math.min(1.4, react + s); },
-    _peek: () => react,
-  };
-  // Tapping the mascot makes it react too.
+  mascot = { trigger: (s = 1) => { react = Math.min(1.5, react + s); } };
   canvas.addEventListener('pointerdown', () => mascot.trigger(1));
 
   function frame(now) {
     requestAnimationFrame(frame);
-    // Battery: skip work when home isn't visible or the tab is backgrounded.
     if (document.hidden || !document.getElementById('screen-home').classList.contains('active')) {
       t0 = now; return;
     }
     const dt = Math.min(0.05, (now - t0) / 1000); t0 = now;
     const t = now / 1000;
-    ry += (0.5 + react * 5) * dt;                       // idle spin, faster on react
-    const bob = Math.sin(t * 1.6) * 0.12;               // gentle vertical bob
-    const wob = Math.sin(t * 0.9) * 0.18;               // slight tilt
-    const pop = 1 + react * 0.22;
-    const model = mMul(mRotY(ry), mMul(mRotX(wob), mScale(pop)));
-    const view  = mTrans(0, bob, -3.4);
+    // Idle: slow spin, gentle forward tilt so the star reads clearly.
+    // On react: spin burst (faster rotation + pop).
+    ry += (0.8 + react * 7) * dt;
+    const tiltX = 0.28 + Math.sin(t * 0.7) * 0.08;  // slight constant forward lean + breathe
+    const bob   = Math.sin(t * 1.5) * 0.10;
+    const pop   = 1 + react * 0.28;
+    const model = mMul(mRotY(ry), mMul(mRotX(tiltX), mScale(pop)));
+    const view  = mTrans(0, bob, -3.6);
     const mvp   = mMul(proj, mMul(view, model));
-    gl.uniformMatrix4fv(uMVP, false, mvp);
+    gl.uniformMatrix4fv(uMVP,   false, mvp);
     gl.uniformMatrix4fv(uModel, false, model);
     gl.uniform1f(uReact, react);
-    react *= Math.pow(0.12, dt);                         // smooth decay back to idle
+    react *= Math.pow(0.08, dt);
     if (react < 0.002) react = 0;
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, verts.length / 6);
@@ -1603,6 +1625,8 @@ function initMascot() {
   requestAnimationFrame(frame);
 }
 function mascotReact(strength = 1) { if (mascot) mascot.trigger(strength); }
+
+// Spawns a field of slow-drifting pastel bubbles behind the grid, and gives
 
 // Spawns a field of slow-drifting pastel bubbles behind the grid, and gives
 // them a gentle repel from the pointer. The drift uses the independent CSS

@@ -10,6 +10,7 @@
 
 import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { networkInterfaces } from "node:os";
 
 import { Endpoint, Environment, Logger, ServerNode, VendorId } from "@matter/main";
 import { BridgedDeviceBasicInformationServer } from "@matter/main/behaviors/bridged-device-basic-information";
@@ -30,7 +31,7 @@ const appData = process.env.APPDATA ?? join(process.env.HOME ?? ".", ".config");
 const configDir = join(appData, "WemoDuskDawn");
 const configPath = join(configDir, "config.json");
 
-function loadDevices() {
+function loadConfig() {
     if (!existsSync(configPath)) {
         console.error(`No config found at ${configPath}.`);
         console.error(`Run "Wemo Control.bat" first and click Discover so your switches are saved.`);
@@ -38,15 +39,51 @@ function loadDevices() {
     }
     // Strip a UTF-8/UTF-16 BOM if PowerShell wrote one.
     const raw = readFileSync(configPath, "utf8").replace(/^﻿/, "");
-    const devices = (JSON.parse(raw).devices ?? []).filter(d => d.ip);
+    const config = JSON.parse(raw);
+    const devices = (config.devices ?? []).filter(d => d.ip);
     if (devices.length === 0) {
         console.error("Config has no switches yet. Run 'Wemo Control.bat' and click Discover first.");
         process.exit(1);
     }
-    return devices;
+    // Optional manual override: pin the bridge to a named adapter (e.g. "Wi-Fi").
+    return { devices, bridgeInterface: config.bridgeInterface };
 }
 
-const devices = loadDevices();
+const { devices, bridgeInterface } = loadConfig();
+
+// --- LAN interface detection -------------------------------------------------
+// A VPN (e.g. NordVPN/NordLynx) adds a tunnel adapter on a different subnet.
+// If the bridge advertised itself there, the Google hub couldn't reach it.
+// Pin mDNS to the adapter that shares a subnet with the switches - that's the
+// real home LAN the Nest hub lives on, and it excludes the VPN tunnel.
+
+function ipToInt(ip) {
+    const p = ip.split(".");
+    if (p.length !== 4) return null;
+    return ((+p[0] << 24) | (+p[1] << 16) | (+p[2] << 8) | +p[3]) >>> 0;
+}
+
+function sameSubnet(a, b, netmask) {
+    const ia = ipToInt(a), ib = ipToInt(b), m = ipToInt(netmask);
+    if (ia === null || ib === null || m === null) return false;
+    return ((ia & m) >>> 0) === ((ib & m) >>> 0);
+}
+
+// Returns the OS interface name (e.g. "Wi-Fi") on the switches' subnet, or null.
+function findLanInterface(devices) {
+    const switchIps = devices.map(d => d.ip);
+    for (const [name, infos] of Object.entries(networkInterfaces())) {
+        for (const info of infos ?? []) {
+            // Node reports family as "IPv4" (newer) or 4 (older).
+            const isV4 = info.family === "IPv4" || info.family === 4;
+            if (!isV4 || info.internal) continue;
+            if (switchIps.some(ip => sameSubnet(ip, info.address, info.netmask))) {
+                return name;
+            }
+        }
+    }
+    return null;
+}
 
 // --- matter node -------------------------------------------------------------
 
@@ -56,6 +93,16 @@ const storageDir = join(configDir, "matter-storage");
 mkdirSync(storageDir, { recursive: true });
 const environment = Environment.default;
 environment.vars.set("storage.path", storageDir);
+
+// Pin all mDNS advertising/discovery to the home LAN adapter so the bridge
+// stays reachable even when a VPN tunnel adapter is active.
+const lanInterface = bridgeInterface || findLanInterface(devices);
+if (lanInterface) {
+    environment.vars.set("mdns.networkInterface", lanInterface);
+    console.log(`Pinning bridge to network interface: ${lanInterface}`);
+} else {
+    console.log("Could not auto-detect a LAN interface on the switches' subnet; using all interfaces.");
+}
 
 const server = await ServerNode.create({
     id: "wemo-matter-bridge",

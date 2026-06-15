@@ -88,6 +88,36 @@ keeps working independently; the bridge is purely additive.
   local IPv6, which is on by default on home networks).
 - As with the scheduler, the PC must be running for Google control to work.
 
+### Using with a VPN (NordVPN, etc.)
+
+A VPN adds a tunnel network adapter on a different subnet. Left unchecked, the
+bridge could announce itself on the VPN address, which your Google hub can't
+reach — the switch tiles then show "offline."
+
+The bridge now **auto-locks onto your home LAN adapter** (the one on the same
+subnet as your switches), so it ignores the VPN tunnel and stays reachable.
+For Google Home to work *while the VPN is connected*, also let local traffic
+bypass the tunnel — do **one** of these in the VPN app:
+
+- **Split tunneling (recommended):** NordVPN → Settings → **Split Tunneling** →
+  "Disable VPN for selected apps" → add `node.exe`
+  (usually `C:\Program Files\nodejs\node.exe`).
+- Or enable LAN visibility (turn **off** "Invisibility on LAN").
+
+After changing the VPN setting, restart the bridge (run `Reset Bridge.bat` as
+administrator, or sign out/in).
+
+If auto-detection ever picks the wrong adapter, set `bridgeInterface` in
+`%APPDATA%\WemoDuskDawn\config.json` to the exact adapter name from Windows
+(e.g. `"Wi-Fi"` or `"Ethernet"`), then restart the bridge:
+
+```json
+{ "bridgeInterface": "Wi-Fi", "devices": [ ... ] }
+```
+
+Note: the dusk/dawn automation is same-subnet PC→switch traffic and generally
+keeps working regardless of the VPN — this only affects Google Home control.
+
 ## Important notes
 
 - **The PC must be on (or asleep-then-woken) for switching to happen.** A PC that's

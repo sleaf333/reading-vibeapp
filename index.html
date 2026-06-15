@@ -1743,19 +1743,54 @@ function spawnShootingStar(sky) {
 // ── UNIFIED LIGHTING ─────────────────────────────────────────────────────────
 // One light source for the whole home scene, derived from the sun/moon's screen
 // position. Cards, their shadows, and the WebGL mascot all read from it, and it
-// shifts warm→cool and high→low as the day turns. window.__light is the shared
-// source of truth (the mascot's render loop reads it every frame).
+// Computes light from the real clock, as a smooth arc across the day.
+// Sun rises at left ~6am, peaks at top-centre noon, sets right ~6pm.
+// Moon mirrors the arc through the night. window.__light is updated by
+// applyLighting() and read every frame by the mascot's render loop.
 function getLight() {
-  const hr = new Date().getHours();
-  if (hr < 12)   // morning: warm, lower sun
-    return { x: 0.82, y: 0.13, hi: '255,238,205', hiS: 0.9, shS: 0.85, shadowA: 0.14,
-             warm: [1.0, 0.93, 0.78], amb: 0.30, intensity: 0.95 };
-  if (hr < 18)   // afternoon: bright, high sun
-    return { x: 0.86, y: 0.10, hi: '255,250,232', hiS: 1.0, shS: 1.0, shadowA: 0.16,
-             warm: [1.0, 0.97, 0.88], amb: 0.32, intensity: 1.1 };
-  // evening: cool moonlight
-  return { x: 0.80, y: 0.14, hi: '224,229,255', hiS: 0.7, shS: 0.7, shadowA: 0.20,
-           warm: [0.80, 0.85, 1.0], amb: 0.34, intensity: 0.72 };
+  const now  = new Date();
+  const t    = now.getHours() + now.getMinutes() / 60;  // 0–24 fractional
+
+  const isDay = t >= 6 && t < 18;
+
+  if (!isDay) {
+    // Moon sweeps from right (6pm) to left (6am) along a gentle arc.
+    const tN  = t >= 18 ? (t - 18) / 12 : (t + 6) / 12;   // 0 at 18h, 1 at 6h
+    const mx  = 0.88 - tN * 0.76;
+    const my  = 0.62 - 0.42 * Math.sin(tN * Math.PI);
+    return { x: mx, y: my,
+             hi: '200,210,255', hiS: 0.60, shS: 0.60, shadowA: 0.22,
+             warm: [0.78, 0.84, 1.0], amb: 0.28, intensity: 0.62 };
+  }
+
+  // Day arc: tDay = 0 at 6am (left/low), 0.5 at noon (centre/high), 1 at 6pm (right/low).
+  const tDay = (t - 6) / 12;
+  const sx   = 0.08 + tDay * 0.84;
+  const sy   = 0.84 - 0.76 * Math.sin(tDay * Math.PI);
+
+  // Colour knots: morning → noon → evening.
+  const M = { warm:[1.00,0.90,0.72], hi:[255,232,192], amb:0.28, int:0.90, shA:0.14, hiS:0.84, shS:0.82 };
+  const N = { warm:[1.00,0.97,0.88], hi:[255,252,235], amb:0.33, int:1.15, shA:0.16, hiS:1.00, shS:1.00 };
+  const E = { warm:[1.00,0.82,0.55], hi:[255,212,158], amb:0.27, int:0.80, shA:0.19, hiS:0.80, shS:0.80 };
+
+  const lerp    = (a, b, f) => a + f * (b - a);
+  const lerpArr = (a, b, f) => a.map((v, i) => v + f * (b[i] - v));
+  const lerpHi  = (a, b, f) => a.map((v, i) => Math.round(v + f * (b[i] - v))).join(',');
+
+  let A, B, f;
+  if (tDay <= 0.5) { A = M; B = N; f = tDay * 2; }
+  else             { A = N; B = E; f = (tDay - 0.5) * 2; }
+
+  return {
+    x: sx, y: sy,
+    hi:        lerpHi(A.hi, B.hi, f),
+    hiS:       lerp(A.hiS, B.hiS, f),
+    shS:       lerp(A.shS, B.shS, f),
+    shadowA:   lerp(A.shA, B.shA, f),
+    warm:      lerpArr(A.warm, B.warm, f),
+    amb:       lerp(A.amb, B.amb, f),
+    intensity: lerp(A.int, B.int, f),
+  };
 }
 
 // Pushes the current light into CSS custom properties (cards read these) and
@@ -1814,6 +1849,17 @@ function initSkyExtras() {
       });
     });
   }
+}
+
+// Drives the light arc in real time: recomputes getLight() and pushes CSS vars
+// every 30 s so card sheens, shadows, and the mascot shader all drift together.
+function startLightArc() {
+  if (window._lightArcInit) return;
+  window._lightArcInit = true;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const onHome = () =>
+    document.getElementById('screen-home').classList.contains('active') && !document.hidden;
+  setInterval(() => { if (onHome()) applyLighting(); }, 30_000);
 }
 
 function refreshHome() {
@@ -3973,6 +4019,7 @@ initHomeFx();
 initParticles();
 initMascot();
 initSkyExtras();
+startLightArc();
 </script>
 </body>
 </html>

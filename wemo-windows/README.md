@@ -1,7 +1,7 @@
 # Wemo Dusk/Dawn Control (Windows)
 
 Keep your discontinued Belkin Wemo switches working **without the Wemo cloud or app**.
-This controls them directly over your home network and turns them **ON at dusk and
+This controls them directly over your home network and turns them **ON at sunset and
 OFF at dawn**, with sunrise/sunset computed locally for ZIP 54313 (Green Bay, WI area)
 — no internet connection required for daily operation.
 
@@ -16,10 +16,10 @@ it runs on any stock Windows 10/11 PC.
 3. Click **Discover**. Your Wemo switches should appear within a few seconds.
    (If one is missing, find its IP in your router's device list and use **Add by IP…**.)
 4. Test it: select a switch and click **Turn ON** / **Turn OFF**.
-5. Leave the **Auto** box checked for every switch you want on the dusk/dawn schedule.
+5. Leave the **Auto** box checked for every switch you want on the schedule.
 6. Click **Install scheduler**. That registers a Windows scheduled task
    (`WemoDuskDawn`) that runs hidden, starts at every sign-in, and fires at
-   dusk and dawn each day.
+   sunset and dawn each day.
 
 That's it. The window only needs to be opened again when you want manual control
 or to change settings.
@@ -28,11 +28,12 @@ or to change settings.
 
 - **Local control:** Wemo devices have a built-in UPnP/SOAP interface on the LAN
   (ports 49152–49155). Belkin shutting down the cloud doesn't affect it.
-- **Dusk/dawn:** computed on your PC with the US Naval Observatory sunrise/sunset
+- **Sunset/dawn:** computed on your PC with the US Naval Observatory sunrise/sunset
   algorithm from latitude/longitude (defaults: 44.5897, −88.1218 for 54313),
-  using **civil twilight** — the point where it's actually getting dark — and
-  your PC's time zone, so daylight saving is handled automatically.
-- **Catch-up:** if the PC was off or asleep at dusk/dawn, the scheduler applies
+  using your PC's time zone, so daylight saving is handled automatically. By
+  default lights turn **ON at sunset** (sun on the horizon) and **OFF at civil
+  dawn** (first light, before sunrise). Both points are configurable below.
+- **Catch-up:** if the PC was off or asleep at sunset/dawn, the scheduler applies
   the correct current state as soon as it starts or wakes.
 
 ## Settings
@@ -42,10 +43,14 @@ Configuration lives in `%APPDATA%\WemoDuskDawn\config.json` (created on first ru
 | Field | Meaning |
 |---|---|
 | `latitude` / `longitude` | Your location (defaults are for ZIP 54313). |
-| `twilight` | `civil` (default), `official` (exact sunset), or `nautical` (darker). |
-| `duskOffsetMinutes` | Shift the ON time. `-15` = 15 min before dusk. |
+| `duskTwilight` | Evening ON point: `official` (default, **sunset** — sun on the horizon), `civil` (dusk, a bit later/darker), or `nautical` (darker still). |
+| `dawnTwilight` | Morning OFF point: `civil` (default, **dawn** — first light), `official` (sunrise), or `nautical`. |
+| `duskOffsetMinutes` | Shift the ON time. `-15` = 15 min before sunset. |
 | `dawnOffsetMinutes` | Shift the OFF time. `30` = 30 min after dawn. |
 | `devices[].automate` | Same as the Auto checkbox in the app. |
+
+To go back to the old "lights on at dusk" behavior, set `duskTwilight` to
+`civil`. For even earlier evenings, use a negative `duskOffsetMinutes`.
 
 Edit with Notepad while the app is closed; the scheduler picks changes up
 automatically. Activity is logged to `%APPDATA%\WemoDuskDawn\scheduler.log`.

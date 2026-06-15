@@ -30,7 +30,7 @@ $form.Controls.Add($lblSun)
 $lblHint = New-Object System.Windows.Forms.Label
 $lblHint.Location = New-Object System.Drawing.Point(12, 32)
 $lblHint.Size = New-Object System.Drawing.Size(600, 18)
-$lblHint.Text = 'Checked switches turn ON at dusk and OFF at dawn (needs the background scheduler installed).'
+$lblHint.Text = 'Checked switches turn ON at sunset and OFF at dawn (needs the background scheduler installed).'
 $form.Controls.Add($lblHint)
 
 $list = New-Object System.Windows.Forms.ListView
@@ -92,7 +92,11 @@ function Update-SunLabel {
     $dawn = Get-SunEventLocal -Date (Get-Date).Date -Config $script:Config -Event 'dawn'
     $duskText = if ($dusk) { $dusk.ToString('h:mm tt') } else { 'n/a' }
     $dawnText = if ($dawn) { $dawn.ToString('h:mm tt') } else { 'n/a' }
-    $lblSun.Text = "ZIP $($script:Config.zip)  -  Today: dawn $dawnText, dusk $duskText  (computed locally, $($script:Config.twilight) twilight)"
+    $duskTw = if ($script:Config.duskTwilight) { "$($script:Config.duskTwilight)" } else { 'official' }
+    $dawnTw = if ($script:Config.dawnTwilight) { "$($script:Config.dawnTwilight)" } else { 'civil' }
+    $duskWord = if ($duskTw -eq 'official') { 'sunset' } else { 'dusk' }
+    $dawnWord = if ($dawnTw -eq 'official') { 'sunrise' } else { 'dawn' }
+    $lblSun.Text = "ZIP $($script:Config.zip)  -  Today: ON at $duskWord $duskText, OFF at $dawnWord $dawnText  (computed locally)"
 }
 
 function Update-TaskLabel { $lblTask.Text = "Background scheduler: $(Get-WemoSchedulerTaskStatus)" }

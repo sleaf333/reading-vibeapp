@@ -14,8 +14,9 @@ function Get-WemoDefaultConfig {
         zip               = '54313'
         latitude          = 44.5897   # Howard / Green Bay, WI
         longitude         = -88.1218
-        twilight          = 'civil'   # official | civil | nautical
-        duskOffsetMinutes = 0         # + = later than dusk, - = earlier
+        duskTwilight      = 'official' # evening ON: official = sunset, civil = dusk, nautical = darker
+        dawnTwilight      = 'civil'    # morning OFF: civil = dawn, official = sunrise, nautical = darker
+        duskOffsetMinutes = 0          # + = later than sunset, - = earlier
         dawnOffsetMinutes = 0
         devices           = @()       # { name, ip, port, automate }
     }
@@ -58,12 +59,18 @@ function Get-SunEventLocal {
         [Parameter(Mandatory)]$Config,
         [Parameter(Mandatory)][ValidateSet('dawn', 'dusk')][string]$Event
     )
-    $zenith = switch ("$($Config.twilight)") {
-        'official' { 90.833 }
-        'nautical' { 102.0 }
-        default    { 96.0 }   # civil twilight = typical "dusk"/"dawn"
-    }
     $isRise = ($Event -eq 'dawn')
+    # Evening (dusk) defaults to sunset; morning (dawn) defaults to civil dawn.
+    $tw = if ($isRise) {
+        if ($Config.dawnTwilight) { "$($Config.dawnTwilight)" } else { 'civil' }
+    } else {
+        if ($Config.duskTwilight) { "$($Config.duskTwilight)" } else { 'official' }
+    }
+    $zenith = switch ($tw) {
+        'official' { 90.833 }   # sun on the horizon = sunrise / sunset
+        'nautical' { 102.0 }
+        default    { 96.0 }     # civil twilight = dusk / dawn
+    }
     $d2r = [math]::PI / 180; $r2d = 180 / [math]::PI
     $lat = [double]$Config.latitude
     $lon = [double]$Config.longitude
@@ -108,12 +115,17 @@ function Get-SunEventLocal {
 function Get-ScheduleEvents {
     param([Parameter(Mandatory)]$Config, [int]$DaysBack = 1, [int]$DaysAhead = 2)
     $events = @()
+    # Label events from their effective twilight (sunset/dusk, dawn/sunrise).
+    $duskTw = if ($Config.duskTwilight) { "$($Config.duskTwilight)" } else { 'official' }
+    $dawnTw = if ($Config.dawnTwilight) { "$($Config.dawnTwilight)" } else { 'civil' }
+    $duskName = if ($duskTw -eq 'official') { 'sunset' } else { 'dusk' }
+    $dawnName = if ($dawnTw -eq 'official') { 'sunrise' } else { 'dawn' }
     for ($i = -$DaysBack; $i -le $DaysAhead; $i++) {
         $day = (Get-Date).Date.AddDays($i)
         $dawn = Get-SunEventLocal -Date $day -Config $Config -Event 'dawn'
         $dusk = Get-SunEventLocal -Date $day -Config $Config -Event 'dusk'
-        if ($dawn) { $events += [pscustomobject]@{ Time = $dawn; State = 0; Name = 'dawn' } }
-        if ($dusk) { $events += [pscustomobject]@{ Time = $dusk; State = 1; Name = 'dusk' } }
+        if ($dawn) { $events += [pscustomobject]@{ Time = $dawn; State = 0; Name = $dawnName } }
+        if ($dusk) { $events += [pscustomobject]@{ Time = $dusk; State = 1; Name = $duskName } }
     }
     return @($events | Sort-Object Time)
 }

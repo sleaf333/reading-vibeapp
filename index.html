@@ -507,11 +507,14 @@
     .doubles-visual { font-size: 30px; line-height: 2; text-align: center; }
     .doubles-extra { background: #fef08a; border-radius: 4px; padding: 0 1px; }
     .sb-word-display { font-size: 52px; font-weight: 900; text-align: center; letter-spacing: 4px; color: var(--text); margin: 12px 0 4px; }
+    .sb-picture { font-size: 56px; text-align: center; line-height: 1; margin: 6px 0 2px; }
     .sb-boxes-row { display: flex; gap: 12px; justify-content: center; margin: 18px 0; flex-wrap: wrap; }
     .sb-box { width: 72px; height: 72px; border: 3px solid var(--border); border-radius: 14px; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; color: var(--text); cursor: pointer; box-shadow: var(--shadow-sm); transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
     .sb-box.sb-filled { background: var(--accent-lt); border-color: var(--accent); }
     .sb-box.sb-correct { background: #dcfce7; border-color: #22c55e; color: #166534; }
     .sb-box.sb-wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; animation: dnShake 0.4s ease; }
+    .sb-box.sb-blended { background: #ede9fe; border-color: #8b5cf6; color: #4c1d95; transform: scale(1.06); }
+    .sb-box.sb-nudge { animation: dnShake 0.3s ease; }
     .sb-tiles-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 16px 0 8px; }
     .sb-tile { min-width: 56px; height: 56px; padding: 0 12px; border: 2.5px solid var(--border); border-radius: 12px; background: var(--surface); font-size: 24px; font-weight: 800; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: all 0.15s; -webkit-tap-highlight-color: transparent; font-family: inherit; }
     .sb-tile.sb-selected { background: var(--accent); border-color: var(--accent); color: #fff; transform: scale(1.1); }
@@ -754,7 +757,8 @@
     <span class="pill pill-green" id="sb-score-pill">0 ✓</span>
   </div>
   <div class="dn-progress-bar"><div class="dn-progress-fill" id="sb-progress-fill" style="width:0%"></div></div>
-  <div style="text-align:center;margin-top:14px">
+  <div class="sb-picture" id="sb-picture"></div>
+  <div style="text-align:center;margin-top:2px">
     <button class="btn btn-secondary btn-sm" onclick="speakSbWord()" style="margin-bottom:8px">🔊 Hear the word</button>
   </div>
   <div class="sb-boxes-row" id="sb-boxes-row"></div>
@@ -778,6 +782,19 @@
   <div id="sb-new-badges" style="margin-bottom:16px"></div>
   <button class="btn btn-primary btn-full" onclick="startSbGame()">Play again</button>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ SOUND BOXES INTRO ═══ -->
+<div id="screen-sbintro" class="screen">
+  <div style="max-width:420px;margin:0 auto;padding:28px 20px 32px;display:flex;flex-direction:column;align-items:center;gap:16px">
+    <div class="mi-banner">✨ Something New!</div>
+    <div class="mi-subtitle">No need to answer — just read!</div>
+    <div id="sbi-emoji" style="font-size:52px;line-height:1.2"></div>
+    <div id="sbi-headline" class="mi-headline"></div>
+    <div id="sbi-visual" class="mi-visual"></div>
+    <div id="sbi-body" class="mi-body"></div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px;font-size:18px" onclick="dismissSbIntro()">Got it! Let's go →</button>
+  </div>
 </div>
 
 <!-- ═══ MATH BREAK ═══ -->
@@ -1108,121 +1125,129 @@ const SW_HARD = ['said','have','from','they','were','there','their','what','when
 
 const SB_WORDS = [
   // L1: CVC — 3 phonemes, all single letters
-  {lv:1,word:'cat', phonemes:['c','a','t']},
-  {lv:1,word:'dog', phonemes:['d','o','g']},
-  {lv:1,word:'big', phonemes:['b','i','g']},
-  {lv:1,word:'sit', phonemes:['s','i','t']},
-  {lv:1,word:'run', phonemes:['r','u','n']},
-  {lv:1,word:'cup', phonemes:['c','u','p']},
-  {lv:1,word:'hat', phonemes:['h','a','t']},
-  {lv:1,word:'pet', phonemes:['p','e','t']},
-  {lv:1,word:'bug', phonemes:['b','u','g']},
-  {lv:1,word:'red', phonemes:['r','e','d']},
-  {lv:1,word:'sun', phonemes:['s','u','n']},
-  {lv:1,word:'pin', phonemes:['p','i','n']},
-  {lv:1,word:'log', phonemes:['l','o','g']},
-  {lv:1,word:'mud', phonemes:['m','u','d']},
-  {lv:1,word:'hen', phonemes:['h','e','n']},
-  {lv:1,word:'map', phonemes:['m','a','p']},
-  {lv:1,word:'top', phonemes:['t','o','p']},
-  {lv:1,word:'bed', phonemes:['b','e','d']},
-  {lv:1,word:'fan', phonemes:['f','a','n']},
-  {lv:1,word:'jam', phonemes:['j','a','m']},
-  {lv:1,word:'lid', phonemes:['l','i','d']},
-  {lv:1,word:'mop', phonemes:['m','o','p']},
-  {lv:1,word:'net', phonemes:['n','e','t']},
-  {lv:1,word:'pig', phonemes:['p','i','g']},
+  {lv:1,word:'cat', phonemes:['c','a','t'], emoji:'🐱'},
+  {lv:1,word:'dog', phonemes:['d','o','g'], emoji:'🐶'},
+  {lv:1,word:'big', phonemes:['b','i','g'], emoji:'🐘'},
+  {lv:1,word:'sit', phonemes:['s','i','t'], emoji:'🪑'},
+  {lv:1,word:'run', phonemes:['r','u','n'], emoji:'🏃'},
+  {lv:1,word:'cup', phonemes:['c','u','p'], emoji:'🥤'},
+  {lv:1,word:'hat', phonemes:['h','a','t'], emoji:'🎩'},
+  {lv:1,word:'pet', phonemes:['p','e','t'], emoji:'🐹'},
+  {lv:1,word:'bug', phonemes:['b','u','g'], emoji:'🐛'},
+  {lv:1,word:'red', phonemes:['r','e','d'], emoji:'🔴'},
+  {lv:1,word:'sun', phonemes:['s','u','n'], emoji:'☀️'},
+  {lv:1,word:'pin', phonemes:['p','i','n'], emoji:'📌'},
+  {lv:1,word:'log', phonemes:['l','o','g'], emoji:'🪵'},
+  {lv:1,word:'mud', phonemes:['m','u','d'], emoji:'🟤'},
+  {lv:1,word:'hen', phonemes:['h','e','n'], emoji:'🐔'},
+  {lv:1,word:'map', phonemes:['m','a','p'], emoji:'🗺️'},
+  {lv:1,word:'top', phonemes:['t','o','p'], emoji:'🔝'},
+  {lv:1,word:'bed', phonemes:['b','e','d'], emoji:'🛏️'},
+  {lv:1,word:'fan', phonemes:['f','a','n'], emoji:'🪭'},
+  {lv:1,word:'jam', phonemes:['j','a','m'], emoji:'🍓'},
+  {lv:1,word:'lid', phonemes:['l','i','d'], emoji:'🫙'},
+  {lv:1,word:'mop', phonemes:['m','o','p'], emoji:'🧹'},
+  {lv:1,word:'net', phonemes:['n','e','t'], emoji:'🥅'},
+  {lv:1,word:'pig', phonemes:['p','i','g'], emoji:'🐷'},
   {lv:1,word:'rug', phonemes:['r','u','g']},
-  {lv:1,word:'van', phonemes:['v','a','n']},
-  {lv:1,word:'web', phonemes:['w','e','b']},
+  {lv:1,word:'van', phonemes:['v','a','n'], emoji:'🚐'},
+  {lv:1,word:'web', phonemes:['w','e','b'], emoji:'🕸️'},
   // L2: CVC + digraphs (sh/ch/th) — 3 phonemes
-  {lv:2,word:'ship', phonemes:['sh','i','p']},
-  {lv:2,word:'chip', phonemes:['ch','i','p']},
+  {lv:2,word:'ship', phonemes:['sh','i','p'], emoji:'🚢'},
+  {lv:2,word:'chip', phonemes:['ch','i','p'], emoji:'🍟'},
   {lv:2,word:'thin', phonemes:['th','i','n']},
   {lv:2,word:'that', phonemes:['th','a','t']},
-  {lv:2,word:'wish', phonemes:['w','i','sh']},
-  {lv:2,word:'fish', phonemes:['f','i','sh']},
-  {lv:2,word:'rich', phonemes:['r','i','ch']},
-  {lv:2,word:'chat', phonemes:['ch','a','t']},
-  {lv:2,word:'shin', phonemes:['sh','i','n']},
+  {lv:2,word:'wish', phonemes:['w','i','sh'], emoji:'🌟'},
+  {lv:2,word:'fish', phonemes:['f','i','sh'], emoji:'🐟'},
+  {lv:2,word:'rich', phonemes:['r','i','ch'], emoji:'💰'},
+  {lv:2,word:'chat', phonemes:['ch','a','t'], emoji:'💬'},
+  {lv:2,word:'shin', phonemes:['sh','i','n'], emoji:'🦵'},
   {lv:2,word:'chin', phonemes:['ch','i','n']},
-  {lv:2,word:'chop', phonemes:['ch','o','p']},
-  {lv:2,word:'shop', phonemes:['sh','o','p']},
-  {lv:2,word:'math', phonemes:['m','a','th']},
-  {lv:2,word:'bath', phonemes:['b','a','th']},
-  {lv:2,word:'path', phonemes:['p','a','th']},
-  {lv:2,word:'shed', phonemes:['sh','e','d']},
-  {lv:2,word:'dash', phonemes:['d','a','sh']},
+  {lv:2,word:'chop', phonemes:['ch','o','p'], emoji:'🪓'},
+  {lv:2,word:'shop', phonemes:['sh','o','p'], emoji:'🛍️'},
+  {lv:2,word:'math', phonemes:['m','a','th'], emoji:'🧮'},
+  {lv:2,word:'bath', phonemes:['b','a','th'], emoji:'🛁'},
+  {lv:2,word:'path', phonemes:['p','a','th'], emoji:'🛤️'},
+  {lv:2,word:'shed', phonemes:['sh','e','d'], emoji:'🏚️'},
+  {lv:2,word:'dash', phonemes:['d','a','sh'], emoji:'💨'},
   {lv:2,word:'with', phonemes:['w','i','th']},
-  {lv:2,word:'moth', phonemes:['m','o','th']},
-  {lv:2,word:'cash', phonemes:['c','a','sh']},
-  {lv:2,word:'dish', phonemes:['d','i','sh']},
+  {lv:2,word:'moth', phonemes:['m','o','th'], emoji:'🦋'},
+  {lv:2,word:'cash', phonemes:['c','a','sh'], emoji:'💵'},
+  {lv:2,word:'dish', phonemes:['d','i','sh'], emoji:'🍽️'},
   {lv:2,word:'such', phonemes:['s','u','ch']},
-  {lv:2,word:'shut', phonemes:['sh','u','t']},
-  {lv:2,word:'whiz', phonemes:['wh','i','z']},
-  {lv:2,word:'thud', phonemes:['th','u','d']},
+  {lv:2,word:'shut', phonemes:['sh','u','t'], emoji:'🚪'},
+  {lv:2,word:'whiz', phonemes:['wh','i','z'], emoji:'💫'},
+  {lv:2,word:'thud', phonemes:['th','u','d'], emoji:'💥'},
   // L3: CCVC / CVCC — 4 phonemes
-  {lv:3,word:'flag', phonemes:['f','l','a','g']},
-  {lv:3,word:'frog', phonemes:['f','r','o','g']},
-  {lv:3,word:'step', phonemes:['s','t','e','p']},
-  {lv:3,word:'clap', phonemes:['c','l','a','p']},
+  {lv:3,word:'flag', phonemes:['f','l','a','g'], emoji:'🚩'},
+  {lv:3,word:'frog', phonemes:['f','r','o','g'], emoji:'🐸'},
+  {lv:3,word:'step', phonemes:['s','t','e','p'], emoji:'👣'},
+  {lv:3,word:'clap', phonemes:['c','l','a','p'], emoji:'👏'},
   {lv:3,word:'slip', phonemes:['s','l','i','p']},
-  {lv:3,word:'trap', phonemes:['t','r','a','p']},
-  {lv:3,word:'snap', phonemes:['s','n','a','p']},
-  {lv:3,word:'drip', phonemes:['d','r','i','p']},
-  {lv:3,word:'lamp', phonemes:['l','a','m','p']},
+  {lv:3,word:'trap', phonemes:['t','r','a','p'], emoji:'🪤'},
+  {lv:3,word:'snap', phonemes:['s','n','a','p'], emoji:'🫰'},
+  {lv:3,word:'drip', phonemes:['d','r','i','p'], emoji:'💧'},
+  {lv:3,word:'lamp', phonemes:['l','a','m','p'], emoji:'💡'},
   {lv:3,word:'bend', phonemes:['b','e','n','d']},
-  {lv:3,word:'jump', phonemes:['j','u','m','p']},
-  {lv:3,word:'hand', phonemes:['h','a','n','d']},
-  {lv:3,word:'fast', phonemes:['f','a','s','t']},
-  {lv:3,word:'nest', phonemes:['n','e','s','t']},
-  {lv:3,word:'soft', phonemes:['s','o','f','t']},
-  {lv:3,word:'plan', phonemes:['p','l','a','n']},
-  {lv:3,word:'spin', phonemes:['s','p','i','n']},
-  {lv:3,word:'gift', phonemes:['g','i','f','t']},
-  {lv:3,word:'milk', phonemes:['m','i','l','k']},
+  {lv:3,word:'jump', phonemes:['j','u','m','p'], emoji:'🦘'},
+  {lv:3,word:'hand', phonemes:['h','a','n','d'], emoji:'✋'},
+  {lv:3,word:'fast', phonemes:['f','a','s','t'], emoji:'🏎️'},
+  {lv:3,word:'nest', phonemes:['n','e','s','t'], emoji:'🪹'},
+  {lv:3,word:'soft', phonemes:['s','o','f','t'], emoji:'🧸'},
+  {lv:3,word:'plan', phonemes:['p','l','a','n'], emoji:'📝'},
+  {lv:3,word:'spin', phonemes:['s','p','i','n'], emoji:'🌀'},
+  {lv:3,word:'gift', phonemes:['g','i','f','t'], emoji:'🎁'},
+  {lv:3,word:'milk', phonemes:['m','i','l','k'], emoji:'🥛'},
   {lv:3,word:'desk', phonemes:['d','e','s','k']},
-  {lv:3,word:'sled', phonemes:['s','l','e','d']},
-  {lv:3,word:'swim', phonemes:['s','w','i','m']},
+  {lv:3,word:'sled', phonemes:['s','l','e','d'], emoji:'🛷'},
+  {lv:3,word:'swim', phonemes:['s','w','i','m'], emoji:'🏊'},
   {lv:3,word:'gram', phonemes:['g','r','a','m']},
   // L4: vowel digraphs — 3 phonemes, vowel pair as one tile
-  {lv:4,word:'boat', phonemes:['b','oa','t']},
-  {lv:4,word:'rain', phonemes:['r','ai','n']},
-  {lv:4,word:'feet', phonemes:['f','ee','t']},
-  {lv:4,word:'coat', phonemes:['c','oa','t']},
+  {lv:4,word:'boat', phonemes:['b','oa','t'], emoji:'⛵'},
+  {lv:4,word:'rain', phonemes:['r','ai','n'], emoji:'🌧️'},
+  {lv:4,word:'feet', phonemes:['f','ee','t'], emoji:'🦶'},
+  {lv:4,word:'coat', phonemes:['c','oa','t'], emoji:'🧥'},
   {lv:4,word:'tail', phonemes:['t','ai','l']},
-  {lv:4,word:'bead', phonemes:['b','ea','d']},
-  {lv:4,word:'sail', phonemes:['s','ai','l']},
-  {lv:4,word:'moon', phonemes:['m','oo','n']},
+  {lv:4,word:'bead', phonemes:['b','ea','d'], emoji:'📿'},
+  {lv:4,word:'sail', phonemes:['s','ai','l'], emoji:'⛵'},
+  {lv:4,word:'moon', phonemes:['m','oo','n'], emoji:'🌙'},
   {lv:4,word:'keep', phonemes:['k','ee','p']},
-  {lv:4,word:'food', phonemes:['f','oo','d']},
-  {lv:4,word:'seed', phonemes:['s','ee','d']},
-  {lv:4,word:'pool', phonemes:['p','oo','l']},
-  {lv:4,word:'wait', phonemes:['w','ai','t']},
-  {lv:4,word:'read', phonemes:['r','ea','d']},
-  {lv:4,word:'leaf', phonemes:['l','ea','f']},
-  {lv:4,word:'road', phonemes:['r','oa','d']},
-  {lv:4,word:'soap', phonemes:['s','oa','p']},
-  {lv:4,word:'meat', phonemes:['m','ea','t']},
-  {lv:4,word:'beach', phonemes:['b','ea','ch']},
+  {lv:4,word:'food', phonemes:['f','oo','d'], emoji:'🍎'},
+  {lv:4,word:'seed', phonemes:['s','ee','d'], emoji:'🌱'},
+  {lv:4,word:'pool', phonemes:['p','oo','l'], emoji:'🌊'},
+  {lv:4,word:'wait', phonemes:['w','ai','t'], emoji:'⏳'},
+  {lv:4,word:'read', phonemes:['r','ea','d'], emoji:'📖'},
+  {lv:4,word:'leaf', phonemes:['l','ea','f'], emoji:'🍃'},
+  {lv:4,word:'road', phonemes:['r','oa','d'], emoji:'🛣️'},
+  {lv:4,word:'soap', phonemes:['s','oa','p'], emoji:'🧼'},
+  {lv:4,word:'meat', phonemes:['m','ea','t'], emoji:'🍖'},
+  {lv:4,word:'beach', phonemes:['b','ea','ch'], emoji:'🏖️'},
   {lv:4,word:'gray', phonemes:['g','r','ay']},
-  {lv:4,word:'paint', phonemes:['p','ai','n','t']},
+  {lv:4,word:'paint', phonemes:['p','ai','n','t'], emoji:'🎨'},
   // L5: complex — igh trigraph, consonant blends as units
-  {lv:5,word:'night',  phonemes:['n','igh','t']},
-  {lv:5,word:'light',  phonemes:['l','igh','t']},
-  {lv:5,word:'right',  phonemes:['r','igh','t']},
-  {lv:5,word:'fight',  phonemes:['f','igh','t']},
-  {lv:5,word:'chain',  phonemes:['ch','ai','n']},
-  {lv:5,word:'train',  phonemes:['tr','ai','n']},
-  {lv:5,word:'float',  phonemes:['fl','oa','t']},
-  {lv:5,word:'cream',  phonemes:['cr','ea','m']},
-  {lv:5,word:'dream',  phonemes:['dr','ea','m']},
-  {lv:5,word:'green',  phonemes:['gr','ee','n']},
+  {lv:5,word:'night',  phonemes:['n','igh','t'], emoji:'🌃'},
+  {lv:5,word:'light',  phonemes:['l','igh','t'], emoji:'💡'},
+  {lv:5,word:'right',  phonemes:['r','igh','t'], emoji:'✅'},
+  {lv:5,word:'fight',  phonemes:['f','igh','t'], emoji:'🥊'},
+  {lv:5,word:'chain',  phonemes:['ch','ai','n'], emoji:'⛓️'},
+  {lv:5,word:'train',  phonemes:['tr','ai','n'], emoji:'🚂'},
+  {lv:5,word:'float',  phonemes:['fl','oa','t'], emoji:'🛟'},
+  {lv:5,word:'cream',  phonemes:['cr','ea','m'], emoji:'🍦'},
+  {lv:5,word:'dream',  phonemes:['dr','ea','m'], emoji:'💭'},
+  {lv:5,word:'green',  phonemes:['gr','ee','n'], emoji:'🟢'},
   {lv:5,word:'plain',  phonemes:['pl','ai','n']},
-  {lv:5,word:'brain',  phonemes:['br','ai','n']},
-  {lv:5,word:'steam',  phonemes:['st','ea','m']},
-  {lv:5,word:'grain',  phonemes:['gr','ai','n']},
-  {lv:5,word:'treat',  phonemes:['tr','ea','t']},
+  {lv:5,word:'brain',  phonemes:['br','ai','n'], emoji:'🧠'},
+  {lv:5,word:'steam',  phonemes:['st','ea','m'], emoji:'♨️'},
+  {lv:5,word:'grain',  phonemes:['gr','ai','n'], emoji:'🌾'},
+  {lv:5,word:'treat',  phonemes:['tr','ea','t'], emoji:'🍬'},
+];
+
+// Phonemes children commonly confuse (similar sound/shape) — used to give a
+// more specific "so close!" hint instead of a generic wrong-answer message.
+const SB_CONFUSE_GROUPS = [
+  ['sh','ch','th','wh'], ['a','e','i','o','u'],
+  ['b','d'], ['p','q'], ['m','n'], ['f','v'],
+  ['ai','ay'], ['ee','ea'], ['oa','oo'],
 ];
 
 const LEVEL_DESC = [
@@ -1294,6 +1319,7 @@ const S = {
   clockgames:    parseInt(lsGet('rl_clockgames','0')),
   clockperfect:  parseInt(lsGet('rl_clockperfect','0')),
   clockIntroSeen:lsJson('rl_clockintroseen', []),
+  sbIntroSeen:   lsJson('rl_sbintroseen', []),
   // transient
   topic: null, title: '', story: '', words: [], quiz: [],
   quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
@@ -1303,6 +1329,7 @@ const S = {
   mathRounds: [], mathIdx: 0, mathScore: 0, mathAnswered: false,
   clockRounds: [], clockIdx: 0, clockScore: 0, clockAnswered: false, clockPhase: 'hour',
   sbWords: [], sbIdx: 0, sbScore: 0, sbSelected: null, sbBoxes: [], sbTileOrder: [], sbWordPerfect: true,
+  sbPhase: 'spell', sbBlendIdx: 0,
   pinBuf: '',
 };
 
@@ -1347,6 +1374,7 @@ function persist() {
   lsSet('rl_sblevelprog', S.sbLevelProg);
   lsSet('rl_sbgames',   S.sbgames);
   lsSet('rl_sbperfect', S.sbperfect);
+  lsSet('rl_sbintroseen', S.sbIntroSeen);
   lsSet('rl_topics',   S.topics);
   lsSet('rl_pin',      S.pin);
   lsSet('rl_apikey',   S.apiKey);
@@ -2517,7 +2545,7 @@ function confirmReset() {
    'rl_badges','rl_perfect','rl_maxlevel','rl_swgames','rl_swperfect','rl_dngames','rl_dnperfect','rl_topics','rl_pin',
    'rl_swlevel','rl_swlevelprog','rl_dnlevel','rl_dnlevelprog',
    'rl_mathlevel','rl_mathlevelprog','rl_mathgames','rl_mathperfect',
-   'rl_sblevel','rl_sblevelprog','rl_sbgames','rl_sbperfect',
+   'rl_sblevel','rl_sblevelprog','rl_sbgames','rl_sbperfect','rl_sbintroseen',
    'rl_totalgames','rl_readingtoday','rl_mathsinceread','rl_mathlastdate',
    'rl_mathintroseen','rl_mathwarmupdone',
    'rl_clocklevel','rl_clocklevelprog','rl_clockgames','rl_clockperfect','rl_clockintroseen']
@@ -3848,7 +3876,53 @@ function spawnConfetti() {
 
 // ─── SOUND BOXES ─────────────────────────────────────────────────────────────
 
+const SB_LEVEL_INTROS = {
+  1: { emoji:'📦', headline:'Sound Boxes!',
+       visual:'c-a-t',
+       body:"Every word is made of small sounds. Listen, then tap a sound tile and drop it into a box!" },
+  2: { emoji:'👅', headline:'Team Sounds!',
+       visual:'sh   ch   th',
+       body:'Sometimes TWO letters team up to make just ONE sound — like sh in "ship". Look for the team tiles!' },
+  3: { emoji:'🔗', headline:'Blended Starts!',
+       visual:'fl-ag    st-ep',
+       body:"Some words start with two sounds blended together, like fl in \"flag\" — you'll hear both sounds run together!" },
+  4: { emoji:'👀', headline:'Vowel Teams!',
+       visual:'boat = b-oa-t',
+       body:'Two vowels can team up to make one sound too — like oa in "boat". One box, one team sound!' },
+  5: { emoji:'✨', headline:'Tricky Teams!',
+       visual:'night = n-igh-t',
+       body:'Some sound teams use THREE letters for one sound, like igh in "night" — it says /ī/!' },
+  6: { emoji:'🕵️', headline:'Spelling Detective!',
+       visual:'c-a-t  + 2 tricky tiles',
+       body:"Now a few extra tiles sneak in that don't belong. Listen carefully and pick only the sounds you need!" },
+};
+
+function showSbIntro(lv) {
+  const d = SB_LEVEL_INTROS[lv];
+  if (!d) { startSbGameNow(); return; }
+  document.getElementById('sbi-emoji').textContent    = d.emoji;
+  document.getElementById('sbi-headline').textContent = d.headline;
+  document.getElementById('sbi-body').textContent     = d.body;
+  document.getElementById('sbi-visual').textContent   = d.visual;
+  showScreen('screen-sbintro');
+}
+
+function dismissSbIntro() {
+  if (!S.sbIntroSeen.includes(S.sbLevel)) {
+    S.sbIntroSeen.push(S.sbLevel);
+    persist();
+  }
+  startSbGameNow();
+}
+
 function startSbGame() {
+  if (!S.sbIntroSeen.includes(S.sbLevel)) {
+    return showSbIntro(S.sbLevel);
+  }
+  startSbGameNow();
+}
+
+function startSbGameNow() {
   // L6 reuses the full word pool but adds distractor tiles in renderSbRound.
   const lv = Math.min(S.sbLevel, 5);
   const pool = SB_WORDS.filter(w => w.lv <= lv);
@@ -3868,6 +3942,8 @@ function renderSbRound() {
   const w = S.sbWords[S.sbIdx];
   S.sbSelected    = null;
   S.sbWordPerfect = true;
+  S.sbPhase       = 'spell';
+  S.sbBlendIdx    = 0;
   S.sbBoxes       = new Array(w.phonemes.length).fill(null);
   let tiles = [...w.phonemes];
   if (S.sbLevel >= 6) {
@@ -3886,9 +3962,10 @@ function renderSbRound() {
   document.getElementById('sb-progress-fill').style.width= `${(S.sbIdx / S.sbWords.length) * 100}%`;
   document.getElementById('sb-feedback').textContent     = '';
   document.getElementById('sb-feedback').className       = 'dn-feedback';
+  document.getElementById('sb-picture').textContent      = w.emoji || '🔊';
 
   document.getElementById('sb-boxes-row').innerHTML = w.phonemes.map((_,i) =>
-    `<div class="sb-box" id="sb-box-${i}" onclick="assignSbBox(${i})"></div>`
+    `<div class="sb-box" id="sb-box-${i}" onclick="sbBoxClick(${i})"></div>`
   ).join('');
 
   document.getElementById('sb-tiles-row').innerHTML = S.sbTileOrder.map((p,i) =>
@@ -3911,6 +3988,13 @@ function speakSbWord() {
   speechSynthesis.speak(u);
 }
 
+function speakPhoneme(p) {
+  const u = new SpeechSynthesisUtterance(p);
+  u.rate = 0.6;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
 function selectSbTile(idx) {
   if (S.sbSelected === idx) {
     S.sbSelected = null;
@@ -3921,6 +4005,11 @@ function selectSbTile(idx) {
   document.querySelectorAll('.sb-tile').forEach(t => t.classList.remove('sb-selected'));
   const el = document.getElementById(`sb-tile-${idx}`);
   if (el) el.classList.add('sb-selected');
+}
+
+function sbBoxClick(boxIdx) {
+  if (S.sbPhase === 'blend') return blendSbBox(boxIdx);
+  return assignSbBox(boxIdx);
 }
 
 function assignSbBox(boxIdx) {
@@ -3946,12 +4035,7 @@ function assignSbBox(boxIdx) {
       fb.innerHTML = `That spells <strong style="font-size:1.3em">${w.word}</strong>! ${S.sbWordPerfect ? '🌟' : '👍'}`;
       fb.className = 'dn-feedback correct';
       setTimeout(() => speak(w.word), 450);
-      setAdvanceTimer(() => {
-        if (S.sbWordPerfect) S.sbScore++;
-        S.sbIdx++;
-        if (S.sbIdx >= S.sbWords.length) showSbResult();
-        else renderSbRound();
-      }, 1400);
+      setTimeout(enterSbBlendPhase, 1300);
     }
   } else {
     S.sbWordPerfect = false;
@@ -3959,15 +4043,60 @@ function assignSbBox(boxIdx) {
     box.classList.add('sb-wrong');
     if (tile) tile.classList.remove('sb-selected');
     S.sbSelected = null;
+    // A confusable near-miss (e.g. 'sh' for 'ch') gets a more specific,
+    // teachable hint and a replay of the correct sound; an unrelated guess
+    // just gets a quick nudge to try again.
+    const nearMiss = SB_CONFUSE_GROUPS.some(g => g.includes(placed) && g.includes(correct));
     const fb = document.getElementById('sb-feedback');
-    fb.textContent = 'Not quite — try another box!';
+    fb.textContent = nearMiss
+      ? `So close! "${placed}" and "${correct}" sound similar — listen again.`
+      : 'Not quite — try another box!';
     fb.className   = 'dn-feedback wrong';
+    if (nearMiss) setTimeout(() => speakPhoneme(correct), 350);
     setTimeout(() => {
       box.textContent = '';
       box.classList.remove('sb-wrong');
       fb.textContent  = '';
       fb.className    = 'dn-feedback';
-    }, 750);
+    }, nearMiss ? 1600 : 750);
+  }
+}
+
+// After a word is spelled correctly, switch to decoding: tap the now-filled
+// boxes left to right to hear each sound, then the whole word blended.
+function enterSbBlendPhase() {
+  S.sbPhase    = 'blend';
+  S.sbBlendIdx = 0;
+  document.getElementById('sb-feedback').textContent = '';
+  document.getElementById('sb-feedback').className   = 'dn-feedback';
+  document.getElementById('sb-hint').textContent = '👉 Now tap each box, left to right, to read the word!';
+  document.getElementById('sb-tiles-row').innerHTML  = '';
+}
+
+function blendSbBox(boxIdx) {
+  const w   = S.sbWords[S.sbIdx];
+  const box = document.getElementById(`sb-box-${boxIdx}`);
+  if (boxIdx !== S.sbBlendIdx) {
+    box.classList.add('sb-nudge');
+    setTimeout(() => box.classList.remove('sb-nudge'), 350);
+    return;
+  }
+  box.classList.add('sb-blended');
+  speakPhoneme(w.phonemes[boxIdx]);
+  S.sbBlendIdx++;
+
+  if (S.sbBlendIdx >= w.phonemes.length) {
+    burstReward(box, ['🎉','✨','📖']);
+    const fb = document.getElementById('sb-feedback');
+    fb.innerHTML = `You read <strong style="font-size:1.3em">${w.word}</strong>! 🎉`;
+    fb.className = 'dn-feedback correct';
+    setTimeout(() => speak(w.word), 500);
+    setAdvanceTimer(() => {
+      if (S.sbWordPerfect) S.sbScore++;
+      S.sbIdx++;
+      if (S.sbIdx >= S.sbWords.length) showSbResult();
+      else renderSbRound();
+    }, 1600);
   }
 }
 

@@ -532,6 +532,13 @@
     .math-word-problem { font-size: 38px; font-weight: 700; line-height: 1.4; text-align: center; margin-bottom: 10px; color: var(--text); }
     .math-equation { font-size: 56px; font-weight: 900; text-align: center; color: var(--accent); letter-spacing: 2px; min-height: 36px; }
 
+    /* ── CLOCK TIME ── */
+    .clock-hand-in {
+      transform-box: view-box; transform-origin: 50px 50px;
+      animation: clockHandPop 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes clockHandPop { from{transform:scale(0.15);opacity:0} to{transform:scale(1);opacity:1} }
+
     /* ── TOAST ── */
     .ten-frame-outer { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 6px 0; }
     .ten-frame-grid { display: grid; grid-template-columns: repeat(5, 30px); grid-template-rows: repeat(2, 30px); gap: 5px; border: 2.5px solid #94a3b8; border-radius: 10px; padding: 8px; background: var(--surface); box-shadow: var(--shadow-sm); }
@@ -763,6 +770,7 @@
     <div id="ci-headline" class="mi-headline"></div>
     <div id="ci-visual" class="mi-visual"></div>
     <div id="ci-body" class="mi-body"></div>
+    <div id="ci-note" class="mi-body" style="font-size:13px;opacity:0.7;display:none"></div>
     <button class="btn btn-primary btn-full" style="margin-top:8px;font-size:18px" onclick="dismissClockIntro()">Got it! Let's go →</button>
   </div>
 </div>
@@ -3733,13 +3741,16 @@ const CLOCK_LEVEL_INTROS = {
        body:"The short hand shows the HOUR. When the long hand points up to 12, it's o'clock!" },
   2: { emoji:'🕧', headline:'Half Past!',
        visual:'3:30',
-       body:"When the long hand points straight down to 6, add 30 minutes — that's half past!" },
+       body:"When the long hand points straight down to 6, add 30 minutes — that's half past!",
+       note:"Sometimes I'll show you a time and YOU build the clock — just tap the numbers!" },
   3: { emoji:'🕒', headline:'Quarter Hours!',
        visual:'3:15  /  3:45',
-       body:'Long hand at 3 = 15 min (quarter past). Long hand at 9 = 45 min (quarter to).' },
+       body:'Long hand at 3 = 15 min (quarter past). Long hand at 9 = 45 min (quarter to).',
+       note:"Sometimes I'll show you a time and YOU build the clock — just tap the numbers!" },
   4: { emoji:'⏱️', headline:'Every 5 Minutes!',
        visual:'1→5   2→10   3→15…',
-       body:'Count by 5s around the clock! Each number the long hand passes = 5 more minutes.' },
+       body:'Count by 5s around the clock! Each number the long hand passes = 5 more minutes.',
+       note:"Sometimes I'll show you a time and YOU build the clock — just tap the numbers!" },
 };
 
 function showClockIntro(lv) {
@@ -3749,6 +3760,9 @@ function showClockIntro(lv) {
   document.getElementById('ci-headline').textContent = d.headline;
   document.getElementById('ci-body').textContent     = d.body;
   document.getElementById('ci-visual').textContent   = d.visual;
+  const noteEl = document.getElementById('ci-note');
+  noteEl.textContent = d.note || '';
+  noteEl.style.display = d.note ? '' : 'none';
   showScreen('screen-clockintro');
 }
 
@@ -3831,9 +3845,9 @@ function svgClockSet(r) {
       `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#4c1d95" font-family="sans-serif">${n}</text></g>`;
   }).join('');
   const hourHand = showHour
-    ? `<line x1="50" y1="50" x2="${(50+24*Math.sin(hAngle)).toFixed(1)}" y2="${(50-24*Math.cos(hAngle)).toFixed(1)}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>` : '';
+    ? `<line class="clock-hand-in" x1="50" y1="50" x2="${(50+24*Math.sin(hAngle)).toFixed(1)}" y2="${(50-24*Math.cos(hAngle)).toFixed(1)}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>` : '';
   const minHand = showMinute
-    ? `<line x1="50" y1="50" x2="${(50+30*Math.sin(mAngle)).toFixed(1)}" y2="${(50-30*Math.cos(mAngle)).toFixed(1)}" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>` : '';
+    ? `<line class="clock-hand-in" x1="50" y1="50" x2="${(50+30*Math.sin(mAngle)).toFixed(1)}" y2="${(50-30*Math.cos(mAngle)).toFixed(1)}" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>` : '';
   return `<svg width="200" height="200" viewBox="0 0 100 100" style="display:block;margin:0 auto">` +
     `<circle cx="50" cy="50" r="47" fill="white" stroke="#cbd5e1" stroke-width="2"/>` +
     spots + hourHand + minHand +
@@ -3869,6 +3883,10 @@ function tapClockPos(n) {
     if (!r.retried) S.clockScore++;
     fb.textContent = r.retried ? 'Got it!' : '🎉 Correct!';
     fb.className = 'dn-feedback correct';
+    if (!r.retried) {
+      const spot = document.getElementById(`clock-pos-${n}`);
+      if (spot) dnBurst(spot);
+    }
     setAdvanceTimer(() => {
       S.clockIdx++;
       if (S.clockIdx >= 10) showClockResult();
@@ -3931,7 +3949,10 @@ function answerClock(num) {
     }, 1300);
   } else {
     r.retried = true;
-    fb.textContent = 'Not quite — try again!';
+    const sameHour = Math.floor(num / 60) === Math.floor(r.answer / 60);
+    fb.textContent = S.clockLevel === 1 ? 'Not quite — check the HOUR hand!'
+                    : sameHour ? 'Close! Check the long MINUTE hand.'
+                    : 'Not quite — check the short HOUR hand first.';
     fb.className = 'dn-feedback wrong';
     if (chosen) chosen.classList.add('dn-wrong');
     btns.forEach(b => { if (!b.classList.contains('dn-wrong')) b.disabled = false; });

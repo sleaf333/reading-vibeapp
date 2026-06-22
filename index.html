@@ -485,6 +485,41 @@
     .dn-feedback.wrong   { color: #dc2626; }
     .dn-particle { position: fixed; pointer-events: none; z-index: 9998; border-radius: 50%; }
     @keyframes dnBurstAnim { 0%{transform:translate(0,0) scale(1);opacity:1} 100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0} }
+    .dn-topic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 8px 0; }
+    .dn-topic-chip {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+      height: 100px; background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r); font-size: 16px; font-weight: 800; color: var(--text);
+      cursor: pointer; box-shadow: var(--shadow-sm); font-family: inherit;
+      -webkit-tap-highlight-color: transparent; transition: transform 0.12s, background 0.15s;
+    }
+    .dn-topic-chip:active { transform: scale(0.94); background: var(--accent-lt); }
+    .dn-topic-emoji { font-size: 34px; line-height: 1; }
+    .dn-choice-btn {
+      min-height: 56px; background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; font-size: 19px; font-weight: 700; cursor: pointer;
+      color: var(--text); font-family: inherit; box-shadow: var(--shadow-sm);
+      padding: 10px 16px; line-height: 1.3; text-align: center;
+      -webkit-tap-highlight-color: transparent; transition: transform 0.12s, background 0.15s;
+    }
+    .dn-choice-btn:active:not(:disabled) { transform: scale(0.97); }
+    .dn-choice-btn:disabled { cursor: default; opacity: 0.5; }
+    .dn-choice-btn.dn-correct { background: #dcfce7; border-color: #22c55e; color: #16a34a; animation: dnCorrectPop 0.35s ease forwards; }
+    .dn-choice-btn.dn-wrong   { background: #fee2e2; border-color: #ef4444; color: #dc2626; animation: dnShake 0.4s ease; }
+    .dn-headline-banner {
+      position: fixed; top: 16%; left: 50%; z-index: 200; pointer-events: none;
+      background: linear-gradient(145deg, #fef3c7, #fde68a); border: 2px solid #f59e0b;
+      border-radius: 16px; padding: 14px 22px; font-size: 20px; font-weight: 900;
+      color: #92400e; box-shadow: var(--shadow); text-align: center;
+      animation: dnHeadlinePop 1.2s ease both;
+    }
+    @keyframes dnHeadlinePop {
+      0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+      15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      30%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      78%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+    }
 
     /* ── MATH TIME ── */
     .math-problem-card {
@@ -613,6 +648,21 @@
 </div>
 
 <!-- ═══ DAILY NEWS GAME ═══ -->
+<div id="screen-dntopic" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="showScreen('screen-home')">✕</button>
+    <span class="screen-label">Pick today's topic! 📰</span>
+  </div>
+  <div class="dn-topic-grid">
+    <button class="dn-topic-chip" onclick="chooseDnTopic('animals')"><span class="dn-topic-emoji">🐾</span>Animals</button>
+    <button class="dn-topic-chip" onclick="chooseDnTopic('magic')"><span class="dn-topic-emoji">✨</span>Magic</button>
+    <button class="dn-topic-chip" onclick="chooseDnTopic('space')"><span class="dn-topic-emoji">🚀</span>Space</button>
+    <button class="dn-topic-chip" onclick="chooseDnTopic('food')"><span class="dn-topic-emoji">🍕</span>Food</button>
+    <button class="dn-topic-chip" onclick="chooseDnTopic('sports')"><span class="dn-topic-emoji">⚽</span>Sports</button>
+    <button class="dn-topic-chip" onclick="chooseDnTopic('surprise')"><span class="dn-topic-emoji">🎲</span>Surprise me!</button>
+  </div>
+</div>
+
 <div id="screen-dnews" class="screen">
   <div class="sw-header">
     <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
@@ -624,6 +674,7 @@
     <div class="dn-step-dot active" id="dn-dot-0"></div>
     <div class="dn-step-dot" id="dn-dot-1"></div>
     <div class="dn-step-dot" id="dn-dot-2"></div>
+    <div class="dn-step-dot" id="dn-dot-3"></div>
   </div>
   <div class="dn-article-card" id="dn-article-card">
     <div style="text-align:right;margin-bottom:4px"><button class="btn btn-secondary btn-sm" onclick="speakDnArticle()">🔊 Read to me</button></div>
@@ -1109,7 +1160,7 @@ const BADGES = [
   { id:'sw_perfect',   icon:'🎖️', name:'Word Master',      desc:'Perfect word game score' },
   { id:'explorer',     icon:'🌍', name:'Explorer',         desc:'Read all 6 topics' },
   { id:'dn_first',     icon:'📰', name:'Daily Reporter',   desc:'Complete your first Daily News' },
-  { id:'dn_perfect',   icon:'🧮', name:'Math Whiz',        desc:'Perfect Daily News score (9/9)' },
+  { id:'dn_perfect',   icon:'🧮', name:'Math Whiz',        desc:'Perfect Daily News score' },
   { id:'math_first',   icon:'➕', name:'Math Star',        desc:'Complete your first Math Time' },
   { id:'math_perfect', icon:'🏅', name:'Math Champion',    desc:'Perfect Math Time score (10/10)' },
   { id:'sb_first',     icon:'📦', name:'Sound Builder',    desc:'Complete your first Sound Boxes' },
@@ -1325,7 +1376,7 @@ const S = {
   quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
 
   swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
-  dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false,
+  dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false, dnStepsPerArticle: 3,
   mathRounds: [], mathIdx: 0, mathScore: 0, mathAnswered: false,
   clockRounds: [], clockIdx: 0, clockScore: 0, clockAnswered: false, clockPhase: 'hour',
   sbWords: [], sbIdx: 0, sbScore: 0, sbSelected: null, sbBoxes: [], sbTileOrder: [], sbWordPerfect: true,
@@ -2602,7 +2653,11 @@ function showToast(msg) {
 
 // ─── DAILY NEWS ──────────────────────────────────────────────────────────────
 
-async function fetchDnArticles() {
+const DN_TOPIC_NAMES = {
+  animals: 'animals', magic: 'magic', space: 'space', food: 'food', sports: 'sports',
+};
+
+async function fetchDnArticles(topic) {
   const levelDesc = [
     '', 'beginner (very simple words, very short sentences)',
     'early reader (simple words, short sentences)',
@@ -2610,11 +2665,19 @@ async function fetchDnArticles() {
     'confident reader (varied vocabulary, 2 clear sentences)',
     'advanced reader (rich vocabulary, 2-3 sentences)',
   ][Math.min(S.dnLevel, 5)];
-  const prompt = `Create 3 short fictional fun news stories for a ${levelDesc} child aged 6. Topics: animals, magic, food, adventures, space, sports, inventions.
+  const topicName = DN_TOPIC_NAMES[topic];
+  const topicLine = topicName
+    ? `Topic for all 3 stories: ${topicName}.`
+    : `Topics: animals, magic, food, adventures, space, sports, inventions.`;
+  const wantsComprehension = S.dnLevel >= 2;
+  const comprehensionFields = wantsComprehension
+    ? `\n- "q": a simple question about what happened in the story (e.g. "What did the fox find?")\n- "choices": an array of exactly 3 short answer options (strings), only one correct\n- "correctIndex": the 0-based index of the correct option in "choices"`
+    : '';
+  const prompt = `Create 3 short fictional fun news stories for a ${levelDesc} child aged 6. ${topicLine}
 Return ONLY a JSON array with exactly 3 objects. Each object must have:
 - "text": 2-3 fun sentences in normal sentence case (capitalize only the first word of each sentence and proper nouns, no all-caps words)
 - "l1": a single lowercase letter appearing 2-5 times in text
-- "l2": a DIFFERENT single lowercase letter also appearing 2-5 times in text
+- "l2": a DIFFERENT single lowercase letter also appearing 2-5 times in text${comprehensionFields}
 No markdown, no explanation, only the JSON array.`;
 
   const h = window.location.hostname;
@@ -2677,23 +2740,41 @@ function verifyDnArticle(a) {
     if (a.c1 === a.c2) a.op = '+';
   }
   a.answer = a.op === '+' ? a.c1 + a.c2 : a.c1 - a.c2;
+
+  if (Array.isArray(a.choices) && a.choices.length >= 2 && typeof a.q === 'string' && a.q.trim()) {
+    a.choices = a.choices.slice(0, 3).map(String);
+    a.correctIndex = Math.min(Math.max(0, parseInt(a.correctIndex) || 0), a.choices.length - 1);
+  } else {
+    a.q = null;
+  }
   return a;
 }
 
-async function startDnGame() {
+function startDnGame() {
   if (_loadingBusy) return;
   if (!S.apiKey) {
     showScreen('screen-loading');
     showLoadingState('error', { emoji: '🔒', title: 'Ask a grown-up!', sub: 'A parent needs to add the API key. Go home and tap 🔒 Parent.', retry: false });
     return;
   }
+  showScreen('screen-dntopic');
+}
+
+function chooseDnTopic(topic) {
+  startDnGameNow(topic);
+}
+
+async function startDnGameNow(topic) {
+  if (_loadingBusy) return;
   _loadingBusy = true;
   showLoadingState('normal');
-  document.getElementById('loading-label').textContent = 'Fetching today\'s news…';
+  const label = DN_TOPIC_NAMES[topic] ? `Fetching today's ${DN_TOPIC_NAMES[topic]} news…` : 'Fetching today\'s news…';
+  document.getElementById('loading-label').textContent = label;
   showScreen('screen-loading');
   try {
-    const raw = await fetchDnArticles();
+    const raw = await fetchDnArticles(topic);
     S.dnRounds   = raw.slice(0, 3).map(verifyDnArticle);
+    S.dnStepsPerArticle = (S.dnLevel >= 2 && S.dnRounds.every(a => a.q)) ? 4 : 3;
     S.dnRoundIdx = 0;
     S.dnStep     = 0;
     S.dnScore    = 0;
@@ -2715,11 +2796,14 @@ function renderDnRound() {
   const fb = document.getElementById('dn-feedback');
   fb.textContent = ''; fb.className = 'dn-feedback';
 
-  const done = S.dnRoundIdx * 3 + S.dnStep;
-  document.getElementById('dn-progress-fill').style.width = `${(done / 9) * 100}%`;
+  const totalSteps = S.dnStepsPerArticle * 3;
+  const done = S.dnRoundIdx * S.dnStepsPerArticle + S.dnStep;
+  document.getElementById('dn-progress-fill').style.width = `${(done / totalSteps) * 100}%`;
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 4; i++) {
     const dot = document.getElementById(`dn-dot-${i}`);
+    if (i >= S.dnStepsPerArticle) { dot.style.display = 'none'; continue; }
+    dot.style.display = '';
     dot.className = 'dn-step-dot' + (i < S.dnStep ? ' done' : i === S.dnStep ? ' active' : '');
   }
 
@@ -2745,12 +2829,9 @@ function renderDnRound() {
   qbox.offsetWidth;
   qbox.style.animation = 'dnQuestionIn 0.3s ease both';
 
-  const stepLabels = [
-    'Step 1 of 3 — Count the letter',
-    'Step 2 of 3 — Count the letter',
-    'Step 3 of 3 — Solve the math! 🧮',
-  ];
-  document.getElementById('dn-step-label').textContent = stepLabels[S.dnStep];
+  const stepTitles = ['Count the letter', 'Count the letter', 'Solve the math! 🧮', 'What happened? 📖'];
+  document.getElementById('dn-step-label').textContent =
+    `Step ${S.dnStep + 1} of ${S.dnStepsPerArticle} — ${stepTitles[S.dnStep]}`;
 
   if (S.dnStep === 0) {
     document.getElementById('dn-question').innerHTML =
@@ -2758,11 +2839,13 @@ function renderDnRound() {
   } else if (S.dnStep === 1) {
     document.getElementById('dn-question').innerHTML =
       `Now find all the <span style="color:#e05050;font-size:36px;font-weight:900">"${r.l2.toUpperCase()}"</span> — how many?`;
-  } else {
+  } else if (S.dnStep === 2) {
     document.getElementById('dn-question').innerHTML =
       `<span style="color:var(--accent)">${r.c1} <b>"${r.l1.toUpperCase()}"</b></span> and ` +
       `<span style="color:#e05050">${r.c2} <b>"${r.l2.toUpperCase()}"</b></span><br>` +
       `<span style="font-size:69px;letter-spacing:2px;display:block;margin-top:8px">${r.c1} ${r.op} ${r.c2} = ?</span>`;
+  } else {
+    document.getElementById('dn-question').innerHTML = `<span style="font-size:30px">${esc(r.q)}</span>`;
   }
   renderDnNumpad();
 }
@@ -2773,6 +2856,14 @@ function toggleDnLetter(el) {
 
 function renderDnNumpad() {
   const r = S.dnRounds[S.dnRoundIdx];
+  const pad = document.getElementById('dn-numpad');
+  if (S.dnStep === 3) {
+    pad.style.gridTemplateColumns = '1fr';
+    pad.innerHTML = r.choices.map((c, i) =>
+      `<button class="dn-choice-btn" data-val="${i}" onclick="answerDn(${i})">${esc(c)}</button>`
+    ).join('');
+    return;
+  }
   let nums, cols;
   if (S.dnStep < 2) {
     nums = Array.from({ length: 10 }, (_, i) => i);
@@ -2785,32 +2876,33 @@ function renderDnNumpad() {
     nums = [...set].sort((a, b) => a - b);
     cols = 4;
   }
-  const pad = document.getElementById('dn-numpad');
   pad.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-  pad.innerHTML = nums.map(n => `<button class="dn-num-btn" onclick="answerDn(${n})">${n}</button>`).join('');
+  pad.innerHTML = nums.map(n => `<button class="dn-num-btn" data-val="${n}" onclick="answerDn(${n})">${n}</button>`).join('');
 }
 
 function answerDn(num) {
   if (S.dnAnswered) return;
   S.dnAnswered = true;
   const r = S.dnRounds[S.dnRoundIdx];
-  const correctVal = S.dnStep === 0 ? r.c1 : S.dnStep === 1 ? r.c2 : r.answer;
+  const correctVal = S.dnStep === 0 ? r.c1 : S.dnStep === 1 ? r.c2 : S.dnStep === 2 ? r.answer : r.correctIndex;
   const correct = num === correctVal;
 
-  const btns = [...document.querySelectorAll('.dn-num-btn')];
+  const btns = [...document.querySelectorAll('#dn-numpad .dn-num-btn, #dn-numpad .dn-choice-btn')];
   btns.forEach(b => { b.disabled = true; });
-  const chosen = btns.find(b => +b.textContent === num);
+  const chosen = btns.find(b => +b.dataset.val === num);
   const fb = document.getElementById('dn-feedback');
 
   if (correct) {
     S.dnScore++;
     if (chosen) chosen.classList.add('dn-correct');
     dnBurst(chosen);
-    fb.textContent = S.dnStep === 2 ? '🎉 Correct!' : `✓ Yes, ${correctVal}!`;
+    const articleDone = S.dnStep === S.dnStepsPerArticle - 1;
+    fb.textContent = S.dnStep >= 2 ? '🎉 Correct!' : `✓ Yes, ${correctVal}!`;
     fb.className = 'dn-feedback correct';
+    if (articleDone) dnArticleCelebration();
     setAdvanceTimer(() => {
       S.dnStep++;
-      if (S.dnStep > 2) { S.dnStep = 0; S.dnRoundIdx++; }
+      if (S.dnStep >= S.dnStepsPerArticle) { S.dnStep = 0; S.dnRoundIdx++; }
       if (S.dnRoundIdx >= 3) showDnResult();
       else renderDnRound();
     }, 1400);
@@ -2825,6 +2917,16 @@ function answerDn(num) {
       renderDnNumpad();
     }, 900);
   }
+}
+
+function dnArticleCelebration() {
+  const banner = document.createElement('div');
+  banner.className = 'dn-headline-banner';
+  banner.textContent = '📰 Headline solved!';
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 1200);
+  const card = document.getElementById('dn-article-card');
+  if (card) dnBurst(card.querySelector('.dn-article-text') || card);
 }
 
 function dnBurst(anchorEl) {
@@ -2851,15 +2953,16 @@ function showDnResult() {
   S.dngames++; S.totalGames++;
   S.readingToday++;
   S.mathSinceRead = 0;
-  if (S.dnScore === 9) S.dnperfect++;
-  const pct = S.dnScore / 9;
+  const maxScore = S.dnStepsPerArticle * 3;
+  if (S.dnScore === maxScore) S.dnperfect++;
+  const pct = S.dnScore / maxScore;
   const prevLevel = advanceLevel('dnLevel', 'dnLevelProg', pct);
   const newB = awardAll();
-  S.sessions.unshift({ topic: 'Daily News', score: `${S.dnScore}/9`, date: new Date().toLocaleDateString(), level: S.dnLevel });
+  S.sessions.unshift({ topic: 'Daily News', score: `${S.dnScore}/${maxScore}`, date: new Date().toLocaleDateString(), level: S.dnLevel });
   if (S.sessions.length > 100) S.sessions.pop();
   persist();
   document.getElementById('dn-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
-  document.getElementById('dn-result-score').textContent = `${S.dnScore} / 9`;
+  document.getElementById('dn-result-score').textContent = `${S.dnScore} / ${maxScore}`;
   document.getElementById('dn-result-msg').textContent =
     pct === 1 ? 'Perfect score! Math wizard! 🧮' : pct >= 0.8 ? 'Amazing work!' : pct >= 0.6 ? 'Good effort!' : 'Keep practicing!';
   document.getElementById('dn-level-msg').innerHTML = levelChangeMsg('dnLevel', 'dnLevelProg', prevLevel);

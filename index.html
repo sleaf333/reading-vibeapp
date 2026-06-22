@@ -284,6 +284,7 @@
     .story-text { font-size: 19px; line-height: 2.2; padding: 4px 0 32px; font-weight: 600; }
     .word { cursor: pointer; display: inline; border-radius: 5px; padding: 0 2px; -webkit-tap-highlight-color: transparent; transition: background 0.1s; }
     .word.tapped { background: #ffe08299; }
+    .word.read-highlight { background: rgba(61,158,104,0.3); }
     .word.saved { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
 
     .quiz-sticky { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background: var(--bg); border-top: 2px solid var(--border); padding: 10px 16px 24px; box-shadow: 0 -6px 24px rgba(0,0,0,0.12); z-index: 100; max-height: 55vh; overflow-y: auto; }
@@ -644,6 +645,8 @@
     <button class="btn-icon" onclick="showScreen('screen-home')">🏠</button>
     <span class="screen-label">Choose a story</span>
   </div>
+  <div style="text-align:center;font-size:14px;color:var(--muted);font-weight:700;margin:4px 0 10px">Want to be the hero? Type your name! (optional)</div>
+  <input type="text" class="text-input" id="hero-name-input" placeholder="Your name" maxlength="20" oninput="saveHeroName(this.value)">
   <div id="topic-list">
     <div class="topic-card" style="background:#fce8f5" onclick="pickTopic('princesses')"><div class="topic-icon">👑</div><div class="topic-name">Princesses</div></div>
     <div class="topic-card" style="background:#e6f5ee" onclick="pickTopic('animals')"><div class="topic-icon">🦁</div><div class="topic-name">Animals</div></div>
@@ -651,6 +654,19 @@
     <div class="topic-card" style="background:#e3eeff" onclick="pickTopic('ocean')"><div class="topic-icon">🐬</div><div class="topic-name">Ocean world</div></div>
     <div class="topic-card" style="background:#fef3e2" onclick="pickTopic('inventors')"><div class="topic-icon">💡</div><div class="topic-name">Young inventors</div></div>
     <div class="topic-card" style="background:#e8f5e8" onclick="pickTopic('dinosaurs')"><div class="topic-icon">🦕</div><div class="topic-name">Dinosaurs</div></div>
+  </div>
+</div>
+
+<!-- ═══ READING INTRO ═══ -->
+<div id="screen-readingintro" class="screen">
+  <div style="max-width:420px;margin:0 auto;padding:28px 20px 32px;display:flex;flex-direction:column;align-items:center;gap:16px">
+    <div class="mi-banner">✨ Something New!</div>
+    <div class="mi-subtitle">No need to answer — just read!</div>
+    <div id="ri-emoji" style="font-size:52px;line-height:1.2"></div>
+    <div id="ri-headline" class="mi-headline"></div>
+    <div id="ri-visual" class="mi-visual"></div>
+    <div id="ri-body" class="mi-body"></div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px;font-size:18px" onclick="dismissReadingIntro()">Got it! Let's go →</button>
   </div>
 </div>
 
@@ -890,6 +906,9 @@
   <div class="back-row">
     <button class="btn-icon" onclick="goHomeFromReading()">←</button>
     <span class="screen-label" id="reading-title">Story</span>
+  </div>
+  <div style="text-align:center;margin:4px 0 8px">
+    <button class="btn btn-secondary btn-sm" id="read-aloud-btn" onclick="toggleReadAloud()">🔊 Read it to me</button>
   </div>
   <div style="text-align:center;font-size:14px;color:var(--muted);font-weight:700;margin:4px 0 8px">Stuck on a word? Tap it to hear it 👂</div>
   <div class="story-text" id="story-text"></div>
@@ -1379,9 +1398,12 @@ const S = {
   clockperfect:  parseInt(lsGet('rl_clockperfect','0')),
   clockIntroSeen:lsJson('rl_clockintroseen', []),
   sbIntroSeen:   lsJson('rl_sbintroseen', []),
+  readingIntroSeen: lsJson('rl_readingintroseen', []),
+  heroName:      lsGet('rl_heroname', ''),
   // transient
   topic: null, title: '', story: '', words: [], quiz: [],
   quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
+  pendingTopicId: null, readAloudActive: false, readAloudWordEl: null,
 
   swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
   dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false, dnStepsPerArticle: 3,
@@ -1450,6 +1472,8 @@ function persist() {
   lsSet('rl_clockgames',     S.clockgames);
   lsSet('rl_clockperfect',   S.clockperfect);
   lsSet('rl_clockintroseen', S.clockIntroSeen);
+  lsSet('rl_readingintroseen', S.readingIntroSeen);
+  lsSet('rl_heroname', S.heroName);
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
@@ -1472,6 +1496,7 @@ function showScreen(id) {
   if (id === 'screen-badges')        renderBadges();
   if (id === 'screen-parent-corner') renderParentCorner();
   if (id === 'screen-parent-entry')  initPinEntry();
+  if (id === 'screen-topics')        initTopicScreen();
 }
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
@@ -2030,8 +2055,59 @@ function retryStory() {
   else showScreen('screen-home');
 }
 
+const READING_LEVEL_INTROS = {
+  2: { emoji:'📘', headline:'A Bit Longer!',
+       visual:'4-6 sentences',
+       body:"Stories now have a few more sentences. Take your time — you've got this!" },
+  3: { emoji:'📗', headline:'Bigger Words!',
+       visual:'6-8 sentences',
+       body:"Stories use grade 1-2 words now. Tap any word you're not sure of to hear it!" },
+  4: { emoji:'📙', headline:'Longer Stories!',
+       visual:'8-10 sentences',
+       body:"You're reading longer stories with richer vocabulary now. Great progress!" },
+  5: { emoji:'📕', headline:'Chapter-Book Level!',
+       visual:'10-12 sentences',
+       body:"These are your longest, most advanced stories yet. You're a super reader!" },
+};
+
+function showReadingIntro(lv) {
+  const d = READING_LEVEL_INTROS[lv];
+  if (!d) { pickTopicNow(S.pendingTopicId); return; }
+  document.getElementById('ri-emoji').textContent    = d.emoji;
+  document.getElementById('ri-headline').textContent = d.headline;
+  document.getElementById('ri-visual').textContent   = d.visual;
+  document.getElementById('ri-body').textContent     = d.body;
+  showScreen('screen-readingintro');
+}
+
+function dismissReadingIntro() {
+  if (!S.readingIntroSeen.includes(S.level)) {
+    S.readingIntroSeen.push(S.level);
+    persist();
+  }
+  pickTopicNow(S.pendingTopicId);
+}
+
+function saveHeroName(v) {
+  S.heroName = v.trim();
+  persist();
+}
+
+function initTopicScreen() {
+  const input = document.getElementById('hero-name-input');
+  if (input) input.value = S.heroName;
+}
+
 async function pickTopic(topicId) {
   if (_loadingBusy) return;
+  if (READING_LEVEL_INTROS[S.level] && !S.readingIntroSeen.includes(S.level)) {
+    S.pendingTopicId = topicId;
+    return showReadingIntro(S.level);
+  }
+  pickTopicNow(topicId);
+}
+
+async function pickTopicNow(topicId) {
   S.topic = TOPICS.find(t => t.id === topicId);
 
   if (!S.apiKey) {
@@ -2073,7 +2149,10 @@ async function pickTopic(topicId) {
 }
 
 async function fetchStory(topic, level) {
-  const prompt = `Write a short children's reading story about "${topic.name}" (${topic.sub}) for a child at reading level: ${LEVEL_DESC[level]}.
+  const heroLine = S.heroName
+    ? ` Make the main character a kid named "${S.heroName}" who is the hero of the story.`
+    : '';
+  const prompt = `Write a short children's reading story about "${topic.name}" (${topic.sub}) for a child at reading level: ${LEVEL_DESC[level]}.${heroLine}
 
 Return ONLY valid JSON, no markdown, no code fences:
 {
@@ -2175,6 +2254,7 @@ function levelChangeMsg(levelKey, progKey, prevLevel) {
 
 function goToQuiz() {
   stopSpeech();
+  readingCelebration();
   S.quizIdx = 0; S.quizScore = 0; S.quizAnswered = false;
   document.getElementById('quiz-btn-wrap').style.display = 'none';
   const qs = document.getElementById('quiz-section');
@@ -2185,6 +2265,16 @@ function goToQuiz() {
   setTimeout(() => {
     document.getElementById('screen-reading').style.paddingBottom = qs.offsetHeight + 'px';
   }, 50);
+}
+
+function readingCelebration() {
+  const banner = document.createElement('div');
+  banner.className = 'dn-headline-banner';
+  banner.textContent = '📖 You read the whole story!';
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 1200);
+  const btn = document.querySelector('#quiz-btn-wrap button');
+  if (btn) dnBurst(btn);
 }
 
 function renderQuizQ() {
@@ -2607,7 +2697,8 @@ function confirmReset() {
    'rl_sblevel','rl_sblevelprog','rl_sbgames','rl_sbperfect','rl_sbintroseen',
    'rl_totalgames','rl_readingtoday','rl_mathsinceread','rl_mathlastdate',
    'rl_mathintroseen','rl_mathwarmupdone',
-   'rl_clocklevel','rl_clocklevelprog','rl_clockgames','rl_clockperfect','rl_clockintroseen']
+   'rl_clocklevel','rl_clocklevelprog','rl_clockgames','rl_clockperfect','rl_clockintroseen',
+   'rl_readingintroseen']
     .forEach(k => localStorage.removeItem(k));
   location.reload();
 }
@@ -2628,6 +2719,7 @@ function updateStreak() {
 function speak(word) {
   if (!window.speechSynthesis) return;
   speechSynthesis.cancel();
+  clearReadAloudHighlight();
   const utt = new SpeechSynthesisUtterance(word);
   utt.rate = 0.9;
   speechSynthesis.speak(utt);
@@ -2635,6 +2727,51 @@ function speak(word) {
 
 function stopSpeech() {
   if (window.speechSynthesis) speechSynthesis.cancel();
+  clearReadAloudHighlight();
+}
+
+// Reads the whole story aloud, highlighting each word as it's spoken
+// (when the browser's TTS engine fires word-boundary events).
+function toggleReadAloud() {
+  if (S.readAloudActive) { stopSpeech(); return; }
+  readStoryAloud();
+}
+
+function readStoryAloud() {
+  if (!window.speechSynthesis || !S.words.length) return;
+  speechSynthesis.cancel();
+  const offsets = [];
+  let pos = 0;
+  S.words.forEach(w => { offsets.push(pos); pos += w.length + 1; });
+  const utt = new SpeechSynthesisUtterance(S.words.join(' '));
+  utt.rate = 0.85;
+  utt.onboundary = (e) => {
+    if (e.name && e.name !== 'word') return;
+    let idx = -1;
+    for (let i = offsets.length - 1; i >= 0; i--) {
+      if (e.charIndex >= offsets[i]) { idx = i; break; }
+    }
+    if (idx === -1) return;
+    if (S.readAloudWordEl) S.readAloudWordEl.classList.remove('read-highlight');
+    const el = document.querySelector(`.word[data-i="${idx}"]`);
+    if (el) { el.classList.add('read-highlight'); S.readAloudWordEl = el; }
+  };
+  utt.onend   = clearReadAloudHighlight;
+  utt.onerror = clearReadAloudHighlight;
+  S.readAloudActive = true;
+  updateReadAloudBtn();
+  speechSynthesis.speak(utt);
+}
+
+function clearReadAloudHighlight() {
+  if (S.readAloudWordEl) { S.readAloudWordEl.classList.remove('read-highlight'); S.readAloudWordEl = null; }
+  S.readAloudActive = false;
+  updateReadAloudBtn();
+}
+
+function updateReadAloudBtn() {
+  const btn = document.getElementById('read-aloud-btn');
+  if (btn) btn.textContent = S.readAloudActive ? '⏸ Stop reading' : '🔊 Read it to me';
 }
 
 function speakDnArticle() {

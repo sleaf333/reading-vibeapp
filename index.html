@@ -564,6 +564,60 @@
     .sb-tile.sb-used { opacity: 0.2; pointer-events: none; }
     #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: var(--pr); font-size: 14px; font-weight: 700; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
     #toast.show { opacity: 1; }
+
+    /* ── COINS + AUDIO TOGGLE (new) ── */
+    .coin-pill { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border-radius:var(--pr); font-size:14px; font-weight:900; background:linear-gradient(145deg,#fff6d8,#ffe79e); color:#9a6000; border:1.5px solid #f0c850; box-shadow:var(--shadow-sm); }
+    .icon-toggle { background:var(--surface); border:1.5px solid var(--border); border-radius:50%; width:38px; height:38px; cursor:pointer; font-size:18px; line-height:1; box-shadow:var(--shadow-sm); transition:transform 0.1s; -webkit-tap-highlight-color:transparent; }
+    .icon-toggle:active { transform:scale(0.9); }
+    .coin-float { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:34px; font-weight:900; color:#9a6000; text-shadow:0 2px 6px rgba(0,0,0,0.18); z-index:1200; pointer-events:none; animation:coinFloat 1.4s ease-out forwards; }
+    @keyframes coinFloat { 0%{opacity:0;transform:translate(-50%,-30%) scale(0.6)} 18%{opacity:1;transform:translate(-50%,-50%) scale(1.15)} 70%{opacity:1} 100%{opacity:0;transform:translate(-50%,-150%) scale(1)} }
+
+    /* ── MASCOT SPEECH BUBBLE ── */
+    #mascot-bubble { position:relative; max-width:200px; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:8px 12px; font-size:13px; font-weight:700; color:var(--text); box-shadow:var(--shadow-sm); opacity:0; transform:translateY(4px) scale(0.96); transition:all 0.2s; pointer-events:none; line-height:1.35; }
+    #mascot-bubble.show { opacity:1; transform:translateY(0) scale(1); }
+
+    /* ── NEW HOME CARD COLORS ── */
+    .hc-closet  { background: linear-gradient(150deg, rgba(255,240,248,0.78), rgba(252,221,238,0.56)); border-color: rgba(244,114,182,0.85); color:#9d174d; }
+    .hc-spell   { background: linear-gradient(150deg, rgba(255,247,237,0.78), rgba(254,230,205,0.56)); border-color: rgba(251,146,60,0.85); color:#9a3412; }
+    .hc-rhyme   { background: linear-gradient(150deg, rgba(245,243,255,0.78), rgba(233,228,255,0.56)); border-color: rgba(167,139,250,0.85); color:#5b21b6; }
+    .hc-reader  { background: linear-gradient(150deg, rgba(236,253,245,0.78), rgba(209,250,229,0.56)); border-color: rgba(52,211,153,0.85); color:#065f46; }
+    .hc-science { background: linear-gradient(150deg, rgba(236,250,255,0.78), rgba(207,238,252,0.56)); border-color: rgba(56,189,248,0.85); color:#0c4a6e; }
+
+    /* ── DRESS-UP CLOSET ── */
+    .closet-doll { display:flex; justify-content:center; margin:6px 0 4px; }
+    .closet-cat-label { font-size:15px; font-weight:900; color:var(--text); margin:14px 0 8px; }
+    .closet-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .closet-item { background:var(--surface); border:2px solid var(--border); border-radius:14px; padding:8px 4px 6px; cursor:pointer; text-align:center; box-shadow:var(--shadow-sm); transition:transform 0.1s; -webkit-tap-highlight-color:transparent; font-family:inherit; color:var(--text); }
+    .closet-item:active { transform:scale(0.94); }
+    .closet-item.equipped { border-color:var(--accent); background:var(--accent-lt); }
+    .closet-item.locked { opacity:0.92; }
+    .closet-item-vis { font-size:26px; line-height:1.1; height:30px; display:flex; align-items:center; justify-content:center; }
+    .closet-swatch { display:inline-block; width:24px; height:24px; border-radius:6px; border:1.5px solid rgba(0,0,0,0.12); }
+    .closet-item-name { font-size:10px; font-weight:700; margin-top:3px; line-height:1.1; }
+    .closet-item-cost { font-size:11px; font-weight:900; margin-top:3px; color:#9a6000; }
+    .closet-item.locked .closet-item-cost { color:var(--muted); }
+
+    /* ── SHARED: emoji choice grid (science) ── */
+    .emoji-choice-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:10px 0; }
+    .emoji-choice { background:var(--surface); border:2.5px solid var(--border); border-radius:18px; padding:18px 8px; font-size:48px; cursor:pointer; box-shadow:var(--shadow-sm); transition:all 0.15s; -webkit-tap-highlight-color:transparent; }
+    .emoji-choice:active:not(:disabled) { transform:scale(0.93); }
+    .emoji-choice:disabled { opacity:0.45; }
+    .emoji-choice.ec-correct { background:#dcfce7; border-color:#22c55e; animation:dnCorrectPop 0.35s ease forwards; }
+    .emoji-choice.ec-wrong { background:#fee2e2; border-color:#ef4444; animation:dnShake 0.4s ease; }
+    .sci-fact { background:#ecfeff; border:1.5px solid #67e8f9; border-radius:14px; padding:12px 14px; font-size:15px; font-weight:700; color:#0c4a6e; margin-top:10px; line-height:1.4; }
+    .sci-q { font-size:21px; font-weight:900; text-align:center; margin:10px 0; color:var(--text); line-height:1.3; }
+
+    /* ── READER LIBRARY ── */
+    .reader-shelf { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:6px; }
+    .reader-book { position:relative; background:var(--surface); border:2px solid var(--border); border-radius:16px; padding:16px 10px; cursor:pointer; text-align:center; box-shadow:var(--shadow); transition:transform 0.1s; -webkit-tap-highlight-color:transparent; color:var(--text); }
+    .reader-book:active { transform:scale(0.95); }
+    .reader-book-emoji { font-size:42px; line-height:1; }
+    .reader-book-title { font-size:14px; font-weight:900; margin-top:6px; line-height:1.2; }
+    .reader-book-done { position:absolute; top:6px; right:8px; font-size:16px; }
+    .reader-level-label { font-size:14px; font-weight:900; color:var(--muted); margin:12px 0 8px; }
+    .rword { cursor:pointer; display:inline; border-radius:5px; padding:0 2px; -webkit-tap-highlight-color:transparent; transition:background 0.1s; }
+    .rword.tapped { background:#ffe08299; }
+    #reader-text { font-size:24px; line-height:2.1; font-weight:700; color:var(--text); text-align:left; margin:14px 4px; }
   </style>
 </head>
 <body>
@@ -579,10 +633,13 @@
       <div>
         <div class="page-title">Juliana Reads! 🌟</div>
         <div id="home-greeting" style="font-size:15px;color:var(--muted);margin-top:4px">Tap a game to start playing! 🎉</div>
+        <div id="mascot-bubble"></div>
       </div>
     </div>
     <div class="header-pills">
       <span id="home-streak-pill" class="pill" style="background:#fff1e0;color:#c2570c;display:none">🔥 0 days</span>
+      <span class="coin-pill" onclick="openCloset()">🪙 <span class="coin-count">0</span></span>
+      <button class="icon-toggle" id="mute-btn" onclick="toggleMute()" title="Sound on/off">🔊</button>
       <button class="lock-btn" onclick="showScreen('screen-parent-entry')">🔒 Parent</button>
     </div>
   </div>
@@ -635,6 +692,42 @@
       <div class="hc-icon" id="home-clock-icon">🕐</div>
       <div class="hc-name">Clock Time</div>
       <div class="hc-sub" id="home-clock-level">Lv. 1</div>
+    </div>
+
+    <div class="home-card hc-spell" onclick="startSpellGame()">
+      <span class="home-done-badge" id="done-spell" style="display:none">✓</span>
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">🔤</div>
+      <div class="hc-name">Build a Word</div>
+      <div class="hc-sub" id="home-spell-level">Lv. 1</div>
+    </div>
+
+    <div class="home-card hc-rhyme" onclick="startRhymeGame()">
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">🎵</div>
+      <div class="hc-name">Rhyme Time</div>
+      <div class="hc-sub">Find the rhyme!</div>
+    </div>
+
+    <div class="home-card hc-reader" onclick="openReaderList()">
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">📚</div>
+      <div class="hc-name">Reading Club</div>
+      <div class="hc-sub" id="home-reader-sub">Little books</div>
+    </div>
+
+    <div class="home-card hc-science" onclick="startScienceGame()">
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">🔬</div>
+      <div class="hc-name">Science Fun</div>
+      <div class="hc-sub">Discover &amp; sort!</div>
+    </div>
+
+    <div class="home-card hc-closet" onclick="openCloset()">
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">👗</div>
+      <div class="hc-name">My Doll</div>
+      <div class="hc-sub" id="home-closet-sub">Dress up · 🪙 <span class="coin-count">0</span></div>
     </div>
   </div>
 </div>
@@ -946,6 +1039,112 @@
   <button class="btn btn-primary btn-full" onclick="showScreen('screen-home')">Back to home</button>
 </div>
 
+<!-- ═══ DRESS-UP CLOSET ═══ -->
+<div id="screen-closet" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="showScreen('screen-home')">🏠</button>
+    <span class="screen-label">My Doll 👗</span>
+    <span class="coin-pill" style="margin-left:auto">🪙 <span class="coin-count" id="closet-coins">0</span></span>
+  </div>
+  <div class="closet-doll" id="closet-doll"></div>
+  <div style="text-align:center;font-size:13px;color:var(--muted);font-weight:700;margin-bottom:4px">Tap an item to wear it. Earn 🪙 by playing games!</div>
+  <div id="closet-items"></div>
+</div>
+
+<!-- ═══ BUILD-A-WORD (SPELLING) ═══ -->
+<div id="screen-spell" class="screen">
+  <div class="sw-header">
+    <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
+    <span class="sw-prog-text" id="spell-prog">1 of 8</span>
+    <span class="pill" style="background:#ffedd5;color:#9a3412;font-weight:800" id="spell-score-pill">0 ✓</span>
+  </div>
+  <div class="dn-progress-bar"><div class="dn-progress-fill" id="spell-progress-fill" style="width:0%;background:linear-gradient(90deg,#fb923c,#fdba74)"></div></div>
+  <div style="text-align:center;margin:6px 0"><span id="spell-emoji" style="font-size:64px;line-height:1.1"></span></div>
+  <div style="text-align:center;margin-bottom:6px"><button class="btn btn-secondary btn-sm" onclick="speak(S.spellTarget)">🔊 Hear the word</button></div>
+  <div class="sb-boxes-row" id="spell-slots"></div>
+  <div class="sb-tiles-row" id="spell-tiles"></div>
+  <div style="text-align:center;margin-top:4px"><button class="btn btn-secondary btn-sm" onclick="clearSpell()">↩︎ Clear</button></div>
+  <div class="dn-feedback" id="spell-feedback"></div>
+</div>
+<div id="screen-spellresult" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">Spelling done! 🔤</span></div>
+  <div class="sw-result-center">
+    <div class="stars-row" id="spell-result-stars">⭐⭐⭐</div>
+    <div class="result-score" id="spell-result-score">8 / 8</div>
+    <div class="result-msg" id="spell-result-msg">Super speller!</div>
+    <div id="spell-level-msg" style="margin-top:10px"></div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="startSpellGame()">Play again</button>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ RHYME TIME ═══ -->
+<div id="screen-rhyme" class="screen">
+  <div class="sw-header">
+    <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
+    <span class="sw-prog-text" id="rhyme-prog">1 of 10</span>
+    <span class="pill" style="background:#ede9fe;color:#5b21b6;font-weight:800" id="rhyme-score-pill">0 ✓</span>
+  </div>
+  <div class="dn-progress-bar"><div class="dn-progress-fill" id="rhyme-progress-fill" style="width:0%;background:linear-gradient(90deg,#a78bfa,#c4b5fd)"></div></div>
+  <div style="text-align:center;margin:14px 0 4px;font-size:16px;font-weight:800;color:var(--muted)">Which word rhymes with…</div>
+  <div style="text-align:center"><span id="rhyme-target-emoji" style="font-size:54px"></span>
+    <div id="rhyme-target-word" style="font-size:30px;font-weight:900;color:var(--text)"></div>
+    <button class="btn btn-secondary btn-sm" style="margin-top:6px" onclick="speak(S.rhymeTargetWord)">🔊 Hear it</button>
+  </div>
+  <div class="emoji-choice-grid" id="rhyme-choices" style="margin-top:14px"></div>
+  <div class="dn-feedback" id="rhyme-feedback"></div>
+</div>
+<div id="screen-rhymeresult" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">Rhyme Time done! 🎵</span></div>
+  <div class="sw-result-center">
+    <div class="stars-row" id="rhyme-result-stars">⭐⭐⭐</div>
+    <div class="result-score" id="rhyme-result-score">10 / 10</div>
+    <div class="result-msg" id="rhyme-result-msg">Rhyme star!</div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="startRhymeGame()">Play again</button>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ SCIENCE FUN ═══ -->
+<div id="screen-science" class="screen">
+  <div class="sw-header">
+    <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
+    <span class="sw-prog-text" id="science-prog">1 of 10</span>
+    <span class="pill" style="background:#cffafe;color:#0c4a6e;font-weight:800" id="science-score-pill">0 ✓</span>
+  </div>
+  <div class="dn-progress-bar"><div class="dn-progress-fill" id="science-progress-fill" style="width:0%;background:linear-gradient(90deg,#38bdf8,#7dd3fc)"></div></div>
+  <div class="sci-q" id="science-q"></div>
+  <div style="text-align:center;margin-bottom:2px"><button class="btn btn-secondary btn-sm" onclick="speak(document.getElementById('science-q').textContent)">🔊 Hear it</button></div>
+  <div class="emoji-choice-grid" id="science-choices"></div>
+  <div class="dn-feedback" id="science-feedback"></div>
+  <div id="science-fact" style="display:none"></div>
+</div>
+<div id="screen-scienceresult" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">Science done! 🔬</span></div>
+  <div class="sw-result-center">
+    <div class="stars-row" id="science-result-stars">⭐⭐⭐</div>
+    <div class="result-score" id="science-result-score">10 / 10</div>
+    <div class="result-msg" id="science-result-msg">Super scientist!</div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="startScienceGame()">Play again</button>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ READING CLUB (DECODABLE LIBRARY) ═══ -->
+<div id="screen-readerlist" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">Reading Club 📚</span></div>
+  <div style="text-align:center;font-size:13px;color:var(--muted);font-weight:700;margin-bottom:4px">Little books you can read all by yourself!</div>
+  <div id="reader-shelf-wrap"></div>
+</div>
+<div id="screen-readerbook" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="openReaderList()">←</button><span class="screen-label" id="reader-title">Book</span></div>
+  <div style="text-align:center;font-size:56px;line-height:1" id="reader-emoji"></div>
+  <div style="text-align:center;margin:6px 0"><button class="btn btn-secondary btn-sm" id="reader-readaloud-btn" onclick="toggleReaderAloud()">🔊 Read it to me</button></div>
+  <div id="reader-text"></div>
+  <div style="text-align:center;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:8px">Tap any word to hear it 👆</div>
+  <button class="btn btn-primary btn-full" onclick="finishReader()">I read it! 🌟</button>
+</div>
+
 <!-- ═══ BADGES ═══ -->
 <div id="screen-badges" class="screen">
   <div class="back-row">
@@ -1081,6 +1280,19 @@
       <button class="pc-lvl-btn" onclick="setGameLevel('clockLevel','clockLevelProg',+1)">+</button>
     </div>
   </div>
+  <div class="pc-level-row">
+    <span class="pc-level-label">🔤 Build a Word</span>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setGameLevel('spellLevel','spellLevelProg',-1)">−</button>
+      <span class="pc-lvl-val" id="pc-spell-level">Lv. 1</span>
+      <button class="pc-lvl-btn" onclick="setGameLevel('spellLevel','spellLevelProg',+1)">+</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-title">Sound &amp; music</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600">The 🔊 button on the home screen mutes all game sounds. Background music is gentle and optional.</div>
+  <button class="btn btn-secondary btn-full" id="pc-music-btn" onclick="toggleMusic()">🎵 Music: Off</button>
 
   <div class="divider"></div>
   <div class="section-title">Math access rules</div>
@@ -1400,10 +1612,28 @@ const S = {
   sbIntroSeen:   lsJson('rl_sbintroseen', []),
   readingIntroSeen: lsJson('rl_readingintroseen', []),
   heroName:      lsGet('rl_heroname', ''),
+  // coins, audio settings, dress-up (new)
+  coins:    parseInt(lsGet('rl_coins','0')),
+  muted:    lsGet('rl_muted','0') === '1',
+  musicOn:  lsGet('rl_musicon','0') === '1',
+  closet:     lsJson('rl_closet', ['dress_pink','hair_brown','acc_none','bg_studio']),
+  dollOutfit: lsJson('rl_dolloutfit', { outfit:'dress_pink', hair:'hair_brown', accessory:'acc_none', background:'bg_studio' }),
+  // spelling / reading-club progress (new)
+  spellLevel:     parseInt(lsGet('rl_spelllevel','1')),
+  spellLevelProg: parseInt(lsGet('rl_spelllevelprog','0')),
+  spellgames:     parseInt(lsGet('rl_spellgames','0')),
+  spellperfect:   parseInt(lsGet('rl_spellperfect','0')),
+  rhymegames:     parseInt(lsGet('rl_rhymegames','0')),
+  sciencegames:   parseInt(lsGet('rl_sciencegames','0')),
+  readerDone:     lsJson('rl_readerdone', []),
   // transient
   topic: null, title: '', story: '', words: [], quiz: [],
   quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
   pendingTopicId: null, readAloudActive: false, readAloudWordEl: null,
+  spellRounds: [], spellIdx: 0, spellScore: 0, spellTarget: '', spellBuilt: [], spellRetried: false,
+  rhymeRounds: [], rhymeIdx: 0, rhymeScore: 0, rhymeAnswered: false, rhymeTargetWord: '',
+  scienceRounds: [], scienceIdx: 0, scienceScore: 0, scienceAnswered: false,
+  readerBook: null, readerAloudActive: false,
 
   swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
   dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false, dnStepsPerArticle: 3,
@@ -1474,6 +1704,18 @@ function persist() {
   lsSet('rl_clockintroseen', S.clockIntroSeen);
   lsSet('rl_readingintroseen', S.readingIntroSeen);
   lsSet('rl_heroname', S.heroName);
+  lsSet('rl_coins',   S.coins);
+  lsSet('rl_muted',   S.muted ? '1' : '0');
+  lsSet('rl_musicon', S.musicOn ? '1' : '0');
+  lsSet('rl_closet',  S.closet);
+  lsSet('rl_dolloutfit', S.dollOutfit);
+  lsSet('rl_spelllevel',     S.spellLevel);
+  lsSet('rl_spelllevelprog', S.spellLevelProg);
+  lsSet('rl_spellgames',     S.spellgames);
+  lsSet('rl_spellperfect',   S.spellperfect);
+  lsSet('rl_rhymegames',     S.rhymegames);
+  lsSet('rl_sciencegames',   S.sciencegames);
+  lsSet('rl_readerdone',     S.readerDone);
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
@@ -1497,6 +1739,8 @@ function showScreen(id) {
   if (id === 'screen-parent-corner') renderParentCorner();
   if (id === 'screen-parent-entry')  initPinEntry();
   if (id === 'screen-topics')        initTopicScreen();
+  if (id === 'screen-closet')        renderCloset();
+  if (id === 'screen-readerlist')    renderReaderList();
 }
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
@@ -1991,6 +2235,11 @@ function refreshHome() {
   document.getElementById('home-math-level').innerHTML    = homeSub(S.mathLevel,  'Math Time',    'mathLevelProg');
   document.getElementById('home-sb-level').innerHTML      = homeSub(S.sbLevel,    'Sound Boxes',  'sbLevelProg');
   document.getElementById('home-clock-level').innerHTML   = homeSub(S.clockLevel, 'Clock Time',   'clockLevelProg');
+  document.getElementById('home-spell-level').innerHTML   = homeSub(S.spellLevel, 'Spelling',     'spellLevelProg');
+  document.getElementById('home-reader-sub').textContent  = `${S.readerDone.length}/${READER_BOOKS.length} books read`;
+  updateCoinDisplays();
+  updateMuteBtn();
+  showMascotTip();
 
   // Live mini-clock of the current time, in place of the 🕐 emoji.
   const now = new Date();
@@ -2308,6 +2557,7 @@ function answerQuiz(chosen) {
 }
 
 function burstReward(anchorEl, emojis) {
+  sfx('correct');
   emojis = emojis || ((S.topic && S.topic.reward) ? S.topic.reward : ['⭐','✨','🎉']);
   const rect = anchorEl.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
@@ -2366,6 +2616,7 @@ function showResult() {
       <div><div class="nb-name">New badge: ${b.name}</div><div class="nb-desc">${b.desc}</div></div>
     </div>`).join('');
 
+  awardCoins(coinsFor(score, total)); sfx('win');
   showScreen('screen-result');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
@@ -2480,6 +2731,7 @@ function showSwResult() {
       <div><div class="nb-name">New badge: ${b.name}</div><div class="nb-desc">${b.desc}</div></div>
     </div>`).join('');
 
+  awardCoins(coinsFor(S.swScore, 10)); sfx('win');
   showScreen('screen-swresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
@@ -2568,6 +2820,9 @@ function renderParentCorner() {
   document.getElementById('pc-math-level').textContent  = `Lv. ${S.mathLevel}`;
   document.getElementById('pc-sb-level').textContent   = `Lv. ${S.sbLevel}`;
   document.getElementById('pc-clock-level').textContent = `Lv. ${S.clockLevel}`;
+  document.getElementById('pc-spell-level').textContent = `Lv. ${S.spellLevel}`;
+  const mb = document.getElementById('pc-music-btn');
+  if (mb) mb.textContent = S.musicOn ? '🎵 Music: On' : '🎵 Music: Off';
   document.getElementById('pc-unlock-req').textContent  = S.dnUnlockReq === 0 ? 'Off' : S.dnUnlockReq;
   document.getElementById('pc-break-every').textContent = S.mathBreakEvery === 0 ? 'Off' : S.mathBreakEvery;
   document.getElementById('api-key-input').value    = S.apiKey;
@@ -2591,7 +2846,7 @@ function renderParentCorner() {
 }
 
 function setGameLevel(levelKey, progKey, delta) {
-  const maxLv = levelKey === 'mathLevel' ? 16 : levelKey === 'clockLevel' ? 4 : levelKey === 'sbLevel' ? 6 : 5;
+  const maxLv = levelKey === 'mathLevel' ? 16 : levelKey === 'clockLevel' ? 4 : levelKey === 'sbLevel' ? 6 : levelKey === 'spellLevel' ? 3 : 5;
   const next = Math.min(maxLv, Math.max(1, S[levelKey] + delta));
   if (next === S[levelKey]) return;
   S[levelKey] = next;
@@ -2602,7 +2857,7 @@ function setGameLevel(levelKey, progKey, delta) {
   document.getElementById({
     level: 'pc-level', swLevel: 'pc-sw-level',
     dnLevel: 'pc-dn-level', mathLevel: 'pc-math-level', sbLevel: 'pc-sb-level',
-    clockLevel: 'pc-clock-level'
+    clockLevel: 'pc-clock-level', spellLevel: 'pc-spell-level'
   }[levelKey]).textContent = `Lv. ${next}`;
 }
 
@@ -2698,7 +2953,10 @@ function confirmReset() {
    'rl_totalgames','rl_readingtoday','rl_mathsinceread','rl_mathlastdate',
    'rl_mathintroseen','rl_mathwarmupdone',
    'rl_clocklevel','rl_clocklevelprog','rl_clockgames','rl_clockperfect','rl_clockintroseen',
-   'rl_readingintroseen']
+   'rl_readingintroseen',
+   'rl_coins','rl_closet','rl_dolloutfit',
+   'rl_spelllevel','rl_spelllevelprog','rl_spellgames','rl_spellperfect',
+   'rl_rhymegames','rl_sciencegames','rl_readerdone']
     .forEach(k => localStorage.removeItem(k));
   location.reload();
 }
@@ -3076,6 +3334,7 @@ function dnArticleCelebration() {
 
 function dnBurst(anchorEl) {
   if (!anchorEl) return;
+  sfx('correct');
   const rect = anchorEl.getBoundingClientRect();
   const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
   const colors = ['#6366f1', '#22c55e', '#fbbf24', '#f472b6', '#60a5fa', '#a78bfa'];
@@ -3116,6 +3375,7 @@ function showDnResult() {
       <span class="nb-emoji">${b.icon}</span>
       <div><div class="nb-name">New badge: ${b.name}</div><div class="nb-desc">${b.desc}</div></div>
     </div>`).join('');
+  awardCoins(coinsFor(S.dnScore, maxScore)); sfx('win');
   showScreen('screen-dnresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
@@ -3866,6 +4126,7 @@ function showMathResult() {
       <div><div class="nb-name">New badge: ${b.name}</div><div class="nb-desc">${b.desc}</div></div>
     </div>`).join('');
   document.getElementById('math-progress-fill').style.width = '100%';
+  awardCoins(coinsFor(S.mathScore, 10)); sfx('win');
   showScreen('screen-mathresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
@@ -4116,6 +4377,7 @@ function showClockResult() {
     `<div class="new-badge"><span class="nb-emoji">${b.icon}</span><div><div class="nb-name">${b.name}</div><div class="nb-desc">${b.desc}</div></div></div>`
   ).join('');
   document.getElementById('clock-progress-fill').style.width = '100%';
+  awardCoins(coinsFor(S.clockScore, 10)); sfx('win');
   showScreen('screen-clockresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
@@ -4382,6 +4644,7 @@ function showSbResult() {
     `<div class="new-badge"><span class="nb-emoji">${b.icon}</span><div><div class="nb-name">${b.name}</div><div class="nb-desc">${b.desc}</div></div></div>`
   ).join('');
   refreshHome();
+  awardCoins(coinsFor(S.sbScore, total)); sfx('win');
   showScreen('screen-sbresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
@@ -4402,6 +4665,560 @@ if (location.hash.startsWith('#apikey=')) {
     history.replaceState(null, '', location.pathname + location.search);
     setTimeout(() => showToast('✅ API key saved! You\'re all set.'), 600);
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  NEW FEATURES: sound · coins · dress-up · spelling · rhyme · science · readers
+// ═══════════════════════════════════════════════════════════════════════════
+
+function shuf(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+// ─── SOUND ENGINE (WebAudio, synthesized — no asset files, works offline) ─────
+let _ac = null;
+function audioCtx() {
+  if (!_ac) { try { _ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+  if (_ac.state === 'suspended') _ac.resume();
+  return _ac;
+}
+// One short tone with an attack/decay envelope.
+function tone(freq, t0, dur, type, vol) {
+  if (!_ac) return;
+  const o = _ac.createOscillator(), g = _ac.createGain();
+  o.type = type || 'sine';
+  o.frequency.setValueAtTime(freq, t0);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.16, t0 + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(_ac.destination);
+  o.start(t0); o.stop(t0 + dur + 0.03);
+}
+function sfx(name) {
+  if (S.muted) return;
+  const ac = audioCtx(); if (!ac) return;
+  const t = ac.currentTime;
+  switch (name) {
+    case 'tap':     tone(520, t, 0.08, 'triangle', 0.10); break;
+    case 'correct': tone(660, t, 0.12, 'sine', 0.16); tone(880, t + 0.09, 0.18, 'sine', 0.16); break;
+    case 'wrong':   tone(196, t, 0.20, 'sawtooth', 0.10); tone(147, t + 0.09, 0.22, 'sawtooth', 0.09); break;
+    case 'coin':    tone(988, t, 0.07, 'square', 0.09); tone(1319, t + 0.06, 0.13, 'square', 0.09); break;
+    case 'win':     [523, 659, 784, 1047].forEach((f, i) => tone(f, t + i * 0.10, 0.24, 'triangle', 0.15)); break;
+    case 'pop':     tone(700, t, 0.06, 'sine', 0.12); break;
+  }
+}
+
+// ─── BACKGROUND MUSIC (gentle, optional, default off — toggle in Parent Corner) ─
+let _musicTimer = null, _musicStep = 0;
+const MUSIC_NOTES = [392, 440, 523, 587, 659, 587, 523, 440];
+function startMusic() {
+  if (S.muted || !S.musicOn || _musicTimer) return;
+  _musicStep = 0;
+  _musicTimer = setInterval(() => {
+    if (S.muted || !S.musicOn) return;
+    const ac = audioCtx(); if (!ac) return;
+    const t = ac.currentTime, f = MUSIC_NOTES[_musicStep % MUSIC_NOTES.length];
+    tone(f, t, 0.9, 'sine', 0.045);
+    tone(f / 2, t, 1.1, 'triangle', 0.025);
+    _musicStep++;
+  }, 950);
+}
+function stopMusic() { if (_musicTimer) { clearInterval(_musicTimer); _musicTimer = null; } }
+function toggleMusic() {
+  S.musicOn = !S.musicOn;
+  lsSet('rl_musicon', S.musicOn ? '1' : '0');
+  const b = document.getElementById('pc-music-btn');
+  if (b) b.textContent = S.musicOn ? '🎵 Music: On' : '🎵 Music: Off';
+  if (S.musicOn) startMusic(); else stopMusic();
+}
+
+// ─── MUTE TOGGLE (controls SFX + music; read-aloud TTS is always available) ────
+function toggleMute() {
+  S.muted = !S.muted;
+  lsSet('rl_muted', S.muted ? '1' : '0');
+  updateMuteBtn();
+  if (S.muted) stopMusic();
+  else { sfx('pop'); if (S.musicOn) startMusic(); }
+}
+function updateMuteBtn() {
+  const b = document.getElementById('mute-btn');
+  if (b) b.textContent = S.muted ? '🔇' : '🔊';
+}
+
+// ─── COINS ────────────────────────────────────────────────────────────────────
+function coinsFor(score, total) { return score * 2 + (score === total ? 5 : 0); }
+function awardCoins(n) {
+  if (n <= 0) return;
+  S.coins += n;
+  lsSet('rl_coins', S.coins);
+  sfx('coin');
+  floatCoins(n);
+  updateCoinDisplays();
+}
+function updateCoinDisplays() {
+  document.querySelectorAll('.coin-count').forEach(el => el.textContent = S.coins);
+}
+function floatCoins(n) {
+  const el = document.createElement('div');
+  el.className = 'coin-float';
+  el.textContent = `+${n} 🪙`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1400);
+}
+
+// ─── MASCOT SPEECH ────────────────────────────────────────────────────────────
+const MASCOT_TIPS = [
+  'Tap a game to start playing! 🎮',
+  'Earn 🪙 coins, then dress up your doll! 👗',
+  'Build a Word helps you practice spelling! 🔤',
+  'Reading Club has little books just for you! 📚',
+  'Try Rhyme Time and Science Fun! 🎵🔬',
+];
+function showMascotTip() {
+  const b = document.getElementById('mascot-bubble');
+  if (!b) return;
+  b.textContent = MASCOT_TIPS[Math.floor(Math.random() * MASCOT_TIPS.length)];
+  b.classList.add('show');
+  clearTimeout(window._mbTimer);
+  window._mbTimer = setTimeout(() => b.classList.remove('show'), 4200);
+}
+// Speak a short bit of encouragement (used at game starts / wins).
+function mascotSay(text, doSpeak) {
+  mascotReact(0.8);
+  if (doSpeak !== false) speak(text);
+}
+
+// ─── DRESS-UP CLOSET ──────────────────────────────────────────────────────────
+const CLOSET_ITEMS = [
+  { id:'dress_pink',  cat:'outfit', name:'Pink Dress',  cost:0,  fill:'#f9a8d4' },
+  { id:'dress_blue',  cat:'outfit', name:'Blue Gown',   cost:20, fill:'#93c5fd' },
+  { id:'dress_purple',cat:'outfit', name:'Purple',      cost:30, fill:'#c4b5fd' },
+  { id:'dress_red',   cat:'outfit', name:'Ruby',        cost:45, fill:'#fca5a5' },
+  { id:'dress_gold',  cat:'outfit', name:'Gold Gown',   cost:60, fill:'#fcd34d' },
+  { id:'dress_teal',  cat:'outfit', name:'Teal',        cost:35, fill:'#5eead4' },
+  { id:'hair_brown',  cat:'hair', name:'Brown Hair',  cost:0,  fill:'#7c4a1e' },
+  { id:'hair_blonde', cat:'hair', name:'Blonde',      cost:25, fill:'#f4d35e' },
+  { id:'hair_black',  cat:'hair', name:'Black',       cost:25, fill:'#2b2b2b' },
+  { id:'hair_pink',   cat:'hair', name:'Pink',        cost:50, fill:'#f472b6' },
+  { id:'hair_red',    cat:'hair', name:'Red',         cost:40, fill:'#d1603f' },
+  { id:'acc_none',    cat:'accessory', name:'None',       cost:0,  emoji:'' },
+  { id:'acc_bow',     cat:'accessory', name:'Bow',        cost:20, emoji:'🎀' },
+  { id:'acc_crown',   cat:'accessory', name:'Crown',      cost:40, emoji:'👑' },
+  { id:'acc_star',    cat:'accessory', name:'Star Clip',  cost:30, emoji:'⭐' },
+  { id:'acc_phones',  cat:'accessory', name:'Headphones', cost:55, emoji:'🎧' },
+  { id:'acc_flower',  cat:'accessory', name:'Flower',     cost:25, emoji:'🌸' },
+  { id:'bg_studio',   cat:'background', name:'Studio',  cost:0,  fill:'#f1f5f9', scene:'' },
+  { id:'bg_castle',   cat:'background', name:'Castle',  cost:35, fill:'#fce7f3', scene:'🏰' },
+  { id:'bg_stage',    cat:'background', name:'Concert', cost:50, fill:'#ede9fe', scene:'🎤' },
+  { id:'bg_garden',   cat:'background', name:'Garden',  cost:35, fill:'#dcfce7', scene:'🌸' },
+  { id:'bg_beach',    cat:'background', name:'Beach',   cost:40, fill:'#cffafe', scene:'🏖️' },
+];
+function clItem(id) { return CLOSET_ITEMS.find(i => i.id === id) || {}; }
+function dollSVG(o, size) {
+  size = size || 210;
+  const dress = clItem(o.outfit).fill || '#f9a8d4';
+  const hc = clItem(o.hair).fill || '#7c4a1e';
+  const acc = clItem(o.accessory).emoji || '';
+  const bg = clItem(o.background);
+  return `<svg viewBox="0 0 200 240" width="${size}" height="${size * 1.2}" style="filter:drop-shadow(0 6px 14px rgba(0,0,0,0.14))">
+    <rect width="200" height="240" rx="20" fill="${bg.fill || '#f1f5f9'}"/>
+    ${bg.scene ? `<text x="100" y="74" font-size="62" text-anchor="middle" opacity="0.32">${bg.scene}</text>` : ''}
+    <path d="M100 122 L58 218 L142 218 Z" fill="${dress}" stroke="rgba(0,0,0,0.08)" stroke-width="1.5"/>
+    <rect x="70" y="120" width="60" height="16" rx="8" fill="#f6c9a8"/>
+    <rect x="92" y="104" width="16" height="20" fill="#f6c9a8"/>
+    <circle cx="100" cy="80" r="42" fill="${hc}"/>
+    <circle cx="100" cy="82" r="32" fill="#f6c9a8"/>
+    <path d="M66 78 A34 34 0 0 1 134 78 L134 60 Q100 38 66 60 Z" fill="${hc}"/>
+    <circle cx="89" cy="82" r="3.6" fill="#3a2a2a"/>
+    <circle cx="111" cy="82" r="3.6" fill="#3a2a2a"/>
+    <path d="M90 94 Q100 102 110 94" stroke="#b9536b" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="82" cy="90" r="4" fill="#f7a8b8" opacity="0.6"/>
+    <circle cx="118" cy="90" r="4" fill="#f7a8b8" opacity="0.6"/>
+    ${acc ? `<text x="100" y="50" font-size="34" text-anchor="middle">${acc}</text>` : ''}
+  </svg>`;
+}
+function openCloset() { showScreen('screen-closet'); }
+function renderCloset() {
+  updateCoinDisplays();
+  document.getElementById('closet-doll').innerHTML = dollSVG(S.dollOutfit);
+  const cats = [['outfit', '👗 Outfits'], ['hair', '💇 Hair'], ['accessory', '✨ Accessories'], ['background', '🖼️ Scenes']];
+  document.getElementById('closet-items').innerHTML = cats.map(([cat, label]) => {
+    const items = CLOSET_ITEMS.filter(i => i.cat === cat);
+    return `<div class="closet-cat-label">${label}</div><div class="closet-grid">` + items.map(i => {
+      const owned = S.closet.includes(i.id);
+      const equipped = S.dollOutfit[cat] === i.id;
+      const vis = i.emoji !== undefined
+        ? (i.emoji || '🚫')
+        : `<span class="closet-swatch" style="background:${i.fill}"></span>`;
+      const cls = equipped ? 'equipped' : owned ? 'owned' : 'locked';
+      const cost = equipped ? '✓ On' : owned ? 'Wear' : `🪙 ${i.cost}`;
+      return `<button class="closet-item ${cls}" onclick="buyOrEquip('${i.id}')">
+        <div class="closet-item-vis">${vis}</div>
+        <div class="closet-item-name">${i.name}</div>
+        <div class="closet-item-cost">${cost}</div></button>`;
+    }).join('') + `</div>`;
+  }).join('');
+}
+function buyOrEquip(id) {
+  const item = clItem(id); if (!item.id) return;
+  if (!S.closet.includes(id)) {
+    if (S.coins < item.cost) { sfx('wrong'); showToast('Play games to earn more 🪙!'); return; }
+    S.coins -= item.cost;
+    S.closet.push(id);
+    lsSet('rl_coins', S.coins);
+    lsSet('rl_closet', S.closet);
+    sfx('coin');
+  } else {
+    sfx('pop');
+  }
+  S.dollOutfit[item.cat] = id;
+  lsSet('rl_dolloutfit', S.dollOutfit);
+  renderCloset();
+}
+
+// ─── BUILD-A-WORD (spelling) ──────────────────────────────────────────────────
+const SPELL_WORDS = {
+  1: [['cat','🐱'],['dog','🐶'],['sun','☀️'],['hat','🎩'],['bug','🐛'],['pig','🐷'],['bus','🚌'],['box','📦'],['fox','🦊'],['hen','🐔'],['bed','🛏️'],['cup','🥤'],['jam','🍓'],['van','🚐'],['web','🕸️']],
+  2: [['fish','🐟'],['frog','🐸'],['star','⭐'],['moon','🌙'],['tree','🌳'],['cake','🎂'],['bird','🐦'],['ball','⚽'],['book','📖'],['milk','🥛'],['rain','🌧️'],['boat','⛵']],
+  3: [['apple','🍎'],['happy','😊'],['water','💧'],['house','🏠'],['train','🚂'],['sheep','🐑'],['snake','🐍'],['cloud','☁️'],['heart','❤️'],['smile','😄'],['sunny','🌞'],['green','🟢']],
+};
+function startSpellGame() {
+  const pool = SPELL_WORDS[S.spellLevel] || SPELL_WORDS[1];
+  S.spellRounds = shuf([...pool]).slice(0, 8);
+  while (S.spellRounds.length < 8) S.spellRounds.push(pool[randInt(0, pool.length - 1)]);
+  S.spellIdx = 0; S.spellScore = 0;
+  showScreen('screen-spell');
+  mascotSay('Spell the word! Listen and tap the letters.');
+  renderSpellRound();
+}
+function renderSpellRound() {
+  const [word, emoji] = S.spellRounds[S.spellIdx];
+  S.spellTarget = word; S.spellBuilt = []; S.spellRetried = false;
+  document.getElementById('spell-prog').textContent = `${S.spellIdx + 1} of 8`;
+  document.getElementById('spell-score-pill').textContent = `${S.spellScore} ✓`;
+  document.getElementById('spell-progress-fill').style.width = `${(S.spellIdx / 8) * 100}%`;
+  document.getElementById('spell-emoji').textContent = emoji;
+  const fb = document.getElementById('spell-feedback');
+  fb.textContent = ''; fb.className = 'dn-feedback';
+  renderSpellSlots();
+  const letters = shuf(word.split(''));
+  document.getElementById('spell-tiles').innerHTML = letters.map((ch, i) =>
+    `<button class="sb-tile" data-ti="${i}" onclick="placeSpellLetter('${ch}',${i})">${ch}</button>`).join('');
+  setTimeout(() => speak(word), 350);
+}
+function renderSpellSlots() {
+  document.getElementById('spell-slots').innerHTML = S.spellTarget.split('').map((_, i) =>
+    `<div class="sb-box ${S.spellBuilt[i] ? 'sb-filled' : ''}">${S.spellBuilt[i] || ''}</div>`).join('');
+}
+function placeSpellLetter(ch, ti) {
+  if (S.spellBuilt.length >= S.spellTarget.length) return;
+  const tile = document.querySelector(`#spell-tiles .sb-tile[data-ti="${ti}"]`);
+  if (!tile || tile.classList.contains('sb-used')) return;
+  S.spellBuilt.push(ch);
+  tile.classList.add('sb-used');
+  sfx('tap');
+  renderSpellSlots();
+  if (S.spellBuilt.length === S.spellTarget.length) checkSpell();
+}
+function checkSpell() {
+  const fb = document.getElementById('spell-feedback');
+  if (S.spellBuilt.join('') === S.spellTarget) {
+    if (!S.spellRetried) S.spellScore++;
+    fb.innerHTML = `Yes! <strong style="font-size:1.3em">${S.spellTarget.toUpperCase()}</strong> 🌟`;
+    fb.className = 'dn-feedback correct';
+    dnBurst(document.getElementById('spell-emoji'));
+    document.querySelectorAll('#spell-slots .sb-box').forEach(b => b.classList.add('sb-correct'));
+    setTimeout(() => speak(S.spellTarget), 250);
+    setAdvanceTimer(() => { S.spellIdx++; if (S.spellIdx >= 8) showSpellResult(); else renderSpellRound(); }, 1400);
+  } else {
+    S.spellRetried = true;
+    fb.textContent = 'Not yet — try again!';
+    fb.className = 'dn-feedback wrong';
+    sfx('wrong');
+    document.querySelectorAll('#spell-slots .sb-box').forEach(b => b.classList.add('sb-wrong'));
+    setTimeout(clearSpell, 750);
+  }
+}
+function clearSpell() {
+  S.spellBuilt = [];
+  document.querySelectorAll('#spell-tiles .sb-tile').forEach(t => t.classList.remove('sb-used'));
+  renderSpellSlots();
+}
+function showSpellResult() {
+  S.spellgames++; S.totalGames++;
+  S.readingToday++; S.mathSinceRead = 0;
+  if (S.spellScore === 8) S.spellperfect++;
+  const pct = S.spellScore / 8;
+  const prev = advanceLevel('spellLevel', 'spellLevelProg', pct, 3);
+  S.sessions.unshift({ topic: 'Spelling', score: `${S.spellScore}/8`, date: new Date().toLocaleDateString(), level: S.spellLevel });
+  if (S.sessions.length > 100) S.sessions.pop();
+  awardCoins(coinsFor(S.spellScore, 8));
+  persist();
+  document.getElementById('spell-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
+  document.getElementById('spell-result-score').textContent = `${S.spellScore} / 8`;
+  document.getElementById('spell-result-msg').textContent = pct === 1 ? 'Super speller! 🏅' : pct >= 0.6 ? 'Great spelling!' : 'Keep practicing!';
+  document.getElementById('spell-level-msg').innerHTML = levelChangeMsg('spellLevel', 'spellLevelProg', prev);
+  sfx('win');
+  showScreen('screen-spellresult');
+  if (pct === 1) setTimeout(spawnConfetti, 250);
+}
+
+// ─── RHYME TIME ───────────────────────────────────────────────────────────────
+const RHYME_FAMILIES = [
+  { key:'at',  words:[['cat','🐱'],['hat','🎩'],['bat','🦇'],['rat','🐀']] },
+  { key:'og',  words:[['dog','🐶'],['log','🪵'],['frog','🐸'],['hog','🐗']] },
+  { key:'un',  words:[['sun','☀️'],['run','🏃'],['bun','🍞'],['fun','🎉']] },
+  { key:'ee',  words:[['bee','🐝'],['tree','🌳'],['key','🔑'],['knee','🦵']] },
+  { key:'ar',  words:[['star','⭐'],['car','🚗'],['jar','🫙']] },
+  { key:'ake', words:[['cake','🎂'],['snake','🐍'],['lake','🏞️'],['rake','🍂']] },
+  { key:'ug',  words:[['bug','🐛'],['rug','🧶'],['mug','☕'],['hug','🤗']] },
+  { key:'en',  words:[['hen','🐔'],['pen','🖊️'],['ten','🔟']] },
+  { key:'all', words:[['ball','⚽'],['wall','🧱'],['tall','📏']] },
+  { key:'ing', words:[['ring','💍'],['king','🤴'],['wing','🪽']] },
+];
+function startRhymeGame() {
+  S.rhymeRounds = [];
+  for (let i = 0; i < 10; i++) S.rhymeRounds.push(makeRhymeRound());
+  S.rhymeIdx = 0; S.rhymeScore = 0;
+  showScreen('screen-rhyme');
+  mascotSay('Find the word that rhymes! Words that rhyme sound the same at the end.');
+  renderRhymeRound();
+}
+function makeRhymeRound() {
+  const fam = RHYME_FAMILIES[randInt(0, RHYME_FAMILIES.length - 1)];
+  const picks = shuf([...fam.words]);
+  const target = picks[0], answer = picks[1];
+  const others = shuf(RHYME_FAMILIES.filter(f => f.key !== fam.key)).slice(0, 3)
+    .map(f => f.words[randInt(0, f.words.length - 1)]);
+  return { target, answer, choices: shuf([answer, ...others]) };
+}
+function renderRhymeRound() {
+  const r = S.rhymeRounds[S.rhymeIdx];
+  S.rhymeAnswered = false;
+  S.rhymeTargetWord = r.target[0];
+  document.getElementById('rhyme-prog').textContent = `${S.rhymeIdx + 1} of 10`;
+  document.getElementById('rhyme-score-pill').textContent = `${S.rhymeScore} ✓`;
+  document.getElementById('rhyme-progress-fill').style.width = `${(S.rhymeIdx / 10) * 100}%`;
+  document.getElementById('rhyme-target-emoji').textContent = r.target[1];
+  document.getElementById('rhyme-target-word').textContent = r.target[0];
+  const fb = document.getElementById('rhyme-feedback');
+  fb.textContent = ''; fb.className = 'dn-feedback';
+  document.getElementById('rhyme-choices').innerHTML = r.choices.map((c, i) =>
+    `<button class="emoji-choice" style="font-size:24px;font-weight:900" onclick="answerRhyme(${i})">${c[1]}<div style="font-size:18px;margin-top:4px">${c[0]}</div></button>`).join('');
+  setTimeout(() => speak(r.target[0]), 350);
+}
+function answerRhyme(i) {
+  if (S.rhymeAnswered) return;
+  const r = S.rhymeRounds[S.rhymeIdx];
+  const correct = r.choices[i][0] === r.answer[0];
+  const btns = [...document.querySelectorAll('#rhyme-choices .emoji-choice')];
+  const fb = document.getElementById('rhyme-feedback');
+  if (correct) {
+    S.rhymeAnswered = true;
+    S.rhymeScore++;
+    btns.forEach(b => b.disabled = true);
+    btns[i].classList.add('ec-correct');
+    fb.innerHTML = `${r.answer[0]} rhymes with ${r.target[0]}! 🎉`;
+    fb.className = 'dn-feedback correct';
+    dnBurst(btns[i]);
+    setAdvanceTimer(() => { S.rhymeIdx++; if (S.rhymeIdx >= 10) showRhymeResult(); else renderRhymeRound(); }, 1400);
+  } else {
+    btns[i].classList.add('ec-wrong');
+    btns[i].disabled = true;
+    fb.textContent = 'Listen again — try another!';
+    fb.className = 'dn-feedback wrong';
+    sfx('wrong');
+    speak(r.target[0]);
+  }
+}
+function showRhymeResult() {
+  S.rhymegames++; S.totalGames++;
+  S.readingToday++; S.mathSinceRead = 0;
+  const pct = S.rhymeScore / 10;
+  S.sessions.unshift({ topic: 'Rhyming', score: `${S.rhymeScore}/10`, date: new Date().toLocaleDateString(), level: 1 });
+  if (S.sessions.length > 100) S.sessions.pop();
+  awardCoins(coinsFor(S.rhymeScore, 10));
+  persist();
+  document.getElementById('rhyme-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
+  document.getElementById('rhyme-result-score').textContent = `${S.rhymeScore} / 10`;
+  document.getElementById('rhyme-result-msg').textContent = pct === 1 ? 'Rhyme star! 🏅' : pct >= 0.6 ? 'Great ears!' : 'Keep practicing!';
+  sfx('win');
+  showScreen('screen-rhymeresult');
+  if (pct === 1) setTimeout(spawnConfetti, 250);
+}
+
+// ─── SCIENCE FUN ──────────────────────────────────────────────────────────────
+const SCIENCE_ROUNDS = [
+  { q:'Which one is ALIVE?', choices:[['🐶',1],['🪨',0],['🚗',0],['⚽',0]], fact:'Living things grow, eat, and breathe. A dog is alive!' },
+  { q:'Which one is NOT alive?', choices:[['🌳',0],['🐱',0],['🪨',1],['🐦',0]], fact:'A rock is not alive — it does not grow or eat.' },
+  { q:'Where does a fish live?', choices:[['🌊',1],['🏜️',0],['🌳',0],['🏠',0]], fact:'Fish live in water and breathe with gills!' },
+  { q:'Which animal can FLY?', choices:[['🦅',1],['🐘',0],['🐢',0],['🐟',0]], fact:'Birds have wings and feathers to help them fly!' },
+  { q:'What do plants need to grow?', choices:[['☀️',1],['🍫',0],['📺',0],['👟',0]], fact:'Plants need sunlight, water, and air to grow.' },
+  { q:'Which gives us light in the daytime?', choices:[['☀️',1],['🌙',0],['⭐',0],['💡',0]], fact:'The Sun lights up our daytime sky!' },
+  { q:'Which lives in the ocean?', choices:[['🐙',1],['🐄',0],['🐔',0],['🐿️',0]], fact:'An octopus lives in the ocean and has eight arms!' },
+  { q:'Which one is COLD?', choices:[['❄️',1],['🔥',0],['☀️',0],['🌶️',0]], fact:'Ice and snow are very cold!' },
+  { q:'Which one is HOT?', choices:[['🔥',1],['🧊',0],['❄️',0],['🍦',0]], fact:'Fire is very hot — never touch it!' },
+  { q:'Which animal has a hard shell?', choices:[['🐢',1],['🐯',0],['🐴',0],['🐶',0]], fact:'A turtle carries its hard shell for protection.' },
+  { q:'What do bees make?', choices:[['🍯',1],['🥛',0],['🍞',0],['🧀',0]], fact:'Bees make sweet honey from flower nectar!' },
+  { q:'Which one FLOATS on water?', choices:[['⛵',1],['🪨',0],['🔑',0],['⚓',0]], fact:'Boats float, but heavy rocks sink!' },
+  { q:'Which planet do we live on?', choices:[['🌍',1],['🌕',0],['☀️',0],['⭐',0]], fact:'We live on Earth — the blue and green planet!' },
+  { q:'Which season brings snow?', choices:[['⛄',1],['🌻',0],['🍂',0],['🏖️',0]], fact:'Winter is the cold season with snow!' },
+  { q:'Which animal says "moo"?', choices:[['🐄',1],['🐖',0],['🐑',0],['🐔',0]], fact:'Cows say moo and give us milk!' },
+  { q:'Which one is a baby butterfly?', choices:[['🐛',1],['🐝',0],['🐞',0],['🕷️',0]], fact:'A caterpillar grows up to become a butterfly!' },
+];
+function startScienceGame() {
+  S.scienceRounds = shuf([...SCIENCE_ROUNDS]).slice(0, 10);
+  S.scienceIdx = 0; S.scienceScore = 0;
+  showScreen('screen-science');
+  mascotSay('Let us discover science! Tap the best answer.');
+  renderScienceRound();
+}
+function renderScienceRound() {
+  const r = S.scienceRounds[S.scienceIdx];
+  S.scienceAnswered = false;
+  document.getElementById('science-prog').textContent = `${S.scienceIdx + 1} of 10`;
+  document.getElementById('science-score-pill').textContent = `${S.scienceScore} ✓`;
+  document.getElementById('science-progress-fill').style.width = `${(S.scienceIdx / 10) * 100}%`;
+  document.getElementById('science-q').textContent = r.q;
+  document.getElementById('science-fact').style.display = 'none';
+  const fb = document.getElementById('science-feedback');
+  fb.textContent = ''; fb.className = 'dn-feedback';
+  const order = shuf(r.choices.map((c, i) => i));
+  document.getElementById('science-choices').innerHTML = order.map(i =>
+    `<button class="emoji-choice" data-correct="${r.choices[i][1]}" onclick="answerScience(this)">${r.choices[i][0]}</button>`).join('');
+  setTimeout(() => speak(r.q), 350);
+}
+function answerScience(btn) {
+  if (S.scienceAnswered) return;
+  const r = S.scienceRounds[S.scienceIdx];
+  const correct = btn.getAttribute('data-correct') === '1';
+  const fb = document.getElementById('science-feedback');
+  if (correct) {
+    S.scienceAnswered = true;
+    S.scienceScore++;
+    document.querySelectorAll('#science-choices .emoji-choice').forEach(b => b.disabled = true);
+    btn.classList.add('ec-correct');
+    fb.textContent = '🎉 Correct!';
+    fb.className = 'dn-feedback correct';
+    dnBurst(btn);
+    const factEl = document.getElementById('science-fact');
+    factEl.className = 'sci-fact'; factEl.textContent = '💡 ' + r.fact; factEl.style.display = '';
+    setTimeout(() => speak(r.fact), 300);
+    setAdvanceTimer(() => { S.scienceIdx++; if (S.scienceIdx >= 10) showScienceResult(); else renderScienceRound(); }, 2400);
+  } else {
+    btn.classList.add('ec-wrong');
+    btn.disabled = true;
+    fb.textContent = 'Try again!';
+    fb.className = 'dn-feedback wrong';
+    sfx('wrong');
+  }
+}
+function showScienceResult() {
+  S.sciencegames++; S.totalGames++;
+  const pct = S.scienceScore / 10;
+  S.sessions.unshift({ topic: 'Science', score: `${S.scienceScore}/10`, date: new Date().toLocaleDateString(), level: 1 });
+  if (S.sessions.length > 100) S.sessions.pop();
+  awardCoins(coinsFor(S.scienceScore, 10));
+  persist();
+  document.getElementById('science-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
+  document.getElementById('science-result-score').textContent = `${S.scienceScore} / 10`;
+  document.getElementById('science-result-msg').textContent = pct === 1 ? 'Super scientist! 🏅' : pct >= 0.6 ? 'Great discovering!' : 'Keep exploring!';
+  sfx('win');
+  showScreen('screen-scienceresult');
+  if (pct === 1) setTimeout(spawnConfetti, 250);
+}
+
+// ─── READING CLUB (decodable library — no API, fully offline) ──────────────────
+const READER_BOOKS = [
+  { id:'r1', level:1, title:'The Cat', emoji:'🐱', text:'A cat sat. The cat is on a mat. The cat is tan. Pat the cat! The cat ran. Run, cat, run!' },
+  { id:'r2', level:1, title:'The Big Pig', emoji:'🐷', text:'A pig is big. The pig digs. The pig sits in the mud. The pig has a hat. The big pig naps. Nap, pig, nap!' },
+  { id:'r3', level:1, title:'The Red Hen', emoji:'🐔', text:'A hen is red. The hen has ten eggs. The hen sat on the eggs. The eggs are warm. Ten eggs! The hen is glad.' },
+  { id:'r4', level:2, title:'Frog and Log', emoji:'🐸', text:'A frog sat on a log. The frog can hop. Hop, frog, hop! The frog hops to the pond. The frog sees a fish. The fish and frog swim and play.' },
+  { id:'r5', level:2, title:'The Ship', emoji:'⛵', text:'The ship is on the sea. The wind is strong and the ship goes fast. A big fish jumps up high. The sun is bright. At last the ship sails home.' },
+  { id:'r6', level:3, title:'The Snail Race', emoji:'🐌', text:'Sam the snail wants to race. He is slow but he will not stop. The other snails zoom past him. Sam keeps going and going. Slow and steady, Sam wins the race! All the snails cheer for Sam.' },
+];
+function openReaderList() { showScreen('screen-readerlist'); }
+function renderReaderList() {
+  const wrap = document.getElementById('reader-shelf-wrap');
+  const levels = [...new Set(READER_BOOKS.map(b => b.level))].sort();
+  wrap.innerHTML = levels.map(lv => {
+    const books = READER_BOOKS.filter(b => b.level === lv);
+    return `<div class="reader-level-label">📘 Level ${lv}</div><div class="reader-shelf">` + books.map(b =>
+      `<button class="reader-book" onclick="openReaderBook('${b.id}')">
+        ${S.readerDone.includes(b.id) ? '<span class="reader-book-done">✅</span>' : ''}
+        <div class="reader-book-emoji">${b.emoji}</div>
+        <div class="reader-book-title">${b.title}</div></button>`).join('') + `</div>`;
+  }).join('');
+}
+function openReaderBook(id) {
+  const book = READER_BOOKS.find(b => b.id === id);
+  if (!book) return;
+  S.readerBook = book;
+  stopReaderAloud();
+  document.getElementById('reader-title').textContent = book.title;
+  document.getElementById('reader-emoji').textContent = book.emoji;
+  const words = book.text.split(/\s+/).filter(Boolean);
+  document.getElementById('reader-text').innerHTML = words.map((w, i) => {
+    const clean = w.replace(/[^A-Za-z']/g, '');
+    return `<span class="rword" data-i="${i}" data-w="${clean}" onclick="tapReaderWord(this)">${w}</span> `;
+  }).join('');
+  showScreen('screen-readerbook');
+  mascotSay('You can read this little book! Tap a word to hear it.');
+}
+function tapReaderWord(el) {
+  const w = el.dataset.w;
+  if (w) speak(w);
+  el.classList.add('tapped');
+  setTimeout(() => el.classList.remove('tapped'), 450);
+}
+function toggleReaderAloud() {
+  if (S.readerAloudActive) { stopReaderAloud(); return; }
+  if (!window.speechSynthesis || !S.readerBook) return;
+  speechSynthesis.cancel();
+  const words = S.readerBook.text.split(/\s+/).filter(Boolean);
+  const offsets = []; let pos = 0;
+  words.forEach(w => { offsets.push(pos); pos += w.length + 1; });
+  const utt = new SpeechSynthesisUtterance(words.join(' '));
+  utt.rate = 0.8;
+  let cur = null;
+  utt.onboundary = (e) => {
+    if (e.name && e.name !== 'word') return;
+    let idx = -1;
+    for (let i = offsets.length - 1; i >= 0; i--) { if (e.charIndex >= offsets[i]) { idx = i; break; } }
+    if (idx === -1) return;
+    if (cur) cur.classList.remove('read-highlight');
+    const el = document.querySelector(`#reader-text .rword[data-i="${idx}"]`);
+    if (el) { el.classList.add('read-highlight'); cur = el; }
+  };
+  const done = () => { if (cur) cur.classList.remove('read-highlight'); cur = null; S.readerAloudActive = false; updateReaderAloudBtn(); };
+  utt.onend = done; utt.onerror = done;
+  S.readerAloudActive = true;
+  updateReaderAloudBtn();
+  speechSynthesis.speak(utt);
+}
+function stopReaderAloud() {
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  document.querySelectorAll('#reader-text .rword.read-highlight').forEach(el => el.classList.remove('read-highlight'));
+  S.readerAloudActive = false;
+  updateReaderAloudBtn();
+}
+function updateReaderAloudBtn() {
+  const b = document.getElementById('reader-readaloud-btn');
+  if (b) b.textContent = S.readerAloudActive ? '⏸ Stop reading' : '🔊 Read it to me';
+}
+function finishReader() {
+  stopReaderAloud();
+  const id = S.readerBook && S.readerBook.id;
+  const firstTime = id && !S.readerDone.includes(id);
+  if (firstTime) S.readerDone.push(id);
+  S.totalGames++;
+  S.readingToday++; S.mathSinceRead = 0;
+  S.sessions.unshift({ topic: 'Reading Club', score: '✓', date: new Date().toLocaleDateString(), level: S.readerBook ? S.readerBook.level : 1 });
+  if (S.sessions.length > 100) S.sessions.pop();
+  awardCoins(firstTime ? 12 : 5);
+  persist();
+  sfx('win');
+  mascotSay('You read the whole book! Wonderful!');
+  setTimeout(spawnConfetti, 200);
+  setTimeout(openReaderList, 1200);
 }
 
 refreshHome();

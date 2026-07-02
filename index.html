@@ -813,6 +813,73 @@
       @keyframes glamScreenInRM { from{opacity:0} to{opacity:1} }
       .glam-swipe { display: none !important; }
     }
+
+    /* ── TODAY'S ADVENTURE: daily quest card (home) ── */
+    #quest-card {
+      position: relative; z-index: 1;
+      margin-top: 14px; padding: 14px 16px 12px;
+      background: linear-gradient(150deg, rgba(255,255,255,0.82), rgba(250,240,255,0.65));
+      border: 1.5px solid rgba(168,85,247,0.45); border-radius: var(--r);
+      box-shadow: var(--shadow-sm), 0 0 14px rgba(168,85,247,0.14);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    }
+    .quest-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .quest-title {
+      font-size: 16px; font-weight: 900;
+      background: linear-gradient(115deg,#ff2d9b,#a855f7,#3b82f6);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .quest-count { font-size: 13px; font-weight: 900; color: #7c3aed; background: #ede9fe; border-radius: var(--pr); padding: 3px 10px; }
+    .quest-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 14px; font-weight: 700; color: var(--text); }
+    .quest-row.quest-done .quest-label { text-decoration: line-through; opacity: 0.55; }
+    .quest-check { font-size: 15px; }
+    .quest-icon { font-size: 17px; }
+    .glam-showtime-btn {
+      width: 100%; margin-top: 8px; min-height: 52px; border: none; border-radius: 14px;
+      font-size: 17px; font-weight: 900; color: #fff; cursor: pointer; font-family: inherit;
+      background: linear-gradient(115deg,#ff2d9b,#a855f7,#3b82f6); background-size: 200% 200%;
+      box-shadow: 0 0 12px rgba(255,45,155,.45), 0 0 24px rgba(168,85,247,.30);
+      animation: glamShowtimePulse 1.6s ease-in-out infinite;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glam-showtime-btn:active { transform: scale(0.96); }
+    /* Pulse via glow + gradient only — never transform, so the tap target stays still. */
+    @keyframes glamShowtimePulse {
+      0%,100% { background-position: 0% 50%;   box-shadow: 0 0 12px rgba(255,45,155,.45), 0 0 24px rgba(168,85,247,.30); }
+      50%     { background-position: 100% 50%; box-shadow: 0 0 18px rgba(255,45,155,.65), 0 0 34px rgba(168,85,247,.45); }
+    }
+    #quest-claimed { text-align: center; font-size: 13px; font-weight: 800; color: #7c3aed; margin-top: 6px; }
+
+    /* ── DOLL CONCERT: quest finale stage (dark is OK here — it's a celebration moment) ── */
+    #screen-concert.active { display: flex; flex-direction: column; min-height: 92vh; }
+    .concert-stage {
+      position: relative; flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 10px; border-radius: var(--r); overflow: hidden;
+      padding: 34px 16px 20px; margin-top: 16px;
+      background: radial-gradient(120% 90% at 50% 0%, #2b1d5e 0%, #17103a 55%, #0c0824 100%);
+    }
+    .concert-beams {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        conic-gradient(from 205deg at 18% 0%, transparent 0deg, rgba(255,45,155,.30) 12deg, transparent 26deg),
+        conic-gradient(from 155deg at 82% 0%, transparent 0deg, rgba(34,211,238,.28) 12deg, transparent 26deg);
+      filter: blur(8px);
+      animation: glamSpotSweep 8s ease-in-out infinite alternate; transform-origin: 50% 0%;
+    }
+    .concert-doll {
+      position: relative; z-index: 1;
+      animation: concertDance 0.9s ease-in-out infinite;
+      filter: drop-shadow(0 0 22px rgba(255,45,155,0.45));
+    }
+    @keyframes concertDance { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-14px) rotate(3deg)} }
+    .concert-caption { position: relative; z-index: 1; font-size: 19px; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 0 12px rgba(168,85,247,.8); }
+    .concert-crowd { position: relative; z-index: 1; display: flex; gap: 6px; font-size: 26px; }
+    .concert-crowd span { display: inline-block; animation: crowdBob 0.7s ease-in-out infinite; }
+    @keyframes crowdBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+    .concert-coins { position: relative; z-index: 1; font-size: 15px; font-weight: 900; color: #fcd34d; }
+    @media (prefers-reduced-motion: reduce) {
+      .concert-beams, .concert-doll, .concert-crowd span, .glam-showtime-btn { animation: none; }
+    }
   </style>
 </head>
 <body>
@@ -838,6 +905,16 @@
       <button class="icon-toggle" id="mute-btn" onclick="toggleMute()" title="Sound on/off">🔊</button>
       <button class="lock-btn" onclick="showScreen('screen-parent-entry')">🔒 Parent</button>
     </div>
+  </div>
+
+  <div id="quest-card">
+    <div class="quest-head">
+      <span class="quest-title">🗺️ Today's Adventure</span>
+      <span class="quest-count" id="quest-count">0 / 3</span>
+    </div>
+    <div id="quest-list"></div>
+    <button class="glam-showtime-btn" id="quest-showtime" style="display:none" onclick="startConcert()">🎤 SHOWTIME! Watch your doll perform!</button>
+    <div id="quest-claimed" style="display:none">🌟 What a show! New adventures tomorrow!</div>
   </div>
 
   <div id="home-games">
@@ -925,6 +1002,18 @@
       <div class="hc-name">My Doll</div>
       <div class="hc-sub" id="home-closet-sub">Dress up · 🪙 <span class="coin-count">0</span></div>
     </div>
+  </div>
+</div>
+
+<!-- ═══ DOLL CONCERT (quest finale) ═══ -->
+<div id="screen-concert" class="screen">
+  <div class="concert-stage">
+    <div class="concert-beams"></div>
+    <div class="concert-doll" id="concert-doll"></div>
+    <div class="concert-caption">⭐ Your doll rocks the stage! ⭐</div>
+    <div class="concert-crowd" id="concert-crowd"></div>
+    <div class="concert-coins" id="concert-coins"></div>
+    <button class="btn btn-primary btn-full" style="position:relative;z-index:1;margin-top:12px" onclick="showScreen('screen-home')">Take a bow → Home 🏠</button>
   </div>
 </div>
 
@@ -2440,6 +2529,7 @@ function refreshHome() {
   updateCoinDisplays();
   updateMuteBtn();
   showMascotTip();
+  renderQuests();
 
   // Live mini-clock of the current time, in place of the 🕐 emoji.
   const now = new Date();
@@ -3156,7 +3246,7 @@ function confirmReset() {
    'rl_readingintroseen',
    'rl_coins','rl_closet','rl_dolloutfit',
    'rl_spelllevel','rl_spelllevelprog','rl_spellgames','rl_spellperfect',
-   'rl_rhymegames','rl_sciencegames','rl_readerdone']
+   'rl_rhymegames','rl_sciencegames','rl_readerdone','rl_questclaim']
     .forEach(k => localStorage.removeItem(k));
   location.reload();
 }
@@ -5031,6 +5121,7 @@ const MASCOT_TIPS = [
   'Build a Word helps you practice spelling! 🔤',
   'Reading Club has little books just for you! 📚',
   'Try Rhyme Time and Science Fun! 🎵🔬',
+  "Finish Today's Adventure for a doll concert! 🎤",
 ];
 function showMascotTip() {
   const b = document.getElementById('mascot-bubble');
@@ -5479,6 +5570,103 @@ function finishReader() {
   mascotSay('You read the whole book! Wonderful!');
   setTimeout(spawnConfetti, 200);
   setTimeout(openReaderList, 1200);
+}
+
+// ─── TODAY'S ADVENTURE: daily quests + doll concert finale ────────────────────
+// Progress is computed live from today's entries in S.sessions — no new
+// counters to persist. Only the once-per-day show bonus is stored
+// (rl_questclaim = date string of the last claimed concert).
+
+function questSessionsToday() {
+  const t = new Date().toLocaleDateString();
+  return S.sessions.filter(s => s.date === t);
+}
+function questPlays(topic) { return questSessionsToday().filter(s => s.topic === topic).length; }
+// "Story" = anything not claimed by a named game (same convention as playedToday),
+// plus Reading Club books.
+function questStoriesToday() {
+  const named = ['Sight Words','Daily News','Math Time','Sound Boxes','Clock Time','Spelling','Rhyming','Science'];
+  return questSessionsToday().filter(s => s.topic === 'Reading Club' || !named.includes(s.topic)).length;
+}
+function questSuperScore() {
+  return questSessionsToday().some(s => {
+    const m = /^(\d+)\/(\d+)$/.exec(s.score);
+    return m && (+m[1] / +m[2]) >= 0.8;
+  });
+}
+
+const QUEST_POOL = [
+  { id:'story', icon:'📖', label:'Read a story or little book',   check: () => questStoriesToday() >= 1 },
+  { id:'sw',    icon:'🎮', label:'Play the Sight Word Game',      check: () => questPlays('Sight Words') >= 1 },
+  { id:'math',  icon:'🔢', label:'Finish a Math Time',            check: () => questPlays('Math Time') >= 1 },
+  { id:'sb',    icon:'📦', label:'Play Sound Boxes',              check: () => questPlays('Sound Boxes') >= 1 },
+  { id:'clock', icon:'🕐', label:'Play Clock Time',               check: () => questPlays('Clock Time') >= 1 },
+  { id:'spell', icon:'🔤', label:'Build words in Spelling',       check: () => questPlays('Spelling') >= 1 },
+  { id:'rhyme', icon:'🎵', label:'Find rhymes in Rhyme Time',     check: () => questPlays('Rhyming') >= 1 },
+  { id:'sci',   icon:'🔬', label:'Discover in Science Fun',       check: () => questPlays('Science') >= 1 },
+  { id:'star',  icon:'⭐', label:'Get a super score in any game', check: questSuperScore },
+];
+
+// Three quests per day, chosen deterministically from the date so they rotate
+// daily with nothing to persist and survive any reload mid-day.
+function questToday() {
+  const d = new Date().toLocaleDateString();
+  let h = 5381;
+  for (const c of d) h = ((h * 33) + c.charCodeAt(0)) >>> 0;
+  const idx = [];
+  let k = h;
+  while (idx.length < 3) {
+    k = ((k * 1103515245) + 12345) >>> 0;
+    const i = k % QUEST_POOL.length;
+    if (!idx.includes(i)) idx.push(i);
+  }
+  return idx.map(i => QUEST_POOL[i]);
+}
+
+function renderQuests() {
+  const list = document.getElementById('quest-list');
+  if (!list) return;
+  const quests = questToday();
+  const done = quests.filter(q => q.check()).length;
+  document.getElementById('quest-count').textContent = `${done} / 3`;
+  list.innerHTML = quests.map(q => {
+    const ok = q.check();
+    return `<div class="quest-row ${ok ? 'quest-done' : ''}">
+      <span class="quest-check">${ok ? '✅' : '⬜'}</span>
+      <span class="quest-icon">${q.icon}</span>
+      <span class="quest-label">${q.label}</span></div>`;
+  }).join('');
+  const claimed = lsGet('rl_questclaim','') === new Date().toLocaleDateString();
+  document.getElementById('quest-showtime').style.display = (done === 3 && !claimed) ? '' : 'none';
+  document.getElementById('quest-claimed').style.display  = (done === 3 && claimed) ? '' : 'none';
+}
+
+// The finale: her own dressed-up doll performs on a neon stage. The +25 show
+// bonus is claimable once per day; re-watching the show is always allowed.
+function startConcert() {
+  const today = new Date().toLocaleDateString();
+  const already = lsGet('rl_questclaim','') === today;
+  document.getElementById('concert-doll').innerHTML = dollSVG(S.dollOutfit, 150);
+  document.getElementById('concert-crowd').innerHTML =
+    ['🧸','👧','🦊','🐰','🐻','🦄','👦','🐱']
+      .map((e, i) => `<span style="animation-delay:${(i % 4) * 0.17}s">${e}</span>`).join('');
+  document.getElementById('concert-coins').textContent = already ? '🎶 Encore! 🎶' : '+25 🪙 show bonus!';
+  showScreen('screen-concert');
+  mascotSay("It's showtime! Your doll is the star!");
+  setTimeout(() => spawnConfetti('SHOWTIME!'), 400);
+  concertTune();
+  if (!already) {
+    lsSet('rl_questclaim', today);
+    setTimeout(() => awardCoins(25), 900);
+  }
+}
+
+function concertTune() {
+  if (S.muted) return;
+  const ac = audioCtx(); if (!ac) return;
+  const t = ac.currentTime;
+  [[523,0],[659,.14],[784,.28],[1047,.42],[784,.60],[1047,.74],[1319,.90]]
+    .forEach(([f, dt]) => tone(f, t + dt, 0.3, 'triangle', 0.14));
 }
 
 refreshHome();

@@ -830,7 +830,9 @@
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     }
     .quest-count { font-size: 13px; font-weight: 900; color: #7c3aed; background: #ede9fe; border-radius: var(--pr); padding: 3px 10px; }
-    .quest-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 14px; font-weight: 700; color: var(--text); }
+    /* Hardcoded dark text (not var(--text)): the card keeps its light frosted
+       background in dark mode, where var(--text) flips to near-white. */
+    .quest-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 14px; font-weight: 700; color: #2b2440; }
     .quest-row.quest-done .quest-label { text-decoration: line-through; opacity: 0.55; }
     .quest-check { font-size: 15px; }
     .quest-icon { font-size: 17px; }

@@ -3268,11 +3268,14 @@ function updateStreak() {
 
 function speak(word) {
   if (!window.speechSynthesis) return;
-  speechSynthesis.cancel();
-  clearReadAloudHighlight();
-  const utt = new SpeechSynthesisUtterance(word);
-  utt.rate = 0.9;
-  speechSynthesis.speak(utt);
+  try {
+    speechSynthesis.cancel();
+    clearReadAloudHighlight();
+    const utt = new SpeechSynthesisUtterance(word);
+    utt.rate = 0.9;
+    utt.lang = 'en-US';
+    speechSynthesis.speak(utt);
+  } catch (e) {}
 }
 
 function stopSpeech() {
@@ -5030,10 +5033,27 @@ function showSbResult() {
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 
-// Unlock Web Speech API on first touch — iOS requires a prior user gesture
-document.addEventListener('touchstart', () => {
-  if (window.speechSynthesis) { speechSynthesis.cancel(); }
-}, { once: true });
+// Unlock Web Speech API on the first user gesture. iOS/iPadOS keeps TTS SILENT
+// until speak() (not just cancel()) has actually run inside a gesture, and until
+// the voice list has loaded — so prime both here. cancel()-only never unlocks,
+// which left every spoken word (sight words, sound boxes, reading…) mute.
+let _speechUnlocked = false;
+function unlockSpeech() {
+  if (_speechUnlocked || !window.speechSynthesis) return;
+  _speechUnlocked = true;
+  try {
+    speechSynthesis.getVoices();
+    const primer = new SpeechSynthesisUtterance(' ');
+    primer.volume = 0;
+    speechSynthesis.speak(primer);
+  } catch (e) {}
+}
+['touchstart', 'pointerdown', 'mousedown', 'keydown'].forEach(ev =>
+  document.addEventListener(ev, unlockSpeech, { once: true, capture: true }));
+if (window.speechSynthesis) {
+  try { speechSynthesis.getVoices(); } catch (e) {}
+  try { speechSynthesis.addEventListener('voiceschanged', () => { try { speechSynthesis.getVoices(); } catch (e) {} }); } catch (e) {}
+}
 
 // Auto-install API key from QR code scan
 if (location.hash.startsWith('#apikey=')) {

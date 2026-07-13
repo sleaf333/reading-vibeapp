@@ -4538,7 +4538,7 @@ function svgClockSet(r) {
     ? `<line class="clock-hand-in" x1="50" y1="50" x2="${(50+24*Math.sin(hAngle)).toFixed(1)}" y2="${(50-24*Math.cos(hAngle)).toFixed(1)}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>` : '';
   const minHand = showMinute
     ? `<line class="clock-hand-in" x1="50" y1="50" x2="${(50+30*Math.sin(mAngle)).toFixed(1)}" y2="${(50-30*Math.cos(mAngle)).toFixed(1)}" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>` : '';
-  return `<svg width="200" height="200" viewBox="0 0 100 100" style="display:block;margin:0 auto">` +
+  return `<svg width="300" height="300" viewBox="0 0 100 100" style="display:block;margin:0 auto;max-width:100%;height:auto">` +
     `<circle cx="50" cy="50" r="47" fill="white" stroke="#cbd5e1" stroke-width="2"/>` +
     spots + hourHand + minHand +
     `<circle cx="50" cy="50" r="3" fill="#1e293b"/>` +
@@ -5454,8 +5454,7 @@ function answerScience(btn) {
     dnBurst(btn);
     const factEl = document.getElementById('science-fact');
     factEl.className = 'sci-fact'; factEl.textContent = '💡 ' + r.fact; factEl.style.display = '';
-    setTimeout(() => speak(r.fact), 300);
-    setAdvanceTimer(() => { S.scienceIdx++; if (S.scienceIdx >= 10) showScienceResult(); else renderScienceRound(); }, 2400);
+    speakFactThenAdvance(r.fact);
   } else {
     btn.classList.add('ec-wrong');
     btn.disabled = true;
@@ -5464,6 +5463,34 @@ function answerScience(btn) {
     sfx('wrong');
   }
 }
+// Reads the "did you know" fact aloud, then advances only once the fact has
+// FINISHED being spoken (plus a short pause) — so the next question's speech
+// never cuts it off. Falls back to a readable fixed delay when muted or when
+// the speech engine can't report completion.
+function speakFactThenAdvance(fact) {
+  const roundAtStart = S.scienceIdx;
+  const goNext = () => { S.scienceIdx++; if (S.scienceIdx >= 10) showScienceResult(); else renderScienceRound(); };
+  const advance = () => {
+    // Guard against a late onend firing after she's navigated away or moved on.
+    const active = document.querySelector('.screen.active');
+    if (active && active.id === 'screen-science' && S.scienceIdx === roundAtStart && S.scienceAnswered) {
+      setAdvanceTimer(goNext, 700);
+    }
+  };
+  // Muted or no speech engine: give her time to READ the fact, then advance.
+  if (!window.speechSynthesis || S.muted) { setAdvanceTimer(goNext, 3200); return; }
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(fact);
+  utt.rate = 0.9;
+  let done = false;
+  const go = () => { if (!done) { done = true; advance(); } };
+  utt.onend = go;
+  utt.onerror = go;
+  // Safety net (longer than the real speech time) if onend never fires.
+  setTimeout(go, 2600 + fact.length * 80);
+  setTimeout(() => speechSynthesis.speak(utt), 250);
+}
+
 function showScienceResult() {
   S.sciencegames++; S.totalGames++;
   const pct = S.scienceScore / 10;

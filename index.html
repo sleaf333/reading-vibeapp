@@ -3695,7 +3695,22 @@ function fmtTime(totalMin) {
   return h + ':' + (m < 10 ? '0' : '') + m;
 }
 
-function svgClock(h, m, size=100, labels=false) {
+// Faint outer ring of minute values (00,05,…55) at each hour position — a
+// teaching scaffold so the child can READ the minute the long hand points to
+// instead of computing ×5. Sits at radius 44 (just beyond the minute-hand tip
+// at 38), so the long hand literally points at its minute number.
+function minuteRingSVG(radius, fontSize) {
+  radius = radius || 44; fontSize = fontSize || 5;
+  return Array.from({length:12}, (_,i) => {
+    const a = i / 12 * 2 * Math.PI;
+    const x = (50 + radius * Math.sin(a)).toFixed(1);
+    const y = (50 - radius * Math.cos(a)).toFixed(1);
+    const mv = String(i * 5).padStart(2, '0');
+    return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${fontSize}" font-weight="700" fill="#a78bfa" font-family="sans-serif">${mv}</text>`;
+  }).join('');
+}
+
+function svgClock(h, m, size=100, labels=false, minuteRing=false) {
   const mAngle = (m / 60) * 2 * Math.PI;
   const hAngle = ((h % 12) + m / 60) / 12 * 2 * Math.PI;
   const mx = 50 + 38 * Math.sin(mAngle), my = 50 - 38 * Math.cos(mAngle);
@@ -3710,9 +3725,10 @@ function svgClock(h, m, size=100, labels=false) {
         `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#475569" font-family="sans-serif">${n}</text>`
       ).join('')
     : '';
+  const mring = minuteRing ? minuteRingSVG() : '';
   return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" style="display:block;margin:0 auto">` +
     `<circle cx="50" cy="50" r="47" fill="white" stroke="#cbd5e1" stroke-width="2"/>` +
-    ticks + nums +
+    ticks + nums + mring +
     `<line x1="50" y1="50" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>` +
     `<line x1="50" y1="50" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>` +
     `<circle cx="50" cy="50" r="3" fill="#1e293b"/>` +
@@ -4513,7 +4529,7 @@ function renderClockRound() {
     document.getElementById('clock-numpad').innerHTML = '';
   } else {
     S.clockPhase = 'hour';
-    document.getElementById('clock-visual').innerHTML = svgClock(r.h, r.m, 160, S.clockLevel <= 3);
+    document.getElementById('clock-visual').innerHTML = svgClock(r.h, r.m, 160, S.clockLevel <= 3, S.clockLevel === 2 || S.clockLevel === 3);
     document.getElementById('clock-word-problem').textContent = 'What time does the clock show?';
     renderClockNumpad(r);
   }
@@ -4526,13 +4542,24 @@ function svgClockSet(r) {
   const showMinute = S.clockPhase === 'done';
   const hAngle = ((r.h % 12) + r.m / 60) / 12 * 2 * Math.PI;
   const mAngle = (r.m / 60) * 2 * Math.PI;
+  // At the minute-learning levels, each tappable number becomes a double-numbered
+  // button: the hour number with its minute value (00,05,…55) faint underneath,
+  // so she connects the position she taps (e.g. 6) to its minute meaning (30).
+  const showRing = S.clockLevel === 2 || S.clockLevel === 3;
   const spots = Array.from({length:12}, (_,i) => {
     const n = i === 0 ? 12 : i;
     const a = i / 12 * 2 * Math.PI;
     const x = (50 + 38 * Math.sin(a)).toFixed(1), y = (50 - 38 * Math.cos(a)).toFixed(1);
+    const cr = showRing ? 9 : 8;
+    const hourY = showRing ? (+y - 1.8).toFixed(1) : y;
+    const hourFs = showRing ? 7 : 8;
+    const minLabel = showRing
+      ? `<text x="${x}" y="${(+y + 3.6).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="4" font-weight="700" fill="#8b5cf6" font-family="sans-serif">${String(i * 5).padStart(2, '0')}</text>`
+      : '';
     return `<g id="clock-pos-${n}" onclick="tapClockPos(${n})" style="cursor:pointer">` +
-      `<circle cx="${x}" cy="${y}" r="8" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1"/>` +
-      `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#4c1d95" font-family="sans-serif">${n}</text></g>`;
+      `<circle cx="${x}" cy="${y}" r="${cr}" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1"/>` +
+      `<text x="${x}" y="${hourY}" text-anchor="middle" dominant-baseline="central" font-size="${hourFs}" font-weight="700" fill="#4c1d95" font-family="sans-serif">${n}</text>` +
+      minLabel + `</g>`;
   }).join('');
   const hourHand = showHour
     ? `<line class="clock-hand-in" x1="50" y1="50" x2="${(50+24*Math.sin(hAngle)).toFixed(1)}" y2="${(50-24*Math.cos(hAngle)).toFixed(1)}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>` : '';

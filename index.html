@@ -882,6 +882,34 @@
     @media (prefers-reduced-motion: reduce) {
       .concert-beams, .concert-doll, .concert-crowd span, .glam-showtime-btn { animation: none; }
     }
+
+    /* ── CLOCK: pick-the-face answer buttons (reverse & time-words rounds) ── */
+    .clock-face-btn {
+      background: var(--surface); border: 2.5px solid var(--border); border-radius: var(--r);
+      padding: 8px 4px; cursor: pointer; box-shadow: var(--shadow-sm); font-family: inherit;
+      -webkit-tap-highlight-color: transparent; transition: transform 0.12s, border-color 0.15s, background 0.15s;
+    }
+    .clock-face-btn:active:not(:disabled) { transform: scale(0.95); }
+    .clock-face-btn:disabled { cursor: default; opacity: 0.55; }
+    .clock-face-btn.cf-correct { border-color: #22c55e; background: #dcfce7; opacity: 1 !important; animation: dnCorrectPop 0.35s ease forwards; }
+    .clock-face-btn.cf-wrong   { border-color: #ef4444; background: #fee2e2; animation: dnShake 0.4s ease; }
+
+    /* ── WATCH QUEST ── */
+    .watch-strip {
+      width: 100%; display: flex; align-items: center; gap: 12px; margin: 14px 0 4px;
+      background: linear-gradient(150deg, rgba(255,255,255,0.85), rgba(250,240,255,0.7));
+      border: 1.5px solid rgba(168,85,247,0.5); border-radius: var(--r); padding: 10px 14px;
+      cursor: pointer; box-shadow: var(--shadow-sm), 0 0 12px rgba(168,85,247,0.14);
+      font-family: inherit; font-size: 15px; font-weight: 900; color: #4c1d95; text-align: left;
+      -webkit-tap-highlight-color: transparent; transition: transform 0.1s;
+    }
+    .watch-strip:active { transform: scale(0.97); }
+    .watch-strip .ws-chev { margin-left: auto; opacity: 0.5; font-size: 20px; }
+    .wq-row { display: flex; align-items: center; gap: 10px; padding: 8px 4px; font-size: 14px; font-weight: 700; color: #2b2440; border-bottom: 1px solid var(--border); }
+    .wq-row:last-child { border-bottom: none; }
+    .wq-row.wq-got .wq-desc { text-decoration: line-through; opacity: 0.55; }
+    .wq-check { font-size: 16px; }
+    .wq-name { font-weight: 900; color: #4c1d95; min-width: 92px; }
   </style>
 </head>
 <body>
@@ -1200,8 +1228,42 @@
     <div id="clock-level-msg" style="margin-top:10px"></div>
     <div id="clock-new-badges" style="margin-top:10px"></div>
   </div>
+  <button class="watch-strip" onclick="showScreen('screen-watchquest')">
+    <span id="cws-svg"></span>
+    <span id="cws-label">Watch Quest: 0 of 5 parts</span>
+    <span class="ws-chev">›</span>
+  </button>
   <button class="btn btn-primary btn-full" onclick="startClockGame()">Play again</button>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ WATCH QUEST ═══ -->
+<div id="screen-watchquest" class="screen">
+  <div class="back-row">
+    <button class="btn-icon" onclick="showScreen('screen-home')">🏠</button>
+    <span class="screen-label">The Watch Quest ⌚</span>
+  </div>
+  <div style="text-align:center;font-size:14px;color:var(--muted);font-weight:700;margin-bottom:2px">Learn to tell time — earn a REAL watch!</div>
+  <div id="wq-watch" style="display:flex;justify-content:center;margin:8px 0 4px"></div>
+  <div id="wq-count" style="text-align:center;font-weight:900;font-size:16px;color:#4c1d95;margin-bottom:8px"></div>
+  <div id="wq-list" style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:6px 12px;box-shadow:var(--shadow-sm)"></div>
+  <button class="btn btn-primary btn-full" id="wq-test-btn" style="margin-top:14px" onclick="startWatchTest()">⌚ Take the Watch Test!</button>
+  <div id="wq-locked" style="text-align:center;font-size:13px;color:var(--muted);font-weight:700;margin-top:8px;display:none">🔒 Reach Clock Level 4 to unlock the Watch Test</div>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="startClockGame()">🕐 Practice Clock Time</button>
+</div>
+
+<!-- ═══ TIME EXPERT CERTIFICATE ═══ -->
+<div id="screen-watchcert" class="screen">
+  <div style="max-width:420px;margin:20px auto 0;padding:26px 20px 22px;text-align:center;background:linear-gradient(150deg,#ffffff,#faf5ff);border:2.5px solid #c4b5fd;border-radius:22px;box-shadow:var(--shadow),0 0 24px rgba(168,85,247,0.25)">
+    <div style="font-size:14px;font-weight:900;letter-spacing:2px;color:#a855f7">⭐ CERTIFICATE ⭐</div>
+    <div class="quest-title" style="font-size:32px;margin:4px 0">TIME EXPERT</div>
+    <div id="wc-name" style="font-size:24px;font-weight:900;color:#4c1d95"></div>
+    <div id="wc-watch" style="display:flex;justify-content:center;margin:10px 0 6px"></div>
+    <div style="font-size:17px;font-weight:800;color:#2b2440;line-height:1.5">can tell time like a champ!<br>You earned your REAL watch! ⌚</div>
+    <div id="wc-date" style="font-size:13px;font-weight:700;color:var(--muted);margin-top:8px"></div>
+    <div style="font-size:13px;font-weight:800;color:#9d174d;margin-top:6px">Show this to your grown-up! 🎁</div>
+  </div>
+  <button class="btn btn-primary btn-full" style="margin-top:16px" onclick="showScreen('screen-home')">🏠 Home</button>
 </div>
 
 <!-- ═══ SOUND BOXES GAME ═══ -->
@@ -1575,6 +1637,10 @@
       <button class="pc-lvl-btn" onclick="setGameLevel('spellLevel','spellLevelProg',+1)">+</button>
     </div>
   </div>
+  <div class="pc-level-row">
+    <span class="pc-level-label">⌚ Watch Quest</span>
+    <span class="pc-lvl-val" id="pc-watch-status">0/5 pieces</span>
+  </div>
 
   <div class="divider"></div>
   <div class="section-title">Sound &amp; music</div>
@@ -1906,6 +1972,8 @@ const S = {
   closet:     lsJson('rl_closet', ['dress_pink','hair_brown','acc_none','bg_studio']),
   dollOutfit: lsJson('rl_dolloutfit', { outfit:'dress_pink', hair:'hair_brown', accessory:'acc_none', background:'bg_studio' }),
   // spelling / reading-club progress (new)
+  watchPieces: lsJson('rl_watchpieces', []),
+  watchEarned: lsGet('rl_watchearned',''),
   spellLevel:     parseInt(lsGet('rl_spelllevel','1')),
   spellLevelProg: parseInt(lsGet('rl_spelllevelprog','0')),
   spellgames:     parseInt(lsGet('rl_spellgames','0')),
@@ -1925,7 +1993,7 @@ const S = {
   swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
   dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false, dnStepsPerArticle: 3,
   mathRounds: [], mathIdx: 0, mathScore: 0, mathAnswered: false,
-  clockRounds: [], clockIdx: 0, clockScore: 0, clockAnswered: false, clockPhase: 'hour',
+  clockRounds: [], clockIdx: 0, clockScore: 0, clockAnswered: false, clockPhase: 'hour', watchTestMode: false,
   sbWords: [], sbIdx: 0, sbScore: 0, sbSelected: null, sbBoxes: [], sbTileOrder: [], sbWordPerfect: true,
   sbPhase: 'spell', sbBlendIdx: 0,
   pinBuf: '',
@@ -1996,6 +2064,8 @@ function persist() {
   lsSet('rl_musicon', S.musicOn ? '1' : '0');
   lsSet('rl_closet',  S.closet);
   lsSet('rl_dolloutfit', S.dollOutfit);
+  lsSet('rl_watchpieces', S.watchPieces);
+  lsSet('rl_watchearned', S.watchEarned);
   lsSet('rl_spelllevel',     S.spellLevel);
   lsSet('rl_spelllevelprog', S.spellLevelProg);
   lsSet('rl_spellgames',     S.spellgames);
@@ -2029,6 +2099,7 @@ function showScreen(id) {
   if (id === 'screen-topics')        initTopicScreen();
   if (id === 'screen-closet')        renderCloset();
   if (id === 'screen-readerlist')    renderReaderList();
+  if (id === 'screen-watchquest')    renderWatchQuest();
 }
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
@@ -3113,6 +3184,7 @@ function renderParentCorner() {
   document.getElementById('pc-sb-level').textContent   = `Lv. ${S.sbLevel}`;
   document.getElementById('pc-clock-level').textContent = `Lv. ${S.clockLevel}`;
   document.getElementById('pc-spell-level').textContent = `Lv. ${S.spellLevel}`;
+  document.getElementById('pc-watch-status').textContent = S.watchEarned ? `Earned ${S.watchEarned}` : `${S.watchPieces.length}/5 pieces`;
   const mb = document.getElementById('pc-music-btn');
   if (mb) mb.textContent = S.musicOn ? '🎵 Music: On' : '🎵 Music: Off';
   document.getElementById('pc-unlock-req').textContent  = S.dnUnlockReq === 0 ? 'Off' : S.dnUnlockReq;
@@ -3248,7 +3320,8 @@ function confirmReset() {
    'rl_readingintroseen',
    'rl_coins','rl_closet','rl_dolloutfit',
    'rl_spelllevel','rl_spelllevelprog','rl_spellgames','rl_spellperfect',
-   'rl_rhymegames','rl_sciencegames','rl_readerdone','rl_questclaim']
+   'rl_rhymegames','rl_sciencegames','rl_readerdone','rl_questclaim',
+   'rl_watchpieces','rl_watchearned']
     .forEach(k => localStorage.removeItem(k));
   location.reload();
 }
@@ -4491,6 +4564,7 @@ function startClockGame() {
 }
 
 function startClockGameNow() {
+  S.watchTestMode = false;
   S.clockRounds   = Array.from({length: 10}, () => generateClockRound(S.clockLevel));
   S.clockIdx      = 0;
   S.clockScore    = 0;
@@ -4505,23 +4579,45 @@ function generateClockRound(lv) {
              : lv === 2 ? [0, 30]
              : lv === 3 ? [0, 15, 30, 45]
              : [0,5,10,15,20,25,30,35,40,45,50,55];
-  const m = opts[randInt(0, opts.length - 1)];
-  // From L2 on, ~30% of rounds flip the task: she's shown a time and
-  // builds the clock by tapping where each hand points.
-  const kind = lv >= 2 && Math.random() < 0.3 ? 'set' : 'read';
+  let m = opts[randInt(0, opts.length - 1)];
+  // Four tasks: read (analog→digital), set (build the clock by tapping),
+  // rev (digital→pick the analog face), words ("half past 3"→pick the face).
+  const roll = Math.random();
+  let kind;
+  if (lv === 1) kind = roll < 0.6 ? 'read' : roll < 0.8 ? 'rev' : 'words';
+  else kind = roll < 0.4 ? 'read' : roll < 0.65 ? 'set' : roll < 0.85 ? 'rev' : 'words';
+  if (kind === 'words') {
+    // Time-words stay on phrase-friendly values even at L4 ("twenty-five past"
+    // isn't first-grade language).
+    const wOpts = lv === 1 ? [0] : lv === 2 ? [0, 30] : [0, 15, 30, 45];
+    m = wOpts[randInt(0, wOpts.length - 1)];
+  }
   return { h, m, answer: h * 60 + m, kind };
+}
+
+// The spoken/written language of time: "3 o'clock", "half past 3",
+// "quarter past 3", "quarter to 4" (note: names the NEXT hour — that's the lesson).
+function timeWords(h, m) {
+  if (m === 0)  return `${h} o'clock`;
+  if (m === 15) return `quarter past ${h}`;
+  if (m === 30) return `half past ${h}`;
+  if (m === 45) return `quarter to ${(h % 12) + 1}`;
+  return fmtTime(h * 60 + m);
 }
 
 function renderClockRound() {
   const r = S.clockRounds[S.clockIdx];
   S.clockAnswered = false;
-  document.getElementById('clock-prog').textContent = `${S.clockIdx + 1} of 10`;
+  document.getElementById('clock-prog').textContent = `${S.watchTestMode ? '⌚ ' : ''}${S.clockIdx + 1} of 10`;
   document.getElementById('clock-score-pill').textContent = `${S.clockScore} ✓`;
   document.getElementById('clock-feedback').textContent = '';
   document.getElementById('clock-feedback').className = 'dn-feedback';
   document.getElementById('clock-progress-fill').style.width = `${(S.clockIdx / 10) * 100}%`;
   const card = document.getElementById('clock-problem-card');
   card.style.animation = 'none'; card.offsetWidth; card.style.animation = '';
+  // Teaching scaffolds (hour labels, minute ring) are hidden during the Watch Test.
+  const scLabels = !S.watchTestMode && S.clockLevel <= 3;
+  const scRing   = !S.watchTestMode && (S.clockLevel === 2 || S.clockLevel === 3);
   if (r.kind === 'set') {
     S.clockPhase = 'hour';
     document.getElementById('clock-visual').innerHTML =
@@ -4530,11 +4626,75 @@ function renderClockRound() {
     document.getElementById('clock-word-problem').textContent =
       'Make the clock show this time! Tap the number the SHORT hour hand points to.';
     document.getElementById('clock-numpad').innerHTML = '';
+  } else if (r.kind === 'rev' || r.kind === 'words') {
+    const prompt = r.kind === 'rev' ? fmtTime(r.answer) : timeWords(r.h, r.m);
+    document.getElementById('clock-visual').innerHTML =
+      `<div style="font-size:${r.kind === 'rev' ? 40 : 30}px;font-weight:900;color:#4c1d95;line-height:1.2">${prompt}</div>`;
+    document.getElementById('clock-word-problem').textContent = 'Which clock shows this time? Tap it!';
+    renderClockFaceChoices(r, scLabels, scRing);
+    if (r.kind === 'words') setTimeout(() => speak(timeWords(r.h, r.m)), 350);
   } else {
     S.clockPhase = 'hour';
-    document.getElementById('clock-visual').innerHTML = svgClock(r.h, r.m, 160, S.clockLevel <= 3, S.clockLevel === 2 || S.clockLevel === 3);
+    document.getElementById('clock-visual').innerHTML = svgClock(r.h, r.m, 160, scLabels, scRing);
     document.getElementById('clock-word-problem').textContent = 'What time does the clock show?';
     renderClockNumpad(r);
+  }
+}
+
+// 2×2 grid of clock faces for 'rev' and 'words' rounds. Distractors are the
+// classic confusions: same hour/wrong minute and wrong hour/same minute.
+function renderClockFaceChoices(r, labels, ring) {
+  const mPool = r.kind === 'words'
+    ? (S.clockLevel === 1 && !S.watchTestMode ? [0] : [0, 15, 30, 45])
+    : (S.watchTestMode ? [0,5,10,15,20,25,30,35,40,45,50,55]
+      : S.clockLevel === 1 ? [0]
+      : S.clockLevel === 2 ? [0, 30]
+      : S.clockLevel === 3 ? [0, 15, 30, 45]
+      : [0,5,10,15,20,25,30,35,40,45,50,55]);
+  const seen = new Set([r.h * 60 + r.m]);
+  const others = [];
+  const tryAdd = (h, m) => { const k = h * 60 + m; if (!seen.has(k) && others.length < 3) { seen.add(k); others.push({h, m}); } };
+  const altM = mPool.filter(m => m !== r.m);
+  if (altM.length) tryAdd(r.h, altM[randInt(0, altM.length - 1)]);
+  tryAdd((r.h % 12) + 1, r.m);
+  let guard = 0;
+  while (others.length < 3 && guard++ < 60) tryAdd(randInt(1, 12), mPool[randInt(0, mPool.length - 1)]);
+  const all = [{h: r.h, m: r.m}, ...others].sort(() => Math.random() - 0.5);
+  const pad = document.getElementById('clock-numpad');
+  pad.style.gridTemplateColumns = 'repeat(2, 1fr)';
+  pad.innerHTML = all.map(c =>
+    `<button class="clock-face-btn" data-h="${c.h}" data-m="${c.m}" onclick="answerClockFace(this)">${svgClock(c.h, c.m, 130, labels, ring)}</button>`).join('');
+}
+
+function answerClockFace(btn) {
+  if (S.clockAnswered) return;
+  S.clockAnswered = true;
+  const r = S.clockRounds[S.clockIdx];
+  const h = +btn.dataset.h, m = +btn.dataset.m;
+  const correct = h === r.h && m === r.m;
+  const btns = [...document.querySelectorAll('#clock-numpad .clock-face-btn')];
+  btns.forEach(b => { b.disabled = true; });
+  const fb = document.getElementById('clock-feedback');
+  if (correct) {
+    if (!r.retried) S.clockScore++;
+    fb.textContent = r.retried ? 'Got it!' : '🎉 Correct!';
+    fb.className = 'dn-feedback correct';
+    btn.classList.add('cf-correct');
+    if (!r.retried) dnBurst(btn);
+    setAdvanceTimer(() => {
+      S.clockIdx++;
+      if (S.clockIdx >= 10) showClockResult();
+      else renderClockRound();
+    }, 1300);
+  } else {
+    r.retried = true;
+    fb.textContent = h === r.h
+      ? 'Close! Look at the long MINUTE hand.'
+      : 'Not quite — check the short HOUR hand.';
+    fb.className = 'dn-feedback wrong';
+    btn.classList.add('cf-wrong');
+    btns.forEach(b => { if (!b.classList.contains('cf-wrong')) b.disabled = false; });
+    S.clockAnswered = false;
   }
 }
 
@@ -4548,7 +4708,7 @@ function svgClockSet(r) {
   // At the minute-learning levels, each tappable number becomes a double-numbered
   // button: the hour number with its minute value (00,05,…55) faint underneath,
   // so she connects the position she taps (e.g. 6) to its minute meaning (30).
-  const showRing = S.clockLevel === 2 || S.clockLevel === 3;
+  const showRing = !S.watchTestMode && (S.clockLevel === 2 || S.clockLevel === 3);
   const spots = Array.from({length:12}, (_,i) => {
     const n = i === 0 ? 12 : i;
     const a = i / 12 * 2 * Math.PI;
@@ -4681,11 +4841,13 @@ function answerClock(num) {
 }
 
 function showClockResult() {
+  if (S.watchTestMode) return showWatchTestResult();
   S.clockgames++; S.totalGames++;
   if (S.clockScore === 10) S.clockperfect++;
   if (!S.clockIntroSeen.includes(S.clockLevel)) S.clockIntroSeen.push(S.clockLevel);
   const pct = S.clockScore / 10;
   const prevLevel = advanceLevel('clockLevel', 'clockLevelProg', pct, 4);
+  updateWatchQuest(prevLevel, S.clockScore);
   S.sessions.unshift({ topic:'Clock Time', score:`${S.clockScore}/10`, date:new Date().toLocaleDateString(), level:S.clockLevel });
   if (S.sessions.length > 100) S.sessions.pop();
   const newB = awardAll();
@@ -4699,9 +4861,162 @@ function showClockResult() {
     `<div class="new-badge"><span class="nb-emoji">${b.icon}</span><div><div class="nb-name">${b.name}</div><div class="nb-desc">${b.desc}</div></div></div>`
   ).join('');
   document.getElementById('clock-progress-fill').style.width = '100%';
+  updateWatchStrip();
   awardCoins(coinsFor(S.clockScore, 10)); sfx('win');
   showScreen('screen-clockresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
+}
+
+// ─── THE WATCH QUEST ─────────────────────────────────────────────────────────
+// She's earning a REAL watch for learning to tell time. The app makes that goal
+// visible and objective: an SVG watch assembles piece-by-piece as she hits
+// mastery milestones, and a final Watch Test (unlocked at L4, 9+/10 to pass)
+// completes it and shows a certificate for the handover moment.
+
+const WATCH_PIECES = [
+  { id:'strap',  name:'Strap',   desc:'Reach Clock Level 2' },
+  { id:'buckle', name:'Buckle',  desc:'Reach Clock Level 3' },
+  { id:'face',   name:'Face',    desc:'Reach Clock Level 4' },
+  { id:'hands',  name:'Hands',   desc:'Score 9+ in a Level 4 game' },
+  { id:'gem',    name:'Gem',     desc:'Pass the Watch Test!' },
+];
+
+// Called after each normal clock game (playedLevel = level BEFORE advanceLevel).
+function updateWatchQuest(playedLevel, score) {
+  const gained = [];
+  const give = id => { if (!S.watchPieces.includes(id)) { S.watchPieces.push(id); gained.push(id); } };
+  if (S.clockLevel >= 2) give('strap');
+  if (S.clockLevel >= 3) give('buckle');
+  if (S.clockLevel >= 4) give('face');
+  if (playedLevel >= 4 && score >= 9) give('hands');
+  if (gained.length) {
+    lsSet('rl_watchpieces', S.watchPieces);
+    const names = { strap:'the strap', buckle:'the buckle', face:'the watch face', hands:'the hands', gem:'the sparkle gem' };
+    showToast(`⌚ Watch piece earned: ${names[gained[0]]}!`);
+    sfx('coin');
+  }
+}
+
+// A wrist-watch drawn in stages; missing pieces are faint dashed silhouettes.
+function watchSVG(pieces, size) {
+  size = size || 150;
+  const has = id => pieces.includes(id);
+  const ghost = 'fill="none" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.55"';
+  const strap = has('strap')
+    ? `<rect x="38" y="2" width="24" height="36" rx="9" fill="#f472b6"/><rect x="38" y="102" width="24" height="30" rx="9" fill="#f472b6"/>`
+    : `<rect x="38" y="2" width="24" height="36" rx="9" ${ghost}/><rect x="38" y="102" width="24" height="30" rx="9" ${ghost}/>`;
+  const buckle = has('buckle')
+    ? `<rect x="41" y="128" width="18" height="9" rx="2.5" fill="#fcd34d" stroke="#d97706" stroke-width="1.5"/>`
+    : `<rect x="41" y="128" width="18" height="9" rx="2.5" ${ghost}/>`;
+  const face = has('face')
+    ? `<circle cx="50" cy="70" r="31" fill="#a855f7"/><circle cx="50" cy="70" r="25" fill="white"/>` +
+      [[12,50,50],[3,70,70],[6,50,90],[9,30,70]].map(([n,x,y]) =>
+        `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="800" fill="#4c1d95" font-family="sans-serif">${n}</text>`).join('')
+    : `<circle cx="50" cy="70" r="31" ${ghost}/>`;
+  const hands = has('hands')
+    ? `<line x1="50" y1="70" x2="41" y2="63" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round"/>` +
+      `<line x1="50" y1="70" x2="61" y2="59" stroke="#e05090" stroke-width="2.5" stroke-linecap="round"/>` +
+      `<circle cx="50" cy="70" r="2.6" fill="#1e293b"/>`
+    : (has('face') ? `<line x1="50" y1="70" x2="41" y2="63" stroke="#c4b5fd" stroke-width="2" stroke-dasharray="3 2" opacity="0.55"/><line x1="50" y1="70" x2="61" y2="59" stroke="#c4b5fd" stroke-width="2" stroke-dasharray="3 2" opacity="0.55"/>` : '');
+  const gem = has('gem')
+    ? `<circle cx="84" cy="70" r="5" fill="#fcd34d" stroke="#d97706" stroke-width="1.5"/>` +
+      `<text x="84" y="55" text-anchor="middle" font-size="10">✨</text>`
+    : `<circle cx="84" cy="70" r="5" ${ghost}/>`;
+  return `<svg width="${size}" height="${(size * 1.4).toFixed(0)}" viewBox="0 0 100 140">` +
+    strap + buckle + face + hands + gem + `</svg>`;
+}
+
+function updateWatchStrip() {
+  const el = document.getElementById('cws-svg');
+  if (!el) return;
+  el.innerHTML = watchSVG(S.watchPieces, 30);
+  document.getElementById('cws-label').textContent = S.watchEarned
+    ? '🏆 Watch earned! See your certificate'
+    : `Watch Quest: ${S.watchPieces.length} of 5 parts`;
+}
+
+function renderWatchQuest() {
+  document.getElementById('wq-watch').innerHTML = watchSVG(S.watchPieces, 130);
+  document.getElementById('wq-count').textContent = S.watchEarned
+    ? '🏆 Watch earned — you can tell time!'
+    : `${S.watchPieces.length} of 5 parts collected`;
+  document.getElementById('wq-list').innerHTML = WATCH_PIECES.map(p => {
+    const got = S.watchPieces.includes(p.id);
+    return `<div class="wq-row ${got ? 'wq-got' : ''}">
+      <span class="wq-check">${got ? '✅' : '⬜'}</span>
+      <span class="wq-name">${p.name}</span>
+      <span class="wq-desc">${p.desc}</span></div>`;
+  }).join('');
+  const btn = document.getElementById('wq-test-btn');
+  const locked = document.getElementById('wq-locked');
+  if (S.watchEarned) {
+    btn.style.display = '';
+    btn.textContent = '🏆 See your certificate';
+    btn.setAttribute('onclick', 'showWatchCert()');
+    locked.style.display = 'none';
+  } else if (S.clockLevel >= 4) {
+    btn.style.display = '';
+    btn.textContent = '⌚ Take the Watch Test!';
+    btn.setAttribute('onclick', 'startWatchTest()');
+    locked.style.display = 'none';
+  } else {
+    btn.style.display = 'none';
+    locked.style.display = '';
+  }
+}
+
+// The final exam: 10 mixed rounds, analog-biased, NO scaffolds (no minute ring,
+// no extra hour labels). Never touches clockLevel progression.
+function startWatchTest() {
+  if (S.clockLevel < 4 && !S.watchEarned) { showToast('Reach Clock Level 4 first!'); return; }
+  const kinds = shuf(['read','read','read','rev','rev','rev','words','words','set','set']);
+  S.clockRounds = kinds.map(k => {
+    const h = randInt(1, 12);
+    const pool = k === 'words' ? [0, 15, 30, 45] : [0,5,10,15,20,25,30,35,40,45,50,55];
+    const m = pool[randInt(0, pool.length - 1)];
+    return { h, m, answer: h * 60 + m, kind: k };
+  });
+  S.clockIdx = 0; S.clockScore = 0; S.clockAnswered = false;
+  S.watchTestMode = true;
+  showScreen('screen-clock');
+  mascotSay('The Watch Test! Show what you know!');
+  renderClockRound();
+}
+
+function showWatchTestResult() {
+  S.watchTestMode = false;
+  S.totalGames++;
+  const score = S.clockScore;
+  S.sessions.unshift({ topic:'Watch Test', score:`${score}/10`, date:new Date().toLocaleDateString(), level:S.clockLevel });
+  if (S.sessions.length > 100) S.sessions.pop();
+  const passed = score >= 9;
+  const firstEarn = passed && !S.watchEarned;
+  if (firstEarn) {
+    S.watchEarned = new Date().toLocaleDateString();
+    WATCH_PIECES.forEach(p => { if (!S.watchPieces.includes(p.id)) S.watchPieces.push(p.id); });
+  }
+  persist();
+  if (passed) {
+    showWatchCert();
+    sfx('win');
+    if (firstEarn) setTimeout(() => awardCoins(50), 900);
+    setTimeout(() => spawnConfetti('YOU DID IT!'), 400);
+  } else {
+    document.getElementById('clock-result-stars').textContent = score >= 7 ? '⭐⭐' : '⭐';
+    document.getElementById('clock-result-score').textContent = `${score} / 10`;
+    document.getElementById('clock-result-msg').textContent = 'So close! Practice a little more, then try the Watch Test again — you can do it!';
+    document.getElementById('clock-level-msg').innerHTML = '';
+    document.getElementById('clock-new-badges').innerHTML = '';
+    updateWatchStrip();
+    showScreen('screen-clockresult');
+  }
+}
+
+function showWatchCert() {
+  document.getElementById('wc-name').textContent = S.heroName || 'Juliana';
+  document.getElementById('wc-watch').innerHTML = watchSVG(WATCH_PIECES.map(p => p.id), 130);
+  document.getElementById('wc-date').textContent = S.watchEarned ? `Earned on ${S.watchEarned}` : '';
+  showScreen('screen-watchcert');
 }
 
 // ─── CONFETTI ────────────────────────────────────────────────────────────────

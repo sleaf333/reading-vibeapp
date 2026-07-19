@@ -910,6 +910,58 @@
     .wq-row.wq-got .wq-desc { text-decoration: line-through; opacity: 0.55; }
     .wq-check { font-size: 16px; }
     .wq-name { font-weight: 900; color: #4c1d95; min-width: 92px; }
+
+    /* ── CLOCK LESSON "MOVIE" ── */
+    #screen-clocklesson.active { display: flex; flex-direction: column; align-items: center; min-height: 92vh; }
+    .lesson-stage {
+      position: relative; width: 100%; flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px; overflow: hidden;
+      border-radius: var(--r); margin-top: 14px; padding: 22px 14px 18px;
+      background: radial-gradient(120% 90% at 50% 12%, #f6f0ff 0%, #efe7fb 60%, #e6dcf6 100%);
+    }
+    .lesson-beams {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        conic-gradient(from 205deg at 20% 0%, transparent 0deg, rgba(255,45,155,.14) 13deg, transparent 28deg),
+        conic-gradient(from 155deg at 80% 0%, transparent 0deg, rgba(34,211,238,.13) 13deg, transparent 28deg);
+      filter: blur(10px); animation: glamSpotSweep 9s ease-in-out infinite alternate; transform-origin: 50% 0%;
+    }
+    #lclk-stage { position: relative; z-index: 1; filter: drop-shadow(0 8px 20px rgba(124,58,237,0.22)); }
+    #lclk-caption {
+      position: relative; z-index: 1; min-height: 64px; max-width: 360px; text-align: center;
+      font-size: 21px; font-weight: 900; line-height: 1.3; color: #2b2440;
+    }
+    .lesson-dots { position: relative; z-index: 1; display: flex; gap: 6px; }
+    .lesson-dots span { width: 8px; height: 8px; border-radius: 50%; background: #d6c9f0; transition: all .2s; }
+    .lesson-dots span.on { background: #a855f7; transform: scale(1.35); }
+    .lesson-dots span.done { background: #c4b5fd; }
+    #lclk-skip {
+      position: absolute; top: 8px; right: 10px; z-index: 3; background: rgba(255,255,255,0.85);
+      border: 1.5px solid var(--border); border-radius: var(--pr); padding: 6px 14px; font-size: 13px;
+      font-weight: 800; color: #4c1d95; cursor: pointer; font-family: inherit; box-shadow: var(--shadow-sm);
+      transition: opacity .4s; -webkit-tap-highlight-color: transparent;
+    }
+    #lclk-endcard { position: relative; z-index: 2; text-align: center; display: none; }
+    #lclk-endcard .lec-big { font-size: 26px; font-weight: 900; }
+    /* lesson clock internals */
+    #lclk-hour, #lclk-minhand { transform-box: view-box; transform-origin: 50px 50px; transition: transform 0.9s ease; }
+    .lclk-lab { opacity: 0; transform: scale(0.2); transform-box: fill-box; transform-origin: center; transition: opacity .25s ease, transform .35s cubic-bezier(.34,1.56,.64,1); }
+    .lclk-lab.on { opacity: 1; transform: scale(1); }
+    .lclk-num { transition: fill .2s, font-size .2s; }
+    .lclk-num.glow { fill: #e05090; font-size: 12.5px; font-weight: 900; }
+    #lclk-shade path { opacity: 0; transition: opacity .55s ease; }
+    #lclk-shade path.on { opacity: 1; }
+    #lclk-hour.pulse { animation: lclkHP .6s ease 3; }
+    #lclk-minhand.pulse { animation: lclkMP .6s ease 3; }
+    @keyframes lclkHP { 0%,100%{stroke:#1e293b} 50%{stroke:#ef4444} }
+    @keyframes lclkMP { 0%,100%{stroke:#3d9e68} 50%{stroke:#16a34a;stroke-width:4} }
+    @media (prefers-reduced-motion: reduce) {
+      .lesson-beams { animation: none; }
+      #lclk-hour, #lclk-minhand { transition: none !important; }
+      .lclk-lab { transition: opacity .2s; transform: none; }
+      #lclk-shade path { transition: none; }
+      #lclk-hour.pulse, #lclk-minhand.pulse { animation: none; }
+    }
   </style>
 </head>
 <body>
@@ -1186,6 +1238,24 @@
 </div>
 
 <!-- ═══ CLOCK TIME INTRO ═══ -->
+<!-- ═══ CLOCK LESSON MOVIE ═══ -->
+<div id="screen-clocklesson" class="screen">
+  <div class="lesson-stage">
+    <div class="lesson-beams"></div>
+    <button id="lclk-skip" onclick="skipLesson()">Skip →</button>
+    <div id="lclk-stage"></div>
+    <div id="lclk-caption"></div>
+    <div class="lesson-dots" id="lclk-dots"></div>
+    <div id="lclk-endcard">
+      <div class="lec-big" style="color:#4c1d95">🎉 You're ready!</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-sm" onclick="replayCurrentLesson()">🎬 Watch again</button>
+        <button class="btn btn-primary btn-sm" id="lclk-endcard-play" onclick="lessonToGame()">Let's play! →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="screen-clockintro" class="screen">
   <div style="max-width:420px;margin:0 auto;padding:28px 20px 32px;display:flex;flex-direction:column;align-items:center;gap:16px">
     <div class="mi-banner">✨ Something New!</div>
@@ -1249,6 +1319,8 @@
   <div id="wq-list" style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:6px 12px;box-shadow:var(--shadow-sm)"></div>
   <button class="btn btn-primary btn-full" id="wq-test-btn" style="margin-top:14px" onclick="startWatchTest()">⌚ Take the Watch Test!</button>
   <div id="wq-locked" style="text-align:center;font-size:13px;color:var(--muted);font-weight:700;margin-top:8px;display:none">🔒 Reach Clock Level 4 to unlock the Watch Test</div>
+  <div style="text-align:center;font-size:13px;color:var(--muted);font-weight:800;margin:14px 0 6px">🎬 Watch a lesson again</div>
+  <div id="wq-lessons" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"></div>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="startClockGame()">🕐 Practice Clock Time</button>
 </div>
 
@@ -4535,6 +4607,208 @@ const CLOCK_LEVEL_INTROS = {
        note:"Sometimes I'll show you a time and YOU build the clock — just tap the numbers!" },
 };
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  CLOCK LESSON MOVIES — animated + narrated lessons between levels
+//  A code-driven "video": the clock hands sweep, pie-wedges shade in, and
+//  minute labels pop, all synced to spoken narration + big captions.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// The lesson clock: hands are rotatable <line>s (CSS transform + transition),
+// hour numbers can glow, an outer minute-label ring can pop in one at a time,
+// and a <g> holds pie-wedge shading behind the dial.
+function lessonClockSVG(size) {
+  size = size || 260;
+  const ticks = Array.from({length:12}, (_,i) => {
+    const a = i/12*2*Math.PI, r1 = i%3===0?38:40, r2 = 45;
+    return `<line x1="${(50+r1*Math.sin(a)).toFixed(1)}" y1="${(50-r1*Math.cos(a)).toFixed(1)}" x2="${(50+r2*Math.sin(a)).toFixed(1)}" y2="${(50-r2*Math.cos(a)).toFixed(1)}" stroke="#94a3b8" stroke-width="${i%3===0?2:1}"/>`;
+  }).join('');
+  const nums = Array.from({length:12}, (_,i) => {
+    const n = i===0?12:i, a = i/12*2*Math.PI;
+    const x = (50+31*Math.sin(a)).toFixed(1), y = (50-31*Math.cos(a)).toFixed(1);
+    return `<text id="lclk-num-${n}" class="lclk-num" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#334155" font-family="sans-serif">${n}</text>`;
+  }).join('');
+  const labs = Array.from({length:12}, (_,i) => {
+    const a = i/12*2*Math.PI;
+    const x = (50+44*Math.sin(a)).toFixed(1), y = (50-44*Math.cos(a)).toFixed(1);
+    return `<text id="lclk-lab-${i}" class="lclk-lab" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="4.6" font-weight="800" fill="#a855f7" font-family="sans-serif">${String(i*5).padStart(2,'0')}</text>`;
+  }).join('');
+  return `<svg id="lclk-svg" viewBox="0 0 100 100" width="${size}" height="${size}" style="max-width:80vw;height:auto">
+    <g id="lclk-shade"></g>
+    <circle cx="50" cy="50" r="47" fill="white" stroke="#cbd5e1" stroke-width="2"/>
+    ${ticks}<g id="lclk-nums">${nums}</g><g id="lclk-labs">${labs}</g>
+    <line id="lclk-hour" x1="50" y1="50" x2="50" y2="27" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+    <line id="lclk-minhand" x1="50" y1="50" x2="50" y2="16" stroke="#3d9e68" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="50" cy="50" r="3" fill="#1e293b"/>
+  </svg>`;
+}
+
+// Cumulative hand angles so sweeps always go forward (a lap = +360, never
+// shortest-path backward). lclkEl finds a lesson-clock sub-element.
+let _lclk = { hDeg: 0, mDeg: 0 };
+let _lessonTimers = [];
+function lclkEl(id) { return document.getElementById(id); }
+function lclkTimeout(fn, ms) { const t = setTimeout(fn, ms); _lessonTimers.push(t); return t; }
+function _fwd(cur, target) { let t = target; while (t < cur - 0.01) t += 360; return t; }
+function _reduce() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+
+function lclkApply(dur) {
+  const hh = lclkEl('lclk-hour'), mm = lclkEl('lclk-minhand');
+  if (!hh || !mm) return;
+  const d = _reduce() ? 0 : (dur == null ? 0.9 : dur);
+  hh.style.transitionDuration = d + 's'; mm.style.transitionDuration = d + 's';
+  hh.style.transform = `rotate(${_lclk.hDeg}deg)`;
+  mm.style.transform = `rotate(${_lclk.mDeg}deg)`;
+}
+// Move hands to time h:m. extraLaps spins the minute hand extra full turns first.
+function lclkSetTime(h, m, dur, extraLaps) {
+  _lclk.hDeg = _fwd(_lclk.hDeg, (h % 12) * 30 + m * 0.5);
+  _lclk.mDeg = _fwd(_lclk.mDeg, m * 6) + (extraLaps || 0) * 360;
+  lclkApply(dur);
+}
+function lclkReset() {
+  _lclk = { hDeg: 0, mDeg: 0 };
+  const hh = lclkEl('lclk-hour'), mm = lclkEl('lclk-minhand');
+  if (hh) { hh.style.transitionDuration = '0s'; mm.style.transitionDuration = '0s'; hh.style.transform = 'rotate(0deg)'; mm.style.transform = 'rotate(0deg)'; }
+  document.querySelectorAll('.lclk-lab').forEach(e => e.classList.remove('on'));
+  document.querySelectorAll('.lclk-num').forEach(e => e.classList.remove('glow'));
+  const sh = lclkEl('lclk-shade'); if (sh) sh.innerHTML = '';
+}
+// Pie wedge from minute a to minute b (clockwise from 12).
+function lclkShade(fromMin, toMin, color) {
+  const sh = lclkEl('lclk-shade'); if (!sh) return;
+  const R = 40, pt = mm => ({ x: 50 + R * Math.sin(mm * 6 * Math.PI / 180), y: 50 - R * Math.cos(mm * 6 * Math.PI / 180) });
+  const s = pt(fromMin), e = pt(toMin), large = (toMin - fromMin) > 30 ? 1 : 0;
+  sh.insertAdjacentHTML('beforeend', `<path d="M50,50 L${s.x.toFixed(1)},${s.y.toFixed(1)} A${R},${R} 0 ${large} 1 ${e.x.toFixed(1)},${e.y.toFixed(1)} Z" fill="${color || 'rgba(168,85,247,0.28)'}"/>`);
+  const p = sh.lastElementChild;
+  lclkTimeout(() => p && p.classList.add('on'), 40);
+  return p;
+}
+// Shade the "hour zone" wedge between hour h and h+1, and glow the passed hour.
+function lclkHourZone(h) {
+  lclkShade(h * 5, h * 5 + 5, 'rgba(251,191,36,0.40)');
+  const num = lclkEl('lclk-num-' + (h === 0 ? 12 : h)); if (num) num.classList.add('glow');
+}
+function lclkGlow(h, on) { const num = lclkEl('lclk-num-' + (h === 0 ? 12 : h)); if (num) num.classList.toggle('glow', on !== false); }
+function lclkPopMinute(i) { const e = lclkEl('lclk-lab-' + (i % 12)); if (e) { e.classList.add('on'); sfx('pop'); } }
+function lclkPulse(which) {
+  const e = lclkEl(which === 'hour' ? 'lclk-hour' : 'lclk-minhand');
+  if (e) { e.classList.remove('pulse'); void e.offsetWidth; e.classList.add('pulse'); }
+}
+
+// ─── Lesson scripts (each scene: {cap, say, run}) ─────────────────────────────
+const CLOCK_LESSONS = {
+  1: [
+    { cap:'This is a clock! It has TWO hands.', say:'This is a clock! It has two hands.', run:()=>{ lclkReset(); lclkSetTime(3,0,0); lclkTimeout(()=>{lclkPulse('hour');lclkPulse('min');},200); } },
+    { cap:'The SHORT hand is the HOUR hand. 🕐', say:'The short hand is the hour hand. It moves very, very slowly.', run:()=>{ lclkPulse('hour'); } },
+    { cap:'The LONG hand is the MINUTE hand. Watch it ZOOM around!', say:'The long hand is the minute hand. Watch it zoom all the way around!', run:()=>{ lclkPulse('min'); lclkTimeout(()=>lclkSetTime(4,0,2.6,0),350); } },
+    { cap:'See? The long hand went all the way around, and the short hand crawled to the next number.', say:'See? The long hand went all the way around one time, and the short hand crawled to the next number.', run:()=>{} },
+    { cap:"When the long hand points UP to 12, it's o'clock!", say:"When the long hand points straight up to twelve, we say oh-clock.", run:()=>{ lclkSetTime(3,0,1.0); lclkTimeout(()=>lclkPulse('min'),1000); } },
+    { cap:'Short hand on 3, long hand on 12… 3 oʼclock! 🔔', say:"The short hand is on three. It's three oh-clock!", run:()=>{ lclkGlow(3); sfx('correct'); } },
+    { cap:"Let's read a few! 7 oʼclock…", say:"Let's read a few more. Seven oh-clock.", run:()=>{ lclkGlow(3,false); lclkSetTime(7,0,1.0); lclkTimeout(()=>{lclkGlow(7);sfx('correct');},1000); } },
+    { cap:'…and 11 oʼclock! ⭐', say:"And eleven oh-clock. You've got it!", run:()=>{ lclkGlow(7,false); lclkSetTime(11,0,1.0); lclkTimeout(()=>{lclkGlow(11);sfx('correct');},1000); } },
+  ],
+  2: [
+    { cap:"Here's 3 oʼclock. Now watch the minute hand move…", say:"Here's three oh-clock. Now watch the long minute hand move.", run:()=>{ lclkReset(); lclkSetTime(3,0,0); lclkTimeout(()=>lclkPulse('min'),300); } },
+    { cap:'Count the minutes with me… 5, 10, 15, 20, 25, 30!', say:'Count the minutes with me. Five, ten, fifteen, twenty, twenty-five, thirty!', run:()=>{ lclkSetTime(3,30,3.0); [1,2,3,4,5,6].forEach((i)=>lclkTimeout(()=>lclkPopMinute(i), i*480)); lclkTimeout(()=>lclkShade(0,30,'rgba(168,85,247,0.28)'),300); } },
+    { cap:'The long hand went HALFWAY around — HALF PAST!', say:"The long hand went halfway around the clock. That's why we say half past. It's half past three!", run:()=>{ } },
+    { cap:'Long hand on 6 ALWAYS means 30 minutes.', say:'The long hand on the six always means thirty minutes.', run:()=>{ lclkPopMinute(6); lclkPulse('min'); } },
+    { cap:'Uh oh… the SHORT hand is stuck BETWEEN 3 and 4!', say:'Uh oh. Look at the short hand. It is stuck in the middle, between three and four! Which hour is it?', run:()=>{ lclkTimeout(()=>{ lclkHourZone(3); lclkPulse('hour'); },200); } },
+    { cap:"The trick: it's the number the short hand already PASSED. Still 3!", say:"Here's the secret trick. The hour is the number the short hand already passed. It has not landed on four yet. So it is still three! Half past three.", run:()=>{ lclkGlow(3); } },
+    { cap:"Watch — it stays 3-oʼclock-something ALL the way until it LANDS on 4…", say:"Watch. It stays three-something all the way around, all the way, all the way… until the short hand finally lands on four.", run:()=>{ const sh=lclkEl('lclk-shade'); if(sh) sh.innerHTML=''; lclkSetTime(4,0,3.4,1); } },
+    { cap:'NOW it landed on 4 — 4 oʼclock! 🔔', say:"Now it landed on four. Now it's four oh-clock!", run:()=>{ lclkGlow(3,false); lclkGlow(4); sfx('correct'); } },
+  ],
+  3: [
+    { cap:'A clock cuts into 4 equal pieces — like a pizza! 🍕', say:'A clock can be cut into four equal pieces, like a pizza. Each piece is called a quarter.', run:()=>{ lclkReset(); lclkSetTime(3,0,0); lclkTimeout(()=>{ lclkShade(0,15,'rgba(236,72,153,0.22)'); lclkShade(15,30,'rgba(168,85,247,0.22)'); lclkShade(30,45,'rgba(59,130,246,0.20)'); lclkShade(45,60,'rgba(34,211,238,0.20)'); },250); } },
+    { cap:'One quarter past = 15 minutes! Quarter past 3.', say:"When the long hand moves one quarter, that's fifteen minutes. Quarter past three!", run:()=>{ const sh=lclkEl('lclk-shade'); if(sh) sh.innerHTML=''; lclkSetTime(3,15,1.6); lclkTimeout(()=>{lclkShade(0,15,'rgba(236,72,153,0.30)'); lclkPopMinute(3);},900); } },
+    { cap:'Three quarters around = 45. Only ONE quarter is left!', say:"Now the long hand is three quarters around. Only one little quarter is left.", run:()=>{ lclkSetTime(3,45,2.2); lclkTimeout(()=>{ lclkShade(0,45,'rgba(168,85,247,0.24)'); lclkPopMinute(9); },1400); } },
+    { cap:"One quarter LEFT = quarter TO the next hour. Quarter to 4!", say:"One quarter left means quarter to the next hour. It's almost four — quarter to four!", run:()=>{ lclkHourZone(3); } },
+    { cap:'Quarter past on the 3 (15). Quarter to on the 9 (45). ⭐', say:'Quarter past is on the three, fifteen. Quarter to is on the nine, forty-five. Great job!', run:()=>{ lclkPopMinute(3); lclkPopMinute(9); sfx('correct'); } },
+  ],
+  4: [
+    { cap:'Every number the long hand passes = 5 more minutes. Count with me!', say:'Here is the secret code. Every number the long hand passes is five more minutes. Count with me!', run:()=>{ lclkReset(); lclkSetTime(12,0,0); } },
+    { cap:'5… 10… 15… 20… 25… 30… 35… 40… 45… 50… 55!', say:'Five, ten, fifteen, twenty, twenty-five, thirty, thirty-five, forty, forty-five, fifty, fifty-five!', run:()=>{ for(let i=1;i<=11;i++){ lclkTimeout(()=>{ lclkSetTime(3, i*5, 0.35); lclkPopMinute(i); }, i*430); } } },
+    { cap:'Long hand on 4? Count 5, 10, 15, 20 — 3:20!', say:'The long hand is on the four. Count five, ten, fifteen, twenty. It is three twenty!', run:()=>{ lclkReset(); lclkSetTime(3,20,1.0); lclkTimeout(()=>{[1,2,3,4].forEach((i)=>lclkTimeout(()=>lclkPopMinute(i),i*350));},900); } },
+    { cap:'Careful! Short hand is ALMOST on 8 — but not yet. Still 7! 7:50', say:"Careful here. The short hand is so close to eight, but it has not landed yet. So it is still seven. Seven fifty!", run:()=>{ lclkReset(); lclkSetTime(7,50,1.4); lclkTimeout(()=>{ lclkHourZone(7); lclkPulse('hour'); },1200); } },
+    { cap:'Now YOU know the secret code of the clock! 🕵️⭐', say:"Now you know the secret code of the clock! You're amazing!", run:()=>{ sfx('correct'); } },
+  ],
+};
+
+// ─── Scene player ─────────────────────────────────────────────────────────────
+let _lessonRun = 0;
+function renderLessonDots(total, cur) {
+  const d = lclkEl('lclk-dots'); if (!d) return;
+  d.innerHTML = Array.from({length: total}, (_, i) =>
+    `<span class="${i === cur ? 'on' : i < cur ? 'done' : ''}"></span>`).join('');
+}
+function stopLesson() {
+  _lessonRun++;
+  _lessonTimers.forEach(t => clearTimeout(t)); _lessonTimers = [];
+  try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
+}
+function playClockLesson(lv) {
+  const scenes = CLOCK_LESSONS[lv];
+  if (!scenes) { return S._lessonReplay ? showScreen('screen-watchquest') : startClockGameNow(); }
+  stopLesson();
+  const runId = ++_lessonRun;
+  S._lessonLv = lv;
+  showScreen('screen-clocklesson');
+  lclkEl('lclk-stage').innerHTML = lessonClockSVG(260);
+  lclkReset();
+  lclkEl('lclk-endcard').style.display = 'none';
+  lclkEl('lclk-caption').style.display = '';
+  const skip = lclkEl('lclk-skip');
+  skip.style.opacity = '0'; skip.style.pointerEvents = 'none';
+  lclkTimeout(() => { skip.style.opacity = '1'; skip.style.pointerEvents = 'auto'; }, 2500);
+  let i = 0;
+  const runScene = () => {
+    if (runId !== _lessonRun) return;
+    const active = document.querySelector('.screen.active');
+    if (!active || active.id !== 'screen-clocklesson') return;
+    if (i >= scenes.length) { showLessonEnd(); return; }
+    const sc = scenes[i];
+    renderLessonDots(scenes.length, i);
+    lclkEl('lclk-caption').textContent = sc.cap;
+    try { sc.run && sc.run(); } catch (e) {}
+    speakThenLesson(sc.say, runId, () => { i++; runScene(); });
+  };
+  runScene();
+}
+function speakThenLesson(text, runId, next) {
+  const guardedNext = () => {
+    if (runId !== _lessonRun) return;
+    const active = document.querySelector('.screen.active');
+    if (!active || active.id !== 'screen-clocklesson') return;
+    lclkTimeout(next, 550);
+  };
+  if (!window.speechSynthesis || S.muted) { lclkTimeout(guardedNext, 1900 + text.length * 55); return; }
+  try { speechSynthesis.cancel(); } catch (e) {}
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 0.85; utt.lang = 'en-US';
+  let done = false;
+  const go = () => { if (!done) { done = true; guardedNext(); } };
+  utt.onend = go; utt.onerror = go;
+  lclkTimeout(go, 2800 + text.length * 80);
+  lclkTimeout(() => { try { speechSynthesis.speak(utt); } catch (e) {} }, 220);
+}
+function showLessonEnd() {
+  renderLessonDots(CLOCK_LESSONS[S._lessonLv].length, CLOCK_LESSONS[S._lessonLv].length);
+  lclkEl('lclk-caption').style.display = 'none';
+  lclkEl('lclk-endcard').style.display = '';
+  lclkEl('lclk-endcard-play').textContent = S._lessonReplay ? 'Done →' : "Let's play! →";
+  if (window.speechSynthesis && !S.muted) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance("You're ready! Let's play!"); u.rate = 0.9; u.lang = 'en-US'; speechSynthesis.speak(u); } catch (e) {} }
+}
+function skipLesson() { stopLesson(); lessonToGame(); }
+function lessonToGame() {
+  stopLesson();
+  const wasReplay = S._lessonReplay;
+  if (!wasReplay && !S.clockIntroSeen.includes(S._lessonLv)) { S.clockIntroSeen.push(S._lessonLv); persist(); }
+  S._lessonReplay = false;
+  if (wasReplay) showScreen('screen-watchquest');
+  else startClockGameNow();
+}
+function replayCurrentLesson() { S._lessonReplay = true; playClockLesson(S._lessonLv); }
+function replayLesson(lv) { S._lessonReplay = true; playClockLesson(lv); }
+
 function showClockIntro(lv) {
   const d = CLOCK_LEVEL_INTROS[lv];
   if (!d) { startClockGameNow(); return; }
@@ -4558,7 +4832,9 @@ function dismissClockIntro() {
 
 function startClockGame() {
   if (!S.clockIntroSeen.includes(S.clockLevel)) {
-    return showClockIntro(S.clockLevel);
+    S._lessonReplay = false;
+    if (CLOCK_LESSONS[S.clockLevel]) return playClockLesson(S.clockLevel);
+    return showClockIntro(S.clockLevel);   // fallback if a level ever lacks a lesson
   }
   startClockGameNow();
 }
@@ -4688,9 +4964,13 @@ function answerClockFace(btn) {
     }, 1300);
   } else {
     r.retried = true;
-    fb.textContent = h === r.h
-      ? 'Close! Look at the long MINUTE hand.'
-      : 'Not quite — check the short HOUR hand.';
+    if (isNextHourMistake(r.h, r.m, h, m)) {
+      fb.textContent = `The short hand hasn't LANDED on ${r.h + 1} yet — it's still ${r.h}! ⏰`;
+    } else {
+      fb.textContent = h === r.h
+        ? 'Close! Look at the long MINUTE hand.'
+        : 'Not quite — check the short HOUR hand.';
+    }
     fb.className = 'dn-feedback wrong';
     btn.classList.add('cf-wrong');
     btns.forEach(b => { if (!b.classList.contains('cf-wrong')) b.disabled = false; });
@@ -4807,6 +5087,27 @@ function renderClockNumpad(r) {
   ).join('');
 }
 
+// Brief amber "hour zone" wedge on the shown clock, pointing at where the short
+// hand sits between two numbers — used as feedback after the classic wrong answer.
+function flashHourZone(containerId, trueH) {
+  const svg = document.querySelector('#' + containerId + ' svg'); if (!svg) return;
+  const R = 42, pt = deg => ({ x: 50 + R * Math.sin(deg * Math.PI / 180), y: 50 - R * Math.cos(deg * Math.PI / 180) });
+  const s = pt(trueH * 30), e = pt((trueH + 1) * 30);
+  const NS = 'http://www.w3.org/2000/svg';
+  const p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', `M50,50 L${s.x.toFixed(1)},${s.y.toFixed(1)} A${R},${R} 0 0 1 ${e.x.toFixed(1)},${e.y.toFixed(1)} Z`);
+  p.setAttribute('fill', 'rgba(251,191,36,0.42)');
+  p.style.transition = 'opacity .4s'; p.style.opacity = '0';
+  svg.appendChild(p);
+  setTimeout(() => { p.style.opacity = '1'; }, 30);
+  setTimeout(() => { p.style.opacity = '0'; setTimeout(() => p.remove(), 500); }, 2500);
+}
+// The classic "read the nearest number" error: true time is h:MM with MM>=30 and
+// she picked the NEXT hour (short hand looks closer to it). true iff that mistake.
+function isNextHourMistake(trueH, trueM, chosenH, chosenM) {
+  return !S.watchTestMode && trueM >= 30 && chosenM === trueM && chosenH === trueH + 1;
+}
+
 function answerClock(num) {
   if (S.clockAnswered) return;
   S.clockAnswered = true;
@@ -4829,10 +5130,16 @@ function answerClock(num) {
     }, 1300);
   } else {
     r.retried = true;
-    const sameHour = Math.floor(num / 60) === Math.floor(r.answer / 60);
-    fb.textContent = S.clockLevel === 1 ? 'Not quite — check the HOUR hand!'
-                    : sameHour ? 'Close! Check the long MINUTE hand.'
-                    : 'Not quite — check the short HOUR hand first.';
+    const trueH = Math.floor(r.answer / 60), trueM = r.answer % 60;
+    const chosenH = Math.floor(num / 60), sameHour = chosenH === trueH;
+    if (isNextHourMistake(trueH, trueM, chosenH, num % 60)) {
+      fb.textContent = `The short hand hasn't LANDED on ${trueH + 1} yet — it's still ${trueH}! ⏰`;
+      if (r.kind === 'read') flashHourZone('clock-visual', trueH);
+    } else {
+      fb.textContent = S.clockLevel === 1 ? 'Not quite — check the HOUR hand!'
+                      : sameHour ? 'Close! Check the long MINUTE hand.'
+                      : 'Not quite — check the short HOUR hand first.';
+    }
     fb.className = 'dn-feedback wrong';
     if (chosen) chosen.classList.add('dn-wrong');
     btns.forEach(b => { if (!b.classList.contains('dn-wrong')) b.disabled = false; });
@@ -4962,6 +5269,13 @@ function renderWatchQuest() {
   } else {
     btn.style.display = 'none';
     locked.style.display = '';
+  }
+  // Replay lesson movies for every level she's reached.
+  const lessons = document.getElementById('wq-lessons');
+  if (lessons) {
+    const top = Math.min(4, Math.max(1, S.clockLevel));
+    lessons.innerHTML = Array.from({length: top}, (_, i) =>
+      `<button class="btn btn-secondary btn-sm" onclick="replayLesson(${i + 1})">Level ${i + 1}</button>`).join('');
   }
 }
 

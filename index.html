@@ -582,6 +582,29 @@
     .hc-rhyme   { background: linear-gradient(150deg, rgba(245,243,255,0.78), rgba(233,228,255,0.56)); border-color: rgba(167,139,250,0.85); color:#5b21b6; }
     .hc-reader  { background: linear-gradient(150deg, rgba(236,253,245,0.78), rgba(209,250,229,0.56)); border-color: rgba(52,211,153,0.85); color:#065f46; }
     .hc-science { background: linear-gradient(150deg, rgba(236,250,255,0.78), rgba(207,238,252,0.56)); border-color: rgba(56,189,248,0.85); color:#0c4a6e; }
+    .hc-measure { background: linear-gradient(150deg, rgba(254,252,232,0.80), rgba(254,243,199,0.58)); border-color: rgba(250,204,21,0.90); color:#854d0e; }
+    .hc-fix     { background: linear-gradient(150deg, rgba(255,241,242,0.80), rgba(254,215,226,0.58)); border-color: rgba(244,63,94,0.85); color:#9f1239; }
+
+    /* ── MEASURE UP ── */
+    .mu-stage { background:rgba(255,255,255,0.62); border:2px solid rgba(250,204,21,0.55); border-radius:20px;
+                padding:16px 12px; margin:12px 0 6px; overflow-x:auto; }
+    .mu-stage svg { display:block; margin:0 auto; max-width:100%; height:auto; }
+    .mu-q { text-align:center; font-size:17px; font-weight:900; color:var(--text); margin:10px 4px 2px; line-height:1.4; }
+    .mu-order-slot { display:inline-flex; align-items:center; justify-content:center; min-width:44px; height:44px;
+                     border-radius:12px; border:2px dashed rgba(250,204,21,0.8); background:rgba(255,251,235,0.8);
+                     font-size:22px; margin:0 4px; font-weight:900; }
+    .mu-order-row { text-align:center; margin:8px 0 4px; }
+
+    /* ── FIX THE SENTENCE ── */
+    .fx-sentence { background:rgba(255,255,255,0.66); border:2px solid rgba(244,63,94,0.45); border-radius:18px;
+                   padding:18px 14px; margin:12px 0 8px; text-align:center; font-size:24px; font-weight:800;
+                   line-height:1.7; color:var(--text); }
+    .fx-word { display:inline-block; padding:2px 6px; margin:2px 1px; border-radius:9px; cursor:pointer;
+               border:2px solid transparent; transition:transform .12s, background .15s; }
+    .fx-word:hover { background:rgba(254,215,226,0.7); }
+    .fx-word.fx-picked-ok  { background:#bbf7d0; border-color:#22c55e; }
+    .fx-word.fx-picked-bad { background:#fecaca; border-color:#ef4444; }
+    .fx-hint { text-align:center; font-size:14px; font-weight:800; color:var(--muted); margin-bottom:4px; }
 
     /* ── DRESS-UP CLOSET ── */
     .closet-doll { display:flex; justify-content:center; margin:6px 0 4px; }
@@ -1049,12 +1072,28 @@
       <div class="hc-sub" id="home-clock-level">Lv. 1</div>
     </div>
 
+    <div class="home-card hc-measure" onclick="startMeasureGame()">
+      <span class="home-done-badge" id="done-measure" style="display:none">✓</span>
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">📏</div>
+      <div class="hc-name">Measure Up</div>
+      <div class="hc-sub" id="home-measure-level">Lv. 1</div>
+    </div>
+
     <div class="home-card hc-spell" onclick="startSpellGame()">
       <span class="home-done-badge" id="done-spell" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">🔤</div>
       <div class="hc-name">Build a Word</div>
       <div class="hc-sub" id="home-spell-level">Lv. 1</div>
+    </div>
+
+    <div class="home-card hc-fix" onclick="startFixGame()">
+      <span class="home-done-badge" id="done-fix" style="display:none">✓</span>
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">✏️</div>
+      <div class="hc-name">Fix the Sentence</div>
+      <div class="hc-sub" id="home-fix-level">Lv. 1</div>
     </div>
 
     <div class="home-card hc-rhyme" onclick="startRhymeGame()">
@@ -1481,10 +1520,11 @@
   </div>
   <div class="dn-progress-bar"><div class="dn-progress-fill" id="spell-progress-fill" style="width:0%;background:linear-gradient(90deg,#fb923c,#fdba74)"></div></div>
   <div style="text-align:center;margin:6px 0"><span id="spell-emoji" style="font-size:64px;line-height:1.1"></span></div>
+  <div class="mu-q" id="spell-prompt" style="display:none"></div>
   <div style="text-align:center;margin-bottom:6px"><button class="btn btn-secondary btn-sm" onclick="speak(S.spellTarget)">🔊 Hear the word</button></div>
   <div class="sb-boxes-row" id="spell-slots"></div>
   <div class="sb-tiles-row" id="spell-tiles"></div>
-  <div style="text-align:center;margin-top:4px"><button class="btn btn-secondary btn-sm" onclick="clearSpell()">↩︎ Clear</button></div>
+  <div style="text-align:center;margin-top:4px" id="spell-clear-row"><button class="btn btn-secondary btn-sm" onclick="clearSpell()">↩︎ Clear</button></div>
   <div class="dn-feedback" id="spell-feedback"></div>
 </div>
 <div id="screen-spellresult" class="screen">
@@ -1548,6 +1588,70 @@
     <div class="result-msg" id="science-result-msg">Super scientist!</div>
   </div>
   <button class="btn btn-primary btn-full" onclick="startScienceGame()">Play again</button>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ MEASURE UP ═══ -->
+<div id="screen-measureintro" class="screen">
+  <div style="max-width:420px;margin:0 auto;padding:28px 20px 32px;display:flex;flex-direction:column;align-items:center;gap:16px">
+    <div class="mi-banner">✨ Something New!</div>
+    <div class="mi-subtitle">No need to answer — just read!</div>
+    <div id="mu-intro-emoji" style="font-size:52px;line-height:1.2"></div>
+    <div id="mu-intro-headline" class="mi-headline"></div>
+    <div id="mu-intro-visual" class="mi-visual"></div>
+    <div id="mu-intro-body" class="mi-body"></div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px;font-size:18px" onclick="dismissMeasureIntro()">Got it! Let's go →</button>
+  </div>
+</div>
+<div id="screen-measure" class="screen">
+  <div class="sw-header">
+    <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
+    <span class="sw-prog-text" id="measure-prog">1 of 10</span>
+    <span class="pill" style="background:#fef9c3;color:#854d0e;font-weight:800" id="measure-score-pill">0 ✓</span>
+  </div>
+  <div class="dn-progress-bar"><div class="dn-progress-fill" id="measure-progress-fill" style="width:0%;background:linear-gradient(90deg,#facc15,#fde68a)"></div></div>
+  <div class="mu-q" id="measure-q"></div>
+  <div style="text-align:center;margin-bottom:2px"><button class="btn btn-secondary btn-sm" onclick="speak(document.getElementById('measure-q').textContent)">🔊 Hear it</button></div>
+  <div class="mu-stage" id="measure-stage"></div>
+  <div id="measure-choices"></div>
+  <div class="dn-feedback" id="measure-feedback"></div>
+</div>
+<div id="screen-measureresult" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">Measure Up done! 📏</span></div>
+  <div class="sw-result-center">
+    <div class="stars-row" id="measure-result-stars">⭐⭐⭐</div>
+    <div class="result-score" id="measure-result-score">10 / 10</div>
+    <div class="result-msg" id="measure-result-msg">Measuring master!</div>
+    <div id="measure-level-msg" style="margin-top:10px"></div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="startMeasureGame()">Play again</button>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ FIX THE SENTENCE ═══ -->
+<div id="screen-fix" class="screen">
+  <div class="sw-header">
+    <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
+    <span class="sw-prog-text" id="fix-prog">1 of 10</span>
+    <span class="pill" style="background:#ffe4e6;color:#9f1239;font-weight:800" id="fix-score-pill">0 ✓</span>
+  </div>
+  <div class="dn-progress-bar"><div class="dn-progress-fill" id="fix-progress-fill" style="width:0%;background:linear-gradient(90deg,#fb7185,#fecdd3)"></div></div>
+  <div class="mu-q" id="fix-q"></div>
+  <div class="fx-hint" id="fix-hint"></div>
+  <div class="fx-sentence" id="fix-sentence"></div>
+  <div style="text-align:center;margin-bottom:4px"><button class="btn btn-secondary btn-sm" onclick="speakFixSentence()">🔊 Hear it</button></div>
+  <div id="fix-choices"></div>
+  <div class="dn-feedback" id="fix-feedback"></div>
+</div>
+<div id="screen-fixresult" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">Fix the Sentence done! ✏️</span></div>
+  <div class="sw-result-center">
+    <div class="stars-row" id="fix-result-stars">⭐⭐⭐</div>
+    <div class="result-score" id="fix-result-score">10 / 10</div>
+    <div class="result-msg" id="fix-result-msg">Editing star!</div>
+    <div id="fix-level-msg" style="margin-top:10px"></div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="startFixGame()">Play again</button>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
 </div>
 
@@ -1710,9 +1814,39 @@
     </div>
   </div>
   <div class="pc-level-row">
+    <span class="pc-level-label">📏 Measure Up</span>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setGameLevel('measureLevel','measureLevelProg',-1)">−</button>
+      <span class="pc-lvl-val" id="pc-measure-level">Lv. 1</span>
+      <button class="pc-lvl-btn" onclick="setGameLevel('measureLevel','measureLevelProg',+1)">+</button>
+    </div>
+  </div>
+  <div class="pc-level-row">
+    <span class="pc-level-label">✏️ Fix the Sentence</span>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setGameLevel('fixLevel','fixLevelProg',-1)">−</button>
+      <span class="pc-lvl-val" id="pc-fix-level">Lv. 1</span>
+      <button class="pc-lvl-btn" onclick="setGameLevel('fixLevel','fixLevelProg',+1)">+</button>
+    </div>
+  </div>
+  <div class="pc-level-row">
     <span class="pc-level-label">⌚ Watch Quest</span>
     <span class="pc-lvl-val" id="pc-watch-status">0/5 pieces</span>
   </div>
+
+  <div class="divider"></div>
+  <div class="section-title">Grade-level map</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:600">
+    Where each game's current level sits against 1st- and 2nd-grade expectations.
+  </div>
+  <div id="pc-grade-map"></div>
+
+  <div class="divider"></div>
+  <div class="section-title">Standards checklist</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:600">
+    The school's essentials, and whether this app is practicing them yet.
+  </div>
+  <div id="pc-standards"></div>
 
   <div class="divider"></div>
   <div class="section-title">Sound &amp; music</div>
@@ -1808,6 +1942,11 @@ const TOPICS = [
   { id:'ocean',     name:'Ocean world',         sub:'Deep sea and hidden treasures', bg:'#e3eeff', icon:'🐬', reward:['🐬','🌊','⭐','🐠','💧'] },
   { id:'inventors', name:'Young inventors',     sub:'Science, gadgets, and big ideas',bg:'#fef3e2',icon:'💡', reward:['💡','⭐','🚀','🎉','🔧'] },
   { id:'dinosaurs', name:'Dinosaurs',           sub:'Giants of the ancient world',   bg:'#e8f5e8', icon:'🦕', reward:['🦕','⭐','🌿','🦖','💥'] },
+  // Nonfiction topics. 1st grade asks children to share details from a
+  // nonfiction book; 2nd grade adds text features and summarizing.
+  { id:'realanimals', name:'Real Animals',      sub:'True facts about amazing animals', bg:'#eefbe9', icon:'🦒', reward:['🦒','🐘','⭐','🌍','🐅'], nonfiction:true },
+  { id:'howthings',   name:'How Things Work',   sub:'Real machines and everyday science', bg:'#eef2ff', icon:'⚙️', reward:['⚙️','🔧','💡','🚂','⭐'], nonfiction:true },
+  { id:'space',       name:'Space Facts',       sub:'Planets, stars, and astronauts', bg:'#f3e8ff', icon:'🪐', reward:['🪐','🚀','⭐','🌙','👩‍🚀'], nonfiction:true },
 ];
 
 const BADGES = [
@@ -2053,6 +2192,16 @@ const S = {
   rhymegames:     parseInt(lsGet('rl_rhymegames','0')),
   sciencegames:   parseInt(lsGet('rl_sciencegames','0')),
   readerDone:     lsJson('rl_readerdone', []),
+  // measurement + writing conventions (curriculum alignment)
+  measureLevel:     parseInt(lsGet('rl_measurelevel','1')),
+  measureLevelProg: parseInt(lsGet('rl_measurelevelprog','0')),
+  measuregames:     parseInt(lsGet('rl_measuregames','0')),
+  measureperfect:   parseInt(lsGet('rl_measureperfect','0')),
+  measureIntroSeen: lsJson('rl_measureintroseen', []),
+  fixLevel:         parseInt(lsGet('rl_fixlevel','1')),
+  fixLevelProg:     parseInt(lsGet('rl_fixlevelprog','0')),
+  fixgames:         parseInt(lsGet('rl_fixgames','0')),
+  fixperfect:       parseInt(lsGet('rl_fixperfect','0')),
   // transient
   topic: null, title: '', story: '', words: [], quiz: [],
   quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
@@ -2061,6 +2210,8 @@ const S = {
   rhymeRounds: [], rhymeIdx: 0, rhymeScore: 0, rhymeAnswered: false, rhymeTargetWord: '',
   scienceRounds: [], scienceIdx: 0, scienceScore: 0, scienceAnswered: false,
   readerBook: null, readerAloudActive: false,
+  measureRounds: [], measureIdx: 0, measureScore: 0, measureAnswered: false, measureOrderPicks: [],
+  fixRounds: [], fixIdx: 0, fixScore: 0, fixAnswered: false,
 
   swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
   dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false, dnStepsPerArticle: 3,
@@ -2145,6 +2296,15 @@ function persist() {
   lsSet('rl_rhymegames',     S.rhymegames);
   lsSet('rl_sciencegames',   S.sciencegames);
   lsSet('rl_readerdone',     S.readerDone);
+  lsSet('rl_measurelevel',     S.measureLevel);
+  lsSet('rl_measurelevelprog', S.measureLevelProg);
+  lsSet('rl_measuregames',     S.measuregames);
+  lsSet('rl_measureperfect',   S.measureperfect);
+  lsSet('rl_measureintroseen', S.measureIntroSeen);
+  lsSet('rl_fixlevel',         S.fixLevel);
+  lsSet('rl_fixlevelprog',     S.fixLevelProg);
+  lsSet('rl_fixgames',         S.fixgames);
+  lsSet('rl_fixperfect',       S.fixperfect);
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
@@ -2184,11 +2344,18 @@ function mathLockState() {
 
 // How many sessions of a given game were played today. 'Stories' counts
 // anything not claimed by a named game (same rule as the heatmap).
+// Every activity that records sessions under its own name. "Stories" is the
+// catch-all for anything not in this list (each AI story logs its topic, e.g.
+// "Dinosaurs"), plus Reading Club books — so a game missing from here would
+// wrongly light up the Stories badge. Keep this as the single source of truth.
+const NAMED_GAMES = ['Sight Words','Daily News','Math Time','Sound Boxes','Clock Time',
+                     'Spelling','Rhyming','Science','Measure Up','Fix the Sentence'];
+
 function playedToday(topic) {
   const today = new Date().toLocaleDateString();
   return S.sessions.filter(s => s.date === today &&
     (topic === 'Stories'
-      ? !['Sight Words','Daily News','Math Time','Sound Boxes','Clock Time'].includes(s.topic)
+      ? !NAMED_GAMES.includes(s.topic)
       : s.topic === topic)).length;
 }
 
@@ -2670,6 +2837,8 @@ function refreshHome() {
   document.getElementById('home-sb-level').innerHTML      = homeSub(S.sbLevel,    'Sound Boxes',  'sbLevelProg');
   document.getElementById('home-clock-level').innerHTML   = homeSub(S.clockLevel, 'Clock Time',   'clockLevelProg');
   document.getElementById('home-spell-level').innerHTML   = homeSub(S.spellLevel, 'Spelling',     'spellLevelProg');
+  document.getElementById('home-measure-level').innerHTML = homeSub(S.measureLevel, 'Measure Up',      'measureLevelProg');
+  document.getElementById('home-fix-level').innerHTML     = homeSub(S.fixLevel,     'Fix the Sentence','fixLevelProg');
   document.getElementById('home-reader-sub').textContent  = `${S.readerDone.length}/${READER_BOOKS.length} books read`;
   updateCoinDisplays();
   updateMuteBtn();
@@ -2683,7 +2852,8 @@ function refreshHome() {
 
   // "Done today" checkmark badges.
   [['done-reading','Stories'], ['done-sw','Sight Words'], ['done-dn','Daily News'],
-   ['done-math','Math Time'], ['done-sb','Sound Boxes'], ['done-clock','Clock Time']]
+   ['done-math','Math Time'], ['done-sb','Sound Boxes'], ['done-clock','Clock Time'],
+   ['done-measure','Measure Up'], ['done-fix','Fix the Sentence']]
     .forEach(([id, topic]) => {
       document.getElementById(id).style.display = playedToday(topic) ? '' : 'none';
     });
@@ -2836,19 +3006,36 @@ async function fetchStory(topic, level) {
   const heroLine = S.heroName
     ? ` Make the main character a kid named "${S.heroName}" who is the hero of the story.`
     : '';
-  const prompt = `Write a short children's reading story about "${topic.name}" (${topic.sub}) for a child at reading level: ${LEVEL_DESC[level]}.${heroLine}
+  // Question mix is pinned to the school's comprehension standards: 1st grade
+  // retells character/setting/events and finds details in nonfiction; 2nd grade
+  // summarizes with key details and uses text features.
+  const askFiction = `The 3 questions MUST be one of each, in this order:
+1. A CHARACTER question (who the story is about, or how a character feels).
+2. A SETTING or EVENTS question (where it happens, or what happened first/next/last).
+3. A "what is this story mainly about?" main-idea question.`;
+  const askNonfiction = `The 3 questions MUST be one of each, in this order:
+1. A KEY DETAIL question (a specific true fact stated in the text).
+2. A second KEY DETAIL question about a different fact.
+3. A "what is this mostly about?" main-idea question.`;
+
+  const askBody = topic.nonfiction
+    ? `Write a short TRUE nonfiction passage for children about "${topic.name}" (${topic.sub}) for a child at reading level: ${LEVEL_DESC[level]}. Use only real, accurate facts — no made-up characters or story plot. Write it like a page from a kids' nonfiction book: start by naming the topic, then give several clear facts about it.`
+    : `Write a short children's reading story about "${topic.name}" (${topic.sub}) for a child at reading level: ${LEVEL_DESC[level]}.${heroLine}`;
+
+  const prompt = `${askBody}
 
 Return ONLY valid JSON, no markdown, no code fences:
 {
-  "title": "Story title",
-  "story": "Full story as one paragraph.",
+  "title": "${topic.nonfiction ? 'Topic title' : 'Story title'}",
+  "story": "Full ${topic.nonfiction ? 'passage' : 'story'} as one paragraph.",
   "questions": [
     {"q": "Question?", "choices": ["A","B","C","D"], "answer": 0},
     {"q": "Question?", "choices": ["A","B","C","D"], "answer": 2},
     {"q": "Question?", "choices": ["A","B","C","D"], "answer": 1}
   ]
 }
-Rules: story must be engaging and age-appropriate. All 3 questions must be about the story. "answer" is the 0-based index of the correct choice. Keep choices short (2-5 words). Return raw JSON only.`;
+${topic.nonfiction ? askNonfiction : askFiction}
+Rules: must be engaging and age-appropriate. All 3 questions must be answerable from the text alone. "answer" is the 0-based index of the correct choice. Keep choices short (2-5 words). Return raw JSON only.`;
 
   const h = window.location.hostname;
   const hasLocalProxy = h.endsWith('.vercel.app') || h.endsWith('.pages.dev');
@@ -3210,12 +3397,14 @@ function checkPin() {
 // ─── PARENT CORNER ────────────────────────────────────────────────────────────
 
 const HM_GAMES = [
-  { label: '📖 Stories',    test: s => !['Sight Words','Daily News','Math Time','Sound Boxes','Clock Time'].includes(s.topic) },
+  { label: '📖 Stories',    test: s => !NAMED_GAMES.includes(s.topic) },
   { label: '🔤 Sight Words', test: s => s.topic === 'Sight Words' },
   { label: '📰 Daily News',  test: s => s.topic === 'Daily News'  },
   { label: '🔢 Math Time',   test: s => s.topic === 'Math Time'   },
   { label: '🔊 Sound Boxes', test: s => s.topic === 'Sound Boxes' },
   { label: '🕐 Clock Time',  test: s => s.topic === 'Clock Time'  },
+  { label: '📏 Measure Up',  test: s => s.topic === 'Measure Up'  },
+  { label: '✏️ Fix Sentence',test: s => s.topic === 'Fix the Sentence' },
 ];
 
 function renderHeatmap() {
@@ -3249,13 +3438,10 @@ function renderParentCorner() {
   document.getElementById('pc-total-games').textContent = S.totalGames;
   document.getElementById('pc-badges').textContent    = `${S.badges.length} / ${BADGES.length}`;
   document.getElementById('pc-streak').textContent    = `${S.streak} day${S.streak !== 1 ? 's' : ''}`;
-  document.getElementById('pc-level').textContent      = `Lv. ${S.level}`;
-  document.getElementById('pc-sw-level').textContent   = `Lv. ${S.swLevel}`;
-  document.getElementById('pc-dn-level').textContent   = `Lv. ${S.dnLevel}`;
-  document.getElementById('pc-math-level').textContent  = `Lv. ${S.mathLevel}`;
-  document.getElementById('pc-sb-level').textContent   = `Lv. ${S.sbLevel}`;
-  document.getElementById('pc-clock-level').textContent = `Lv. ${S.clockLevel}`;
-  document.getElementById('pc-spell-level').textContent = `Lv. ${S.spellLevel}`;
+  Object.keys(LEVEL_EL_IDS).forEach(k => {
+    const el = document.getElementById(LEVEL_EL_IDS[k]);
+    if (el) el.innerHTML = `Lv. ${S[k]}${gradeTag(k, S[k])}`;
+  });
   document.getElementById('pc-watch-status').textContent = S.watchEarned ? `Earned ${S.watchEarned}` : `${S.watchPieces.length}/5 pieces`;
   const mb = document.getElementById('pc-music-btn');
   if (mb) mb.textContent = S.musicOn ? '🎵 Music: On' : '🎵 Music: Off';
@@ -3268,6 +3454,8 @@ function renderParentCorner() {
   document.getElementById('backup-code').style.display = 'none';
 
   renderHeatmap();
+  renderGradeMap();
+  renderStandards();
 
   const sessEl = document.getElementById('pc-sessions');
   if (!S.sessions.length) {
@@ -3281,8 +3469,160 @@ function renderParentCorner() {
   }
 }
 
+// ─── GRADE-LEVEL MAP ─────────────────────────────────────────────────────────
+// Each activity's numeric level mapped onto the grade band it corresponds to,
+// so the Parent Corner can answer "where is she relative to school?" directly.
+// `bands` entries are [highestLevelInBand, label], checked in order.
+const GRADE_BANDS = {
+  level:        { name:'📖 Reading Stories',  bands:[[1,'Pre-K–K'],[2,'Grade 1'],[3,'Grade 1–2'],[4,'Grade 2–3'],[5,'Grade 3–4']] },
+  swLevel:      { name:'🎮 Sight Words',      bands:[[2,'Grade 1'],[3,'Grade 1–2'],[5,'Grade 2']] },
+  dnLevel:      { name:'📰 Daily News',       bands:[[2,'Grade 1'],[3,'Grade 1–2'],[5,'Grade 2']] },
+  mathLevel:    { name:'🔢 Math Time',        bands:[[2,'Kindergarten'],[6,'Grade 1'],[15,'Grade 2'],[16,'Grade 3 ready']] },
+  sbLevel:      { name:'📦 Sound Boxes',      bands:[[2,'Grade 1'],[5,'Grade 1–2'],[6,'Grade 2']] },
+  clockLevel:   { name:'🕐 Clock Time',       bands:[[2,'Grade 1'],[4,'Grade 2']] },
+  spellLevel:   { name:'🔤 Build a Word',     bands:[[1,'Grade 1'],[2,'Grade 1–2'],[4,'Grade 2']] },
+  measureLevel: { name:'📏 Measure Up',       bands:[[2,'Grade 1'],[4,'Grade 2']] },
+  fixLevel:     { name:'✏️ Fix the Sentence', bands:[[1,'Grade 1'],[3,'Grade 1–2']] },
+};
+const GRADE_COLORS = {
+  'Pre-K–K':      ['#f1f5f9','#475569'],
+  'Kindergarten': ['#f1f5f9','#475569'],
+  'Grade 1':      ['#fef3c7','#92400e'],
+  'Grade 1–2':    ['#e0f2fe','#075985'],
+  'Grade 2':      ['#dcfce7','#166534'],
+  'Grade 2–3':    ['#ede9fe','#5b21b6'],
+  'Grade 3–4':    ['#fae8ff','#86198f'],
+  'Grade 3 ready':['#fae8ff','#86198f'],
+};
+function gradeBandFor(levelKey, lv) {
+  const g = GRADE_BANDS[levelKey];
+  if (!g) return '';
+  for (const [max, label] of g.bands) if (lv <= max) return label;
+  return g.bands[g.bands.length - 1][1];
+}
+function gradeTag(levelKey, lv) {
+  const label = gradeBandFor(levelKey, lv);
+  if (!label) return '';
+  const [bg, fg] = GRADE_COLORS[label] || ['#f1f5f9','#475569'];
+  return ` <span style="display:inline-block;background:${bg};color:${fg};font-size:10px;font-weight:900;` +
+         `padding:2px 6px;border-radius:7px;vertical-align:middle;white-space:nowrap">${label}</span>`;
+}
+function renderGradeMap() {
+  document.getElementById('pc-grade-map').innerHTML = Object.keys(GRADE_BANDS).map(k => {
+    const lv = S[k], cap = LEVEL_CAPS[k] || 5;
+    const label = gradeBandFor(k, lv);
+    const [bg, fg] = GRADE_COLORS[label] || ['#f1f5f9','#475569'];
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
+      <span style="flex:1;font-size:13px;font-weight:800;color:var(--text)">${GRADE_BANDS[k].name}</span>
+      <span style="font-size:12px;font-weight:800;color:var(--muted)">Lv. ${lv}/${cap}</span>
+      <span style="background:${bg};color:${fg};font-size:11px;font-weight:900;padding:3px 8px;border-radius:8px;white-space:nowrap">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── STANDARDS CHECKLIST ─────────────────────────────────────────────────────
+// The school's own 1st- and 2nd-grade essentials. `k`/`n` say which activity
+// level practices a standard; `k:null` means the app genuinely does not cover
+// it yet, which is worth showing honestly rather than hiding.
+const STANDARDS = [
+  // ── Grade 1 · Word Study ──
+  { g:1, s:'Word Study', t:'Break apart & blend sounds in one-syllable words', k:'sbLevel', n:1, w:'Sound Boxes' },
+  { g:1, s:'Word Study', t:'Identify short and long vowels',                   k:'spellLevel', n:4, w:'Build a Word Lv.4' },
+  { g:1, s:'Word Study', t:'Change vowel sounds to make new words',            k:'spellLevel', n:4, w:'Build a Word Lv.4' },
+  { g:1, s:'Word Study', t:'Read words with digraphs (sh, th, ch)',            k:'sbLevel', n:2, w:'Sound Boxes Lv.2' },
+  { g:1, s:'Word Study', t:'Read and write one-syllable words',                k:'spellLevel', n:1, w:'Build a Word' },
+  { g:1, s:'Word Study', t:'Read snap words',                                  k:'swLevel', n:1, w:'Sight Word Game' },
+  { g:1, s:'Word Study', t:'Spell using sounds and word patterns',             k:'spellLevel', n:1, w:'Build a Word · Rhyme Time' },
+  // ── Grade 1 · Reading ──
+  { g:1, s:'Reading', t:'Read grade-level text with fluency',                  k:'level', n:2, w:'Reading Club · Stories' },
+  { g:1, s:'Reading', t:'Monitor own reading and reread when needed',          k:null,  w:'Needs an adult listening' },
+  { g:1, s:'Reading', t:'Ask and answer questions about texts',                k:'level', n:1, w:'Story quiz' },
+  { g:1, s:'Reading', t:'Tell about characters, setting and events',           k:'level', n:1, w:'Story quiz (retell)' },
+  { g:1, s:'Reading', t:'Share details from a nonfiction book',                k:'level', n:1, w:'Stories → nonfiction topics' },
+  // ── Grade 1 · Writing ──
+  { g:1, s:'Writing', t:'Capitalize dates and names of people',                k:'fixLevel', n:1, w:'Fix the Sentence' },
+  { g:1, s:'Writing', t:'Use end punctuation',                                 k:'fixLevel', n:2, w:'Fix the Sentence Lv.2' },
+  { g:1, s:'Writing', t:'Write an opinion piece with a reason and an ending',  k:null, w:'Pencil-and-paper work' },
+  { g:1, s:'Writing', t:'Write a narrative with two events and transitions',   k:null, w:'Pencil-and-paper work' },
+  { g:1, s:'Speaking', t:'Conversations, turn-taking, active listening',       k:null, w:'Off-screen with an adult' },
+  // ── Grade 1 · Math ──
+  { g:1, s:'Math', t:'Add & subtract within 20 in word problems',              k:'mathLevel', n:5, w:'Math Lv.5' },
+  { g:1, s:'Math', t:'Word problems with three whole numbers (sum ≤ 20)',      k:'mathLevel', n:4, w:'Math Lv.4' },
+  { g:1, s:'Math', t:'Subtract by finding an unknown addend',                  k:'mathLevel', n:5, w:'Math Lv.5' },
+  { g:1, s:'Math', t:'Subitize groups and combine them',                       k:'mathLevel', n:1, w:'Math Lv.1–2' },
+  { g:1, s:'Math', t:'Fluently add & subtract within 10',                      k:'mathLevel', n:2, w:'Math Lv.2' },
+  { g:1, s:'Math', t:'Understand the equal sign — true or false equations',    k:'mathLevel', n:3, w:'Math Lv.3' },
+  { g:1, s:'Math', t:'Count, read and write to 120 from any number',           k:'mathLevel', n:6, w:'Math Lv.6' },
+  { g:1, s:'Math', t:'Ten as a group of ten ones; teens as ten + ones',        k:'mathLevel', n:3, w:'Math Lv.3' },
+  { g:1, s:'Math', t:'Compare two-digit numbers with >, =, <',                 k:'mathLevel', n:6, w:'Math Lv.6' },
+  { g:1, s:'Math', t:'Find 10 more or 10 less without counting',               k:'mathLevel', n:6, w:'Math Lv.6' },
+  { g:1, s:'Math', t:'Subtract decade numbers (40 − 20)',                      k:'mathLevel', n:8, w:'Math Lv.8' },
+  { g:1, s:'Math', t:'Order three objects by length; compare using a third',   k:'measureLevel', n:1, w:'Measure Up Lv.1' },
+  { g:1, s:'Math', t:'Measure with same-size units, no gaps or overlaps',      k:'measureLevel', n:2, w:'Measure Up Lv.2' },
+  { g:1, s:'Math', t:'Tell time to the hour and half hour',                    k:'clockLevel', n:2, w:'Clock Time Lv.2' },
+  // ── Grade 2 · Literacy ──
+  { g:2, s:'Reading', t:'Summarize a text with key details',                   k:'level', n:3, w:'Story quiz (main idea)' },
+  { g:2, s:'Reading', t:'Use illustrations and text features',                 k:'level', n:3, w:'Stories → nonfiction' },
+  { g:2, s:'Writing', t:'Correct capitalization, punctuation and spelling',    k:'fixLevel', n:3, w:'Fix the Sentence Lv.3' },
+  { g:2, s:'Writing', t:'Write opinion, informative and narrative pieces',     k:null, w:'Pencil-and-paper work' },
+  // ── Grade 2 · Math ──
+  { g:2, s:'Math', t:'Add & subtract within 100, one- and two-step problems',  k:'mathLevel', n:8,  w:'Math Lv.8' },
+  { g:2, s:'Math', t:'Fluently add & subtract within 20',                      k:'mathLevel', n:5,  w:'Math Lv.5' },
+  { g:2, s:'Math', t:'Hundreds, tens and ones in a three-digit number',        k:'mathLevel', n:11, w:'Math Lv.11' },
+  { g:2, s:'Math', t:'Count within 1000 by 5s, 10s and 100s',                  k:'mathLevel', n:12, w:'Math Lv.12' },
+  { g:2, s:'Math', t:'Read & write to 1000 — numerals, names, expanded form',  k:'mathLevel', n:11, w:'Math Lv.11–12' },
+  { g:2, s:'Math', t:'Compare three-digit numbers with >, =, <',               k:'mathLevel', n:12, w:'Math Lv.12' },
+  { g:2, s:'Math', t:'Add up to four two-digit numbers',                       k:'mathLevel', n:13, w:'Math Lv.13' },
+  { g:2, s:'Math', t:'Add & subtract within 1000 (regrouping)',                k:'mathLevel', n:13, w:'Math Lv.13–14' },
+  { g:2, s:'Math', t:'Mentally add or subtract 10 or 100',                     k:'mathLevel', n:6,  w:'Math Lv.6 & 14' },
+  { g:2, s:'Math', t:'Explain why addition & subtraction strategies work',     k:null, w:'Talk it through together' },
+  { g:2, s:'Math', t:'Measure with a ruler in standard units',                 k:'measureLevel', n:3, w:'Measure Up Lv.3' },
+  { g:2, s:'Math', t:'Compare measurements — how much longer',                 k:'measureLevel', n:4, w:'Measure Up Lv.4' },
+  { g:2, s:'Math', t:'Show sums and differences on a number line',             k:'measureLevel', n:4, w:'Measure Up Lv.4' },
+];
+
+function renderStandards() {
+  const box = document.getElementById('pc-standards');
+  const counts = { done:0, soon:0, none:0 };
+  let html = '';
+  [1, 2].forEach(g => {
+    const rows = STANDARDS.filter(x => x.g === g);
+    html += `<div style="font-size:13px;font-weight:900;color:var(--text);margin:12px 0 6px">
+               ${g === 1 ? '1st grade' : '2nd grade'} essentials</div>`;
+    let lastSubj = '';
+    rows.forEach(r => {
+      let icon, tint, note;
+      if (!r.k)                    { icon = '⬜'; tint = 'var(--muted)'; note = r.w; counts.none++; }
+      else if (S[r.k] >= r.n)      { icon = '✅'; tint = '#166534';      note = r.w; counts.done++; }
+      else                         { icon = '🔸'; tint = '#b45309';      note = `${r.w} — she's at Lv. ${S[r.k]}`; counts.soon++; }
+      if (r.s !== lastSubj) {
+        lastSubj = r.s;
+        html += `<div style="font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:9px 0 3px">${r.s}</div>`;
+      }
+      html += `<div style="display:flex;gap:7px;padding:4px 0;align-items:flex-start">
+        <span style="font-size:13px;line-height:1.4">${icon}</span>
+        <span style="flex:1;font-size:12.5px;font-weight:700;color:var(--text);line-height:1.4">${r.t}
+          <span style="display:block;font-size:11px;font-weight:700;color:${tint}">${note}</span></span>
+      </div>`;
+    });
+  });
+  box.innerHTML =
+    `<div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap">
+       <span style="background:#dcfce7;color:#166534;font-size:11px;font-weight:900;padding:3px 8px;border-radius:8px">✅ ${counts.done} practicing</span>
+       <span style="background:#fef3c7;color:#b45309;font-size:11px;font-weight:900;padding:3px 8px;border-radius:8px">🔸 ${counts.soon} ahead of her level</span>
+       <span style="background:#f1f5f9;color:#475569;font-size:11px;font-weight:900;padding:3px 8px;border-radius:8px">⬜ ${counts.none} off-screen</span>
+     </div>` + html;
+}
+
+const LEVEL_CAPS = { mathLevel:16, clockLevel:4, sbLevel:6, spellLevel:4, measureLevel:4, fixLevel:3 };
+const LEVEL_EL_IDS = {
+  level:'pc-level', swLevel:'pc-sw-level', dnLevel:'pc-dn-level', mathLevel:'pc-math-level',
+  sbLevel:'pc-sb-level', clockLevel:'pc-clock-level', spellLevel:'pc-spell-level',
+  measureLevel:'pc-measure-level', fixLevel:'pc-fix-level',
+};
+
 function setGameLevel(levelKey, progKey, delta) {
-  const maxLv = levelKey === 'mathLevel' ? 16 : levelKey === 'clockLevel' ? 4 : levelKey === 'sbLevel' ? 6 : levelKey === 'spellLevel' ? 3 : 5;
+  const maxLv = LEVEL_CAPS[levelKey] || 5;
   const next = Math.min(maxLv, Math.max(1, S[levelKey] + delta));
   if (next === S[levelKey]) return;
   S[levelKey] = next;
@@ -3290,11 +3630,8 @@ function setGameLevel(levelKey, progKey, delta) {
   if (next > S.maxlevel) S.maxlevel = next;
   persist();
   refreshHome();
-  document.getElementById({
-    level: 'pc-level', swLevel: 'pc-sw-level',
-    dnLevel: 'pc-dn-level', mathLevel: 'pc-math-level', sbLevel: 'pc-sb-level',
-    clockLevel: 'pc-clock-level', spellLevel: 'pc-spell-level'
-  }[levelKey]).textContent = `Lv. ${next}`;
+  const el = document.getElementById(LEVEL_EL_IDS[levelKey]);
+  if (el) el.innerHTML = `Lv. ${next}${gradeTag(levelKey, next)}`;
 }
 
 function setMathRule(key, lsKey, min, max, delta) {
@@ -3886,6 +4223,16 @@ function svgClock(h, m, size=100, labels=false, minuteRing=false) {
 // Returns a shuffled array of 10 category strings for the given level.
 // Pre-allocating the deck ensures each session has a balanced type distribution
 // rather than leaving it to chance across 10 independent rolls.
+const NW_ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten',
+                 'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+const NW_TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+function numberToWords(n) {
+  if (n < 20) return NW_ONES[n];
+  if (n < 100) { const t = Math.floor(n / 10), o = n % 10; return NW_TENS[t] + (o ? `-${NW_ONES[o]}` : ''); }
+  const h = Math.floor(n / 100), rest = n % 100;
+  return `${NW_ONES[h]} hundred${rest ? ` ${numberToWords(rest)}` : ''}`;
+}
+
 function buildMathDeck(lv) {
   function shuffle(a) {
     for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
@@ -3895,10 +4242,10 @@ function buildMathDeck(lv) {
   const deck = (...spec) => shuffle([].concat(...spec));
   if (lv===1)  return deck(t('std_l1',10));
   if (lv===2)  return deck(t('std_l2',10));
-  if (lv===3)  return deck(t('doubles',3), t('teen_decomp',3), t('std_l3',4));
-  if (lv===4)  return deck(t('near_double',3), t('teen_decomp',4), t('std_l4',3));
-  if (lv===5)  return deck(t('missing_addend',5), t('std_l5',5));
-  if (lv===6)  return deck(t('skip_small',5), t('std_l6',5));
+  if (lv===3)  return deck(t('doubles',2), t('teen_decomp',3), t('equation_tf',2), t('std_l3',3));
+  if (lv===4)  return deck(t('near_double',2), t('teen_decomp',3), t('three_add',2), t('equation_tf',1), t('std_l4',2));
+  if (lv===5)  return deck(t('missing_addend',4), t('three_add',2), t('equation_tf',1), t('std_l5',3));
+  if (lv===6)  return deck(t('skip_small',3), t('ten_more_less',3), t('compare2',2), t('std_l6',2));
   const warmup7  = lv===7  && !S.mathWarmupDone.includes(7);
   const warmup8  = lv===8  && !S.mathWarmupDone.includes(8);
   const warmup9  = lv===9  && !S.mathWarmupDone.includes(9);
@@ -3911,9 +4258,9 @@ function buildMathDeck(lv) {
                                : deck(t('groups',5), t('std_l9',5));
   if (lv===10) return warmup10 ? deck(t('mul2',6), t('div2',4))
                                : deck(t('multiply_l10',5), t('division_l10',5));
-  if (lv===11) return deck(t('place_value',7), t('multiply_lo',3));
-  if (lv===12) return deck(t('compare',4), t('skip_large',3), t('place_value',2), t('multiply_lo',1));
-  if (lv===13) return deck(t('regroup_add',5), t('compare',2), t('place_value',2), t('multiply_lo',1));
+  if (lv===11) return deck(t('place_value',5), t('number_name',2), t('multiply_lo',3));
+  if (lv===12) return deck(t('compare',3), t('skip_large',2), t('number_name',2), t('place_value',2), t('multiply_lo',1));
+  if (lv===13) return deck(t('regroup_add',4), t('four_2digit',2), t('compare',2), t('place_value',1), t('multiply_lo',1));
   if (lv===14) return deck(t('regroup_sub',4), t('regroup_add',3), t('mental',2), t('multiply_lo',1));
   if (lv===15) return deck(t('time_read',4), t('two_step_sc',3), t('regroup_add',2), t('regroup_sub',1));
   return         deck(t('multiply_div_l16',4), t('two_step_nosc',3), t('time_read',2), t('mixed_l16',1));
@@ -3976,6 +4323,87 @@ function generateMathRound(cat) {
 
   // ── category dispatch ───────────────────────────────────────────────────────
   switch (cat) {
+    // "Determine if equations involving addition and subtraction are true or
+    // false" — the equal sign as a balance, not a "the answer goes here" arrow.
+    // The balanced form (5 + 3 = 4 + 4) is what breaks that misconception.
+    case 'equation_tf': {
+      const balanced = Math.random() < 0.45;
+      const isTrue = Math.random() < 0.5;
+      let x, y, op, left;
+      if (balanced) {
+        x = randInt(2, 9); y = randInt(2, 9); op = '+'; left = x + y;
+      } else {
+        op = Math.random() < 0.6 ? '+' : '-';
+        if (op === '+') { x = randInt(2, 10); y = randInt(2, Math.min(10, 20 - x)); left = x + y; }
+        else            { x = randInt(6, 20); y = randInt(1, x - 1);                left = x - y; }
+      }
+      // The shown right-hand side matches the left only when the item is true.
+      let rightVal = left;
+      if (!isTrue) {
+        const off = randInt(1, 2) * (Math.random() < 0.5 ? 1 : -1);
+        rightVal = left + off;
+        if (rightVal < (balanced ? 2 : 0)) rightVal = left + randInt(1, 2);
+      }
+      const out = { type:'equation_tf', a:x, b:y, op, balanced, rightVal,
+                    answer: isTrue ? 1 : 0, correctTotal: left, ctx, name };
+      // Balanced form (5 + 3 = 4 + 4) splits the right side into two addends.
+      if (balanced) {
+        out.c = randInt(1, rightVal - 1);
+        out.d = rightVal - out.c;
+      }
+      return out;
+    }
+    // "Solve word problems that call for addition of three whole numbers whose
+    // sum is less than or equal to 20."
+    case 'three_add': {
+      const x = randInt(1, 7), y = randInt(1, 7);
+      const z = randInt(1, Math.max(1, 20 - x - y));
+      return { type:'three_add', a:x, b:y, c:z, answer:x + y + z, showWord:true, ctx, name };
+    }
+    // "Find 10 more or 10 less than a two-digit number without having to count,
+    // and explain the reasoning." Opens up to 100 more/less at higher levels.
+    case 'ten_more_less': {
+      const useHundred = lv >= 12 && Math.random() < 0.5;
+      const step = useHundred ? 100 : 10;
+      const more = Math.random() < 0.5;
+      const n = useHundred ? randInt(1, 8) * 100 + randInt(0, 99) : randInt(10, 89);
+      return { type:'ten_more_less', n, step, more, answer: more ? n + step : n - step, ctx, name };
+    }
+    // 1st grade compares TWO-digit numbers; the existing `compare` category is
+    // 3-digit and lives at level 12.
+    case 'compare2': {
+      const x = randInt(10, 99);
+      const y = Math.random() < 0.15 ? x : randInt(10, 99);
+      return { type:'compare', a:x, b:y, answer: x > y ? 1 : x < y ? -1 : 0 };
+    }
+    // "Add up to four two-digit numbers using place value and properties."
+    case 'four_2digit': {
+      const nums = Array.from({ length: randInt(3, 4) }, () => randInt(10, 29));
+      return { type:'four_2digit', nums, answer: nums.reduce((s, v) => s + v, 0), ctx, name };
+    }
+    // "Read and write numbers to 1000 using number names."
+    case 'number_name': {
+      const n = randInt(101, 999);
+      const toNumeral = Math.random() < 0.5;
+      const h = Math.floor(n / 100), t2 = Math.floor(n / 10) % 10, o = n % 10;
+      // Place-confusion distractors first (digit swap, wrong hundred, wrong
+      // ten), then random top-ups — repeated digits make some variants collapse
+      // back onto n, so the count can never be assumed.
+      const wrongs = new Set();
+      for (const v of [h * 100 + o * 10 + t2, ((h % 9) + 1) * 100 + t2 * 10 + o,
+                       h * 100 + ((t2 + 1) % 10) * 10 + o, h * 100 + t2 * 10 + ((o + 1) % 10)]) {
+        if (v !== n && v >= 100 && v <= 999) wrongs.add(v);
+      }
+      let guard = 0;
+      while (wrongs.size < 3 && guard++ < 60) {
+        const v = randInt(101, 999);
+        if (v !== n) wrongs.add(v);
+      }
+      const pool = shuf([n, ...[...wrongs].slice(0, 3)]);
+      return { type:'number_name', n, toNumeral, pool,
+               choices: pool.map(v => toNumeral ? String(v) : numberToWords(v)),
+               answer: pool.indexOf(n) };
+    }
     case 'std_l1':
       a=randInt(1,3); b=randInt(1,Math.min(3,6-a)); op='+';
       return { type:'standard', a, b, op, answer:a+b, showVisual:true, showWord:false, ctx, name };
@@ -4183,6 +4611,33 @@ function mathWordProblem(r) {
     ][randInt(0,2)];
   }
   if (r.type === 'time_read') return 'What time does the clock show?';
+  if (r.type === 'equation_tf') return r.balanced
+    ? 'Are both sides worth the SAME? Tap True or False.'
+    : 'Is this equation true or false?';
+  if (r.type === 'three_add') {
+    const { a, b, c, ctx, name } = r;
+    return [
+      `${name} has ${a} ${ctx.plural}, then finds ${b} more, then finds ${c} more. How many in all?`,
+      `Three baskets hold ${a}, ${b}, and ${c} ${ctx.plural}. How many ${ctx.plural} altogether?`,
+      `${name} counts ${a} ${ctx.plural} on Monday, ${b} on Tuesday, and ${c} on Wednesday. How many in total?`,
+    ][randInt(0, 2)];
+  }
+  if (r.type === 'four_2digit') {
+    return `Add these ${r.nums.length} numbers together. Try adding the tens first, then the ones!`;
+  }
+  if (r.type === 'ten_more_less') {
+    const { n, step, more } = r;
+    return [
+      `What is ${step} ${more ? 'more' : 'less'} than ${n}?`,
+      `Start at ${n} and jump ${step} ${more ? 'forward' : 'back'}. Where do you land?`,
+      `${n} … ${more ? 'add' : 'take away'} ${step}. What is the new number? (Only the ${step === 10 ? 'tens' : 'hundreds'} digit changes!)`,
+    ][randInt(0, 2)];
+  }
+  if (r.type === 'number_name') {
+    return r.toNumeral
+      ? 'Which numeral matches these number words?'
+      : 'Which words match this number?';
+  }
   if (r.type === 'missing_addend') {
     const { known, total, ctx, name } = r;
     const kThing = known === 1 ? ctx.singular : ctx.plural;
@@ -4447,7 +4902,20 @@ function renderMathRound() {
   else if (r.type === 'compare')      equation = '';
   else if (r.type === 'two_step')     equation = `${r.a} ${r.op1} ${r.b} ${r.op2} ${r.c} = ?`;
   else if (r.type === 'time_read')    equation = '';
-  document.getElementById('math-equation').textContent = equation;
+  else if (r.type === 'equation_tf')  equation = r.balanced
+    ? `${r.a} + ${r.b} = ${r.c} + ${r.d}`
+    : `${r.a} ${r.op} ${r.b} = ${r.rightVal}`;
+  else if (r.type === 'three_add')    equation = `${r.a} + ${r.b} + ${r.c} = ?`;
+  else if (r.type === 'four_2digit')  equation = `${r.nums.join(' + ')} = ?`;
+  else if (r.type === 'ten_more_less')equation = `${r.n} ${r.more ? '+' : '−'} ${r.step} = ?`;
+  else if (r.type === 'number_name')  equation = r.toNumeral ? numberToWords(r.n) : String(r.n);
+  const eqEl = document.getElementById('math-equation');
+  eqEl.textContent = equation;
+  // The 56px default overflows a phone once an equation gets long (four
+  // two-digit addends, or a number spelled out in words), so scale it down.
+  eqEl.style.fontSize = equation.length > 26 ? '26px'
+                      : equation.length > 18 ? '34px'
+                      : equation.length > 13 ? '44px' : '';
 
   renderMathNumpad(r);
 }
@@ -4459,6 +4927,24 @@ function renderMathNumpad(r) {
     pad.style.gridTemplateColumns = 'repeat(3, 1fr)';
     pad.innerHTML = [['&lt;',-1],['=',0],['&gt;',1]].map(([sym,val]) =>
       `<button class="dn-num-btn" onclick="answerMath(${val})" style="font-size:26px">${sym}</button>`
+    ).join('');
+    return;
+  }
+
+  // True/false judgement of an equation — deliberately not a number pad, so the
+  // child weighs the whole equation instead of computing a right-hand answer.
+  if (r.type === 'equation_tf') {
+    pad.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    pad.innerHTML = [['✅ True', 1], ['❌ False', 0]].map(([label, val]) =>
+      `<button class="dn-num-btn" onclick="answerMath(${val})" style="font-size:20px">${label}</button>`
+    ).join('');
+    return;
+  }
+
+  if (r.type === 'number_name') {
+    pad.style.gridTemplateColumns = '1fr';
+    pad.innerHTML = r.choices.map((c, i) =>
+      `<button class="dn-num-btn" onclick="answerMath(${i})" style="font-size:${r.toNumeral ? 26 : 17}px;padding:12px 8px">${c}</button>`
     ).join('');
     return;
   }
@@ -5908,30 +6394,157 @@ const SPELL_WORDS = {
   1: [['cat','🐱'],['dog','🐶'],['sun','☀️'],['hat','🎩'],['bug','🐛'],['pig','🐷'],['bus','🚌'],['box','📦'],['fox','🦊'],['hen','🐔'],['bed','🛏️'],['cup','🥤'],['jam','🍓'],['van','🚐'],['web','🕸️']],
   2: [['fish','🐟'],['frog','🐸'],['star','⭐'],['moon','🌙'],['tree','🌳'],['cake','🎂'],['bird','🐦'],['ball','⚽'],['book','📖'],['milk','🥛'],['rain','🌧️'],['boat','⛵']],
   3: [['apple','🍎'],['happy','😊'],['water','💧'],['house','🏠'],['train','🚂'],['sheep','🐑'],['snake','🐍'],['cloud','☁️'],['heart','❤️'],['smile','😄'],['sunny','🌞'],['green','🟢']],
+  // Level 4 — long vowels (magic e). Spelling these puts the silent e to work.
+  4: [['cake','🎂'],['bike','🚲'],['rose','🌹'],['kite','🪁'],['cube','🧊'],['note','🎵'],['game','🎮'],['home','🏠'],['five','5️⃣'],['mule','🐴'],['bone','🦴'],['nose','👃']],
 };
+// "Change short and long vowel sounds to make new words" — swap one vowel and
+// the whole word changes.
+const VOWEL_SWAPS = [
+  { from:'cat', fe:'🐱', to:'cot', te:'🛏️', v:'o' },
+  { from:'hat', fe:'🎩', to:'hot', te:'🔥', v:'o' },
+  { from:'pin', fe:'📌', to:'pan', te:'🍳', v:'a' },
+  { from:'big', fe:'🐘', to:'bag', te:'👜', v:'a' },
+  { from:'log', fe:'🪵', to:'leg', te:'🦵', v:'e' },
+  { from:'cup', fe:'🥤', to:'cap', te:'🧢', v:'a' },
+  { from:'fan', fe:'🪭', to:'fun', te:'🎉', v:'u' },
+  { from:'top', fe:'🔝', to:'tap', te:'🚰', v:'a' },
+  { from:'mop', fe:'🧹', to:'map', te:'🗺️', v:'a' },
+  { from:'net', fe:'🥅', to:'nut', te:'🥜', v:'u' },
+  { from:'pot', fe:'🍲', to:'pet', te:'🐕', v:'e' },
+  { from:'rug', fe:'🧶', to:'rag', te:'🧺', v:'a' },
+];
+// "Identify short and long vowels."
+const VOWEL_SORT = [
+  { word:'cat',  emoji:'🐱', long:false }, { word:'cake', emoji:'🎂', long:true  },
+  { word:'bed',  emoji:'🛏️', long:false }, { word:'bike', emoji:'🚲', long:true  },
+  { word:'pig',  emoji:'🐷', long:false }, { word:'rose', emoji:'🌹', long:true  },
+  { word:'dog',  emoji:'🐶', long:false }, { word:'kite', emoji:'🪁', long:true  },
+  { word:'sun',  emoji:'☀️', long:false }, { word:'cube', emoji:'🧊', long:true  },
+  { word:'box',  emoji:'📦', long:false }, { word:'note', emoji:'🎵', long:true  },
+  { word:'bug',  emoji:'🐛', long:false }, { word:'five', emoji:'5️⃣', long:true  },
+  { word:'net',  emoji:'🥅', long:false }, { word:'bone', emoji:'🦴', long:true  },
+];
+
 function startSpellGame() {
-  const pool = SPELL_WORDS[S.spellLevel] || SPELL_WORDS[1];
-  S.spellRounds = shuf([...pool]).slice(0, 8);
-  while (S.spellRounds.length < 8) S.spellRounds.push(pool[randInt(0, pool.length - 1)]);
+  if (S.spellLevel >= 4) {
+    // Vowel Power: spelling long-vowel words, swapping vowels to make new
+    // words, and telling short from long — the three 1st-grade vowel skills.
+    S.spellRounds = shuf([
+      ...shuf([...SPELL_WORDS[4]]).slice(0, 3).map(([word, emoji]) => ({ kind:'spell', word, emoji })),
+      ...shuf([...VOWEL_SWAPS]).slice(0, 3).map(o => ({ kind:'swap', ...o })),
+      ...shuf([...VOWEL_SORT]).slice(0, 2).map(o => ({ kind:'sortv', ...o })),
+    ]);
+  } else {
+    const pool = SPELL_WORDS[S.spellLevel] || SPELL_WORDS[1];
+    const picks = shuf([...pool]).slice(0, 8);
+    while (picks.length < 8) picks.push(pool[randInt(0, pool.length - 1)]);
+    S.spellRounds = picks.map(([word, emoji]) => ({ kind:'spell', word, emoji }));
+  }
   S.spellIdx = 0; S.spellScore = 0;
   showScreen('screen-spell');
-  mascotSay('Spell the word! Listen and tap the letters.');
+  mascotSay(S.spellLevel >= 4 ? 'Vowel power! Listen closely to the middle sound.'
+                              : 'Spell the word! Listen and tap the letters.');
   renderSpellRound();
 }
 function renderSpellRound() {
-  const [word, emoji] = S.spellRounds[S.spellIdx];
-  S.spellTarget = word; S.spellBuilt = []; S.spellRetried = false;
-  document.getElementById('spell-prog').textContent = `${S.spellIdx + 1} of 8`;
+  const r = S.spellRounds[S.spellIdx];
+  S.spellBuilt = []; S.spellRetried = false;
+  document.getElementById('spell-prog').textContent = `${S.spellIdx + 1} of ${S.spellRounds.length}`;
   document.getElementById('spell-score-pill').textContent = `${S.spellScore} ✓`;
-  document.getElementById('spell-progress-fill').style.width = `${(S.spellIdx / 8) * 100}%`;
-  document.getElementById('spell-emoji').textContent = emoji;
+  document.getElementById('spell-progress-fill').style.width = `${(S.spellIdx / S.spellRounds.length) * 100}%`;
   const fb = document.getElementById('spell-feedback');
   fb.textContent = ''; fb.className = 'dn-feedback';
+  const promptEl = document.getElementById('spell-prompt');
+  const clearRow = document.getElementById('spell-clear-row');
+  const slotsEl  = document.getElementById('spell-slots');
+  const tilesEl  = document.getElementById('spell-tiles');
+
+  if (r.kind === 'swap') {
+    S.spellTarget = r.to;
+    document.getElementById('spell-emoji').textContent = r.te;
+    promptEl.style.display = '';
+    promptEl.innerHTML = `The word is <b>${r.from.toUpperCase()}</b> ${r.fe}. Change the vowel to make <b>${r.to.toUpperCase()}</b>!`;
+    clearRow.style.display = 'none';
+    slotsEl.innerHTML = r.to.split('').map((ch, i) =>
+      `<div class="sb-box ${i === 1 ? '' : 'sb-filled'}">${i === 1 ? '' : ch}</div>`).join('');
+    tilesEl.innerHTML = ['a','e','i','o','u'].map(ch =>
+      `<button class="sb-tile" onclick="answerVowelSwap('${ch}')">${ch}</button>`).join('');
+    setTimeout(() => speak(`${r.from}. Change the vowel to make ${r.to}`), 350);
+    return;
+  }
+  if (r.kind === 'sortv') {
+    S.spellTarget = r.word;
+    document.getElementById('spell-emoji').textContent = r.emoji;
+    promptEl.style.display = '';
+    promptEl.innerHTML = `Is the vowel sound in <b>${r.word.toUpperCase()}</b> short or long?`;
+    clearRow.style.display = 'none';
+    slotsEl.innerHTML = '';
+    tilesEl.innerHTML = [['SHORT', 0], ['LONG', 1]].map(([label, v]) =>
+      `<button class="sb-tile" style="width:auto;padding:0 18px;font-size:18px" onclick="answerVowelSort(${v})">${label}</button>`).join('');
+    setTimeout(() => speak(r.word), 350);
+    return;
+  }
+
+  S.spellTarget = r.word;
+  document.getElementById('spell-emoji').textContent = r.emoji;
+  promptEl.style.display = 'none';
+  clearRow.style.display = '';
   renderSpellSlots();
-  const letters = shuf(word.split(''));
-  document.getElementById('spell-tiles').innerHTML = letters.map((ch, i) =>
+  const letters = shuf(r.word.split(''));
+  tilesEl.innerHTML = letters.map((ch, i) =>
     `<button class="sb-tile" data-ti="${i}" onclick="placeSpellLetter('${ch}',${i})">${ch}</button>`).join('');
-  setTimeout(() => speak(word), 350);
+  setTimeout(() => speak(r.word), 350);
+}
+
+function nextSpellRound() {
+  setAdvanceTimer(() => {
+    S.spellIdx++;
+    if (S.spellIdx >= S.spellRounds.length) showSpellResult();
+    else renderSpellRound();
+  }, 1500);
+}
+function answerVowelSwap(ch) {
+  const r = S.spellRounds[S.spellIdx];
+  if (S.spellBuilt.length) return;              // already solved
+  const fb = document.getElementById('spell-feedback');
+  if (ch === r.v) {
+    S.spellBuilt = [ch];
+    if (!S.spellRetried) S.spellScore++;
+    document.querySelectorAll('#spell-slots .sb-box')[1].textContent = ch;
+    document.querySelectorAll('#spell-slots .sb-box').forEach(b => b.classList.add('sb-correct'));
+    document.querySelectorAll('#spell-tiles .sb-tile').forEach(b => b.disabled = true);
+    fb.innerHTML = `Yes! <strong style="font-size:1.3em">${r.to.toUpperCase()}</strong> 🌟`;
+    fb.className = 'dn-feedback correct';
+    setTimeout(() => speak(r.to), 250);
+    nextSpellRound();
+  } else {
+    S.spellRetried = true;
+    fb.textContent = 'Not that vowel — listen again!';
+    fb.className = 'dn-feedback wrong';
+    sfx('wrong');
+    speak(r.to);
+  }
+}
+function answerVowelSort(v) {
+  const r = S.spellRounds[S.spellIdx];
+  if (S.spellBuilt.length) return;
+  const fb = document.getElementById('spell-feedback');
+  if (!!v === r.long) {
+    S.spellBuilt = ['done'];
+    if (!S.spellRetried) S.spellScore++;
+    document.querySelectorAll('#spell-tiles .sb-tile').forEach(b => b.disabled = true);
+    fb.innerHTML = r.long
+      ? `Yes! <b>${r.word.toUpperCase()}</b> has a LONG vowel — it says its own name. 🌟`
+      : `Yes! <b>${r.word.toUpperCase()}</b> has a SHORT vowel. 🌟`;
+    fb.className = 'dn-feedback correct';
+    nextSpellRound();
+  } else {
+    S.spellRetried = true;
+    fb.textContent = 'Listen again — say the word slowly!';
+    fb.className = 'dn-feedback wrong';
+    sfx('wrong');
+    speak(r.word);
+  }
 }
 function renderSpellSlots() {
   document.getElementById('spell-slots').innerHTML = S.spellTarget.split('').map((_, i) =>
@@ -5956,7 +6569,7 @@ function checkSpell() {
     dnBurst(document.getElementById('spell-emoji'));
     document.querySelectorAll('#spell-slots .sb-box').forEach(b => b.classList.add('sb-correct'));
     setTimeout(() => speak(S.spellTarget), 250);
-    setAdvanceTimer(() => { S.spellIdx++; if (S.spellIdx >= 8) showSpellResult(); else renderSpellRound(); }, 1400);
+    nextSpellRound();
   } else {
     S.spellRetried = true;
     fb.textContent = 'Not yet — try again!';
@@ -5974,15 +6587,16 @@ function clearSpell() {
 function showSpellResult() {
   S.spellgames++; S.totalGames++;
   S.readingToday++; S.mathSinceRead = 0;
-  if (S.spellScore === 8) S.spellperfect++;
-  const pct = S.spellScore / 8;
-  const prev = advanceLevel('spellLevel', 'spellLevelProg', pct, 3);
-  S.sessions.unshift({ topic: 'Spelling', score: `${S.spellScore}/8`, date: new Date().toLocaleDateString(), level: S.spellLevel });
+  const total = S.spellRounds.length || 8;
+  if (S.spellScore === total) S.spellperfect++;
+  const pct = S.spellScore / total;
+  const prev = advanceLevel('spellLevel', 'spellLevelProg', pct, 4);
+  S.sessions.unshift({ topic: 'Spelling', score: `${S.spellScore}/${total}`, date: new Date().toLocaleDateString(), level: S.spellLevel });
   if (S.sessions.length > 100) S.sessions.pop();
-  awardCoins(coinsFor(S.spellScore, 8));
+  awardCoins(coinsFor(S.spellScore, total));
   persist();
   document.getElementById('spell-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
-  document.getElementById('spell-result-score').textContent = `${S.spellScore} / 8`;
+  document.getElementById('spell-result-score').textContent = `${S.spellScore} / ${total}`;
   document.getElementById('spell-result-msg').textContent = pct === 1 ? 'Super speller! 🏅' : pct >= 0.6 ? 'Great spelling!' : 'Keep practicing!';
   document.getElementById('spell-level-msg').innerHTML = levelChangeMsg('spellLevel', 'spellLevelProg', prev);
   sfx('win');
@@ -6071,6 +6685,529 @@ function showRhymeResult() {
   document.getElementById('rhyme-result-msg').textContent = pct === 1 ? 'Rhyme star! 🏅' : pct >= 0.6 ? 'Great ears!' : 'Keep practicing!';
   sfx('win');
   showScreen('screen-rhymeresult');
+  if (pct === 1) setTimeout(spawnConfetti, 250);
+}
+
+// ─── MEASURE UP (measurement & length) ───────────────────────────────────────
+// Covers the 1st-grade measurement standards — order three objects by length,
+// compare two using a third (indirect comparison), and lay multiple copies of a
+// shorter unit end to end with no gaps or overlaps — and the 2nd-grade ones:
+// measuring with a ruler from zero, and showing sums/differences as lengths on
+// a number line diagram.
+
+const MU_OBJECTS = [
+  { emoji:'✏️', name:'pencil',  color:'#fbbf24' },
+  { emoji:'🖍️', name:'crayon',  color:'#f472b6' },
+  { emoji:'🥕', name:'carrot',  color:'#fb923c' },
+  { emoji:'🪱', name:'worm',    color:'#a3e635' },
+  { emoji:'🎀', name:'ribbon',  color:'#c084fc' },
+  { emoji:'🥖', name:'bread',   color:'#d4a373' },
+  { emoji:'🪵', name:'stick',   color:'#a16207' },
+  { emoji:'🧵', name:'string',  color:'#38bdf8' },
+];
+const MU_UNITS = [
+  { emoji:'📎', many:'paper clips', one:'paper clip' },
+  { emoji:'🧱', many:'blocks',      one:'block' },
+  { emoji:'🪙', many:'coins',       one:'coin' },
+];
+
+const MU_W = 320;
+function muSvg(h, inner) {
+  return `<svg viewBox="0 0 ${MU_W} ${h}" width="${MU_W}" height="${h}">${inner}</svg>`;
+}
+// Horizontal bars, one per object, drawn to scale from a common left edge so
+// lengths can be compared by eye.
+function muBarsSVG(bars) {
+  const rowH = 44, pad = 10, left = 34, usable = MU_W - left - 14;
+  const maxU = Math.max(...bars.map(b => b.units));
+  let inner = '';
+  bars.forEach((b, i) => {
+    const y = pad + i * rowH;
+    const w = Math.max(14, Math.round(usable * (b.units / maxU)));
+    inner += `<text x="4" y="${y + 26}" font-size="21">${b.emoji}</text>`;
+    inner += `<rect x="${left}" y="${y + 8}" width="${w}" height="24" rx="12" fill="${b.color}" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>`;
+  });
+  return muSvg(pad * 2 + bars.length * rowH - 10, inner);
+}
+// An object bar with a row of identical units laid end to end beneath it.
+function muUnitsSVG(obj, unit, n) {
+  const left = 32, usable = MU_W - left - 14;
+  const uw = Math.min(34, Math.floor(usable / n));
+  const barW = uw * n;
+  let inner = '';
+  inner += `<text x="2" y="26" font-size="21">${obj.emoji}</text>`;
+  inner += `<rect x="${left}" y="8" width="${barW}" height="24" rx="12" fill="${obj.color}" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>`;
+  for (let i = 0; i < n; i++) {
+    const x = left + i * uw;
+    inner += `<rect x="${x}" y="42" width="${uw}" height="26" rx="6" fill="#fff" stroke="#a16207" stroke-width="2"/>`;
+    inner += `<text x="${x + uw / 2}" y="61" font-size="${Math.min(16, uw - 8)}" text-anchor="middle">${unit.emoji}</text>`;
+  }
+  return muSvg(78, inner);
+}
+// A ruler with numbered ticks; the object always starts at 0 so the child reads
+// the number the far end lands on. Off-by-one distractors catch the classic
+// "count the tick marks instead of the spaces" error.
+function muRulerSVG(obj, len, maxUnit, unitLabel) {
+  // Wide side margins so the end labels (especially the 0 the child must line
+  // the object up with, and a two-digit final tick) aren't clipped.
+  const left = 32, usable = MU_W - left - 30, step = usable / maxUnit;
+  let inner = `<rect x="${left}" y="8" width="${Math.round(step * len)}" height="22" rx="11" fill="${obj.color}" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>`;
+  inner += `<text x="2" y="26" font-size="18">${obj.emoji}</text>`;
+  inner += `<rect x="${left}" y="42" width="${Math.round(step * maxUnit)}" height="30" fill="#fffbeb" stroke="#a16207" stroke-width="2"/>`;
+  for (let i = 0; i <= maxUnit; i++) {
+    const x = left + step * i;
+    inner += `<line x1="${x}" y1="42" x2="${x}" y2="56" stroke="#a16207" stroke-width="2"/>`;
+    inner += `<text x="${x}" y="69" font-size="${i === 0 ? 13 : 11}" text-anchor="middle" fill="${i === 0 ? '#b45309' : '#854d0e'}" font-weight="${i === 0 ? 900 : 700}">${i}</text>`;
+  }
+  inner += `<text x="${MU_W / 2}" y="86" font-size="11" text-anchor="middle" fill="#854d0e" font-weight="700">${unitLabel}</text>`;
+  return muSvg(92, inner);
+}
+// Number line with an optional hop arc from `from` to `to`; the landing point is
+// marked "?" so the child counts along the line to read it.
+function muNumberLineSVG(max, tickEvery, from, to) {
+  const left = 18, usable = MU_W - left - 16, step = usable / max, y = 62;
+  let inner = `<line x1="${left}" y1="${y}" x2="${left + usable}" y2="${y}" stroke="#0f766e" stroke-width="3"/>`;
+  // On a 0-100 line every-1 ticks would collapse into a solid bar at this
+  // width, so only draw the minor ticks when they can still be told apart.
+  const minorStep = max <= 20 ? 1 : tickEvery;
+  for (let i = 0; i <= max; i += minorStep) {
+    const x = left + step * i;
+    const big = i % tickEvery === 0;
+    inner += `<line x1="${x}" y1="${y - (big ? 9 : 5)}" x2="${x}" y2="${y + (big ? 9 : 5)}" stroke="#0f766e" stroke-width="${big ? 3 : 2}"/>`;
+    if (big) inner += `<text x="${x}" y="${y + 24}" font-size="11" text-anchor="middle" fill="#0f766e" font-weight="800">${i}</text>`;
+  }
+  if (from != null && to != null) {
+    const x1 = left + step * from, x2 = left + step * to;
+    const mid = (x1 + x2) / 2;
+    // Quadratic hop with a fixed apex, so the "+n" label always clears the
+    // curve; the landing point is a labelled disc rather than loose text,
+    // which can't collide with the arc or the tick numbers.
+    inner += `<path d="M ${x1} ${y - 8} Q ${mid} ${y - 60} ${x2} ${y - 8}" fill="none" stroke="#e11d48" stroke-width="3" stroke-linecap="round"/>`;
+    inner += `<text x="${mid}" y="${y - 38}" font-size="14" text-anchor="middle" fill="#e11d48" font-weight="900">${to > from ? '+' : '−'}${Math.abs(to - from)}</text>`;
+    inner += `<circle cx="${x1}" cy="${y}" r="6" fill="#0f766e"/>`;
+    inner += `<circle cx="${x2}" cy="${y}" r="10" fill="#e11d48"/>`;
+    inner += `<text x="${x2}" y="${y + 5}" font-size="14" text-anchor="middle" fill="#fff" font-weight="900">?</text>`;
+  }
+  return muSvg(92, inner);
+}
+
+const MEASURE_LEVEL_INTROS = {
+  1: { emoji:'📏', headline:'Longer or Shorter?',
+       visual:'▬▬▬▬\n▬▬', body:"Look at two things side by side. The one that reaches further is LONGER. You'll also put three things in order from shortest to longest!" },
+  2: { emoji:'📎', headline:'Measure with Paper Clips!',
+       visual:'✏️\n📎📎📎📎', body:'Lay the little things end to end with no gaps and no overlaps, then count them. That tells you how long something is!' },
+  3: { emoji:'📐', headline:'Using a Real Ruler!',
+       visual:'0 1 2 3 4 5', body:'Line the object up with ZERO on the ruler. Then read the number where the other end stops. Count the spaces, not the lines!' },
+  4: { emoji:'🔢', headline:'Hopping on a Number Line!',
+       visual:'0 — 5 — 10', body:'A number line turns adding and subtracting into hops. Start on a number, hop along the line, and see where you land!' },
+};
+
+function startMeasureGame() {
+  if (!S.measureIntroSeen.includes(S.measureLevel)) return showMeasureIntro(S.measureLevel);
+  startMeasureGameNow();
+}
+function showMeasureIntro(lv) {
+  const d = MEASURE_LEVEL_INTROS[lv];
+  if (!d) return startMeasureGameNow();
+  document.getElementById('mu-intro-emoji').textContent    = d.emoji;
+  document.getElementById('mu-intro-headline').textContent = d.headline;
+  document.getElementById('mu-intro-body').textContent     = d.body;
+  const vis = document.getElementById('mu-intro-visual');
+  vis.style.fontFamily = 'monospace'; vis.style.fontSize = '24px';
+  vis.textContent = d.visual;
+  showScreen('screen-measureintro');
+}
+function dismissMeasureIntro() {
+  if (!S.measureIntroSeen.includes(S.measureLevel)) { S.measureIntroSeen.push(S.measureLevel); persist(); }
+  startMeasureGameNow();
+}
+function startMeasureGameNow() {
+  S.measureRounds = [];
+  for (let i = 0; i < 10; i++) S.measureRounds.push(makeMeasureRound(S.measureLevel, i));
+  S.measureIdx = 0; S.measureScore = 0;
+  showScreen('screen-measure');
+  mascotSay(MEASURE_LEVEL_INTROS[S.measureLevel]?.headline || 'Let\'s measure!');
+  renderMeasureRound();
+}
+
+function makeMeasureRound(lv, i) {
+  const pick = n => shuf([...MU_OBJECTS]).slice(0, n);
+  if (lv === 1) {
+    // Alternate: direct comparison, ordering three, indirect comparison.
+    const kind = i % 3;
+    if (kind === 0) {
+      const [a, b] = pick(2);
+      // Two clearly different lengths so the comparison is unambiguous by eye.
+      const [ua, ub] = shuf([randInt(3, 5), randInt(8, 11)]);
+      const bars = [{ ...a, units: ua }, { ...b, units: ub }];
+      const wantLong = Math.random() < 0.5;
+      const longerIdx = ua > ub ? 0 : 1;
+      const ans = wantLong ? longerIdx : 1 - longerIdx;
+      return { kind:'pick', q:`Which one is ${wantLong ? 'LONGER' : 'SHORTER'}?`,
+               stage: muBarsSVG(bars), choices: bars.map(x => x.emoji), answer: ans,
+               explain: `The ${bars[ans].name} is ${wantLong ? 'longer' : 'shorter'}!` };
+    }
+    if (kind === 1) {
+      const objs = pick(3);
+      const lens = shuf([3, 6, 10]);
+      const bars = objs.map((o, k) => ({ ...o, units: lens[k] }));
+      const seq = bars.map((b, k) => k).sort((x, y) => bars[x].units - bars[y].units);
+      return { kind:'order', q:'Tap them in order: SHORTEST first, longest last.',
+               stage: muBarsSVG(bars), choices: bars.map(b => b.emoji), seq,
+               explain:'Shortest to longest — nice ordering!' };
+    }
+    // Indirect comparison: "A is longer than B, B is longer than C — which is longest?"
+    const [a, b, c] = pick(3);
+    const askLongest = Math.random() < 0.5;
+    return { kind:'pick',
+             q:`The ${a.name} is longer than the ${b.name}. The ${b.name} is longer than the ${c.name}. Which is ${askLongest ? 'the LONGEST' : 'the SHORTEST'}?`,
+             stage: muBarsSVG([{ ...a, units:10 }, { ...b, units:7 }, { ...c, units:4 }].map(o => ({ ...o, color:'#e5e7eb' }))),
+             choices: [a.emoji, b.emoji, c.emoji], answer: askLongest ? 0 : 2,
+             explain: askLongest ? `The ${a.name} is longest!` : `The ${c.name} is shortest!` };
+  }
+  if (lv === 2) {
+    const obj = pick(1)[0];
+    const unit = MU_UNITS[randInt(0, MU_UNITS.length - 1)];
+    const n = randInt(3, 8);
+    return { kind:'num', q:`How many ${unit.many} long is the ${obj.name}?`,
+             stage: muUnitsSVG(obj, unit, n), answer: n,
+             choices: muNumChoices(n, 1, 3),
+             explain: `It is ${n} ${n === 1 ? unit.one : unit.many} long.` };
+  }
+  if (lv === 3) {
+    const obj = pick(1)[0];
+    const unitLabel = Math.random() < 0.5 ? 'inches' : 'centimeters';
+    const maxUnit = unitLabel === 'inches' ? 8 : 10;
+    const len = randInt(2, maxUnit - 1);
+    return { kind:'num', q:`How many ${unitLabel} long is the ${obj.name}?`,
+             stage: muRulerSVG(obj, len, maxUnit, unitLabel), answer: len,
+             choices: muNumChoices(len, 1, 3),
+             explain: `It starts at 0 and ends at ${len} — so it is ${len} ${unitLabel} long.` };
+  }
+  // Level 4 — number line: hops, and difference as distance.
+  if (i % 3 === 2) {
+    const [a, b] = pick(2);
+    const big = randInt(6, 14), small = randInt(2, big - 2);
+    return { kind:'num', q:`How much longer is the ${a.name} than the ${b.name}?`,
+             stage: muBarsSVG([{ ...a, units: big }, { ...b, units: small }]),
+             answer: big - small, choices: muNumChoices(big - small, 1, 3),
+             explain: `${big} − ${small} = ${big - small}. That is the difference!` };
+  }
+  const max = Math.random() < 0.4 ? 100 : 20;
+  const tickEvery = max === 100 ? 10 : 2;
+  const up = Math.random() < 0.65;
+  const jump = max === 100 ? randInt(1, 4) * 10 : randInt(2, 5);
+  // Pick the start so the hop always lands inside the line — clamping the
+  // landing point instead would contradict the "+n" drawn on the arc.
+  const from = up
+    ? (max === 100 ? randInt(1, (max - jump) / 10) * 10 : randInt(2, max - jump))
+    : (max === 100 ? randInt(jump / 10 + 1, 9) * 10 : randInt(jump + 1, max - 1));
+  const to = up ? from + jump : from - jump;
+  return { kind:'num', q:`Start at ${from} and hop ${up ? 'forward' : 'back'} ${jump}. Where do you land?`,
+           stage: muNumberLineSVG(max, tickEvery, from, to), answer: to,
+           choices: muNumChoices(to, max === 100 ? 10 : 1, 3),
+           explain: `${from} ${up ? '+' : '−'} ${jump} = ${to}` };
+}
+// Numeric answer choices: the answer plus near-miss distractors, sorted.
+function muNumChoices(ans, spacing, count) {
+  const set = new Set([ans]);
+  let d = spacing;
+  while (set.size < count + 1) {
+    if (ans - d > 0) set.add(ans - d);
+    if (set.size < count + 1) set.add(ans + d);
+    d += spacing;
+  }
+  return [...set].sort((a, b) => a - b);
+}
+
+function renderMeasureRound() {
+  const r = S.measureRounds[S.measureIdx];
+  S.measureAnswered = false;
+  S.measureOrderPicks = [];
+  document.getElementById('measure-prog').textContent = `${S.measureIdx + 1} of 10`;
+  document.getElementById('measure-score-pill').textContent = `${S.measureScore} ✓`;
+  document.getElementById('measure-progress-fill').style.width = `${(S.measureIdx / 10) * 100}%`;
+  document.getElementById('measure-q').textContent = r.q;
+  document.getElementById('measure-stage').innerHTML = r.stage;
+  const fb = document.getElementById('measure-feedback');
+  fb.textContent = ''; fb.className = 'dn-feedback';
+  renderMeasureChoices();
+  setTimeout(() => speak(r.q), 350);
+}
+function renderMeasureChoices() {
+  const r = S.measureRounds[S.measureIdx];
+  const box = document.getElementById('measure-choices');
+  if (r.kind === 'num') {
+    box.innerHTML = `<div id="measure-numpad" style="display:grid;grid-template-columns:repeat(${r.choices.length},1fr);gap:10px;margin-top:10px">` +
+      r.choices.map(n => `<button class="dn-num-btn" onclick="answerMeasure(${n})">${n}</button>`).join('') + '</div>';
+    return;
+  }
+  const slots = r.kind === 'order'
+    ? `<div class="mu-order-row">${r.seq.map((_, k) =>
+        `<span class="mu-order-slot" id="mu-slot-${k}">${S.measureOrderPicks[k] != null ? r.choices[S.measureOrderPicks[k]] : k + 1}</span>`).join('')}</div>`
+    : '';
+  box.innerHTML = slots + `<div class="emoji-choice-grid" style="margin-top:10px">` +
+    r.choices.map((c, i) =>
+      `<button class="emoji-choice" id="mu-ch-${i}" style="font-size:30px" onclick="answerMeasure(${i})"${S.measureOrderPicks.includes(i) ? ' disabled' : ''}>${c}</button>`).join('') + '</div>';
+}
+
+function answerMeasure(val) {
+  if (S.measureAnswered) return;
+  const r = S.measureRounds[S.measureIdx];
+  const fb = document.getElementById('measure-feedback');
+
+  if (r.kind === 'order') {
+    const nextWanted = r.seq[S.measureOrderPicks.length];
+    if (val === nextWanted) {
+      S.measureOrderPicks.push(val);
+      renderMeasureChoices();
+      if (S.measureOrderPicks.length === r.seq.length) {
+        S.measureAnswered = true;
+        if (!r.retried) S.measureScore++;
+        fb.textContent = `🎉 ${r.explain}`;
+        fb.className = 'dn-feedback correct';
+        sfx('correct');
+        nextMeasureRound();
+      } else {
+        sfx('tap');
+      }
+    } else {
+      r.retried = true;
+      const btn = document.getElementById(`mu-ch-${val}`);
+      if (btn) btn.classList.add('ec-wrong');
+      fb.textContent = 'Not that one — find the shorter one first!';
+      fb.className = 'dn-feedback wrong';
+      sfx('wrong');
+      setAdvanceTimer(() => { if (btn) btn.classList.remove('ec-wrong'); fb.textContent = ''; fb.className = 'dn-feedback'; }, 900);
+    }
+    return;
+  }
+
+  const correct = val === r.answer;
+  const btn = r.kind === 'num'
+    ? [...document.querySelectorAll('#measure-numpad .dn-num-btn')].find(b => b.getAttribute('onclick') === `answerMeasure(${val})`)
+    : document.getElementById(`mu-ch-${val}`);
+  if (correct) {
+    S.measureAnswered = true;
+    if (!r.retried) S.measureScore++;
+    document.querySelectorAll('#measure-choices button').forEach(b => b.disabled = true);
+    if (btn) { btn.classList.add(r.kind === 'num' ? 'dn-correct' : 'ec-correct'); if (!r.retried) dnBurst(btn); }
+    fb.textContent = `🎉 ${r.explain}`;
+    fb.className = 'dn-feedback correct';
+    nextMeasureRound();
+  } else {
+    r.retried = true;
+    if (btn) { btn.classList.add(r.kind === 'num' ? 'dn-wrong' : 'ec-wrong'); btn.disabled = true; }
+    fb.textContent = 'Not quite — look again and count carefully!';
+    fb.className = 'dn-feedback wrong';
+    sfx('wrong');
+  }
+}
+function nextMeasureRound() {
+  setAdvanceTimer(() => {
+    S.measureIdx++;
+    if (S.measureIdx >= 10) showMeasureResult();
+    else renderMeasureRound();
+  }, 1600);
+}
+
+function showMeasureResult() {
+  S.measuregames++; S.totalGames++;
+  if (S.measureScore === 10) S.measureperfect++;
+  const pct = S.measureScore / 10;
+  const prevLevel = advanceLevel('measureLevel', 'measureLevelProg', pct, 4, 0.8, 0.4);
+  S.sessions.unshift({ topic:'Measure Up', score:`${S.measureScore}/10`, date:new Date().toLocaleDateString(), level:S.measureLevel });
+  if (S.sessions.length > 100) S.sessions.pop();
+  awardCoins(coinsFor(S.measureScore, 10));
+  persist();
+  document.getElementById('measure-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
+  document.getElementById('measure-result-score').textContent = `${S.measureScore} / 10`;
+  document.getElementById('measure-result-msg').textContent = pct === 1 ? 'Measuring master! 📏' : pct >= 0.6 ? 'Great measuring!' : 'Keep practicing!';
+  document.getElementById('measure-level-msg').innerHTML = levelChangeMsg('measureLevel', 'measureLevelProg', prevLevel);
+  sfx('win');
+  showScreen('screen-measureresult');
+  if (pct === 1) setTimeout(spawnConfetti, 250);
+}
+
+// ─── FIX THE SENTENCE (writing conventions) ──────────────────────────────────
+// The 1st-grade writing standards ask for capitalizing dates and names of
+// people and using end punctuation; 2nd grade extends that to using
+// capitalization and punctuation correctly in their own writing. This is
+// tap-to-fix rather than typing, which keeps it usable for a 6-year-old.
+
+// In each capitalization item exactly one word is wrong, at index `bad`.
+const FIX_CAPS = [
+  { s:'my dog is very big.',            bad:0, why:'The first word of a sentence always starts with a capital letter.' },
+  { s:'we went to the park.',           bad:0, why:'The first word of a sentence always starts with a capital letter.' },
+  { s:'she can run really fast.',       bad:0, why:'The first word of a sentence always starts with a capital letter.' },
+  { s:'today is a sunny day.',          bad:0, why:'The first word of a sentence always starts with a capital letter.' },
+  { s:'My friend anna has a cat.',      bad:2, why:"Anna is a person's name, so it needs a capital letter." },
+  { s:'I play with jack at school.',    bad:3, why:"Jack is a person's name, so it needs a capital letter." },
+  { s:'We saw maria at the store.',     bad:2, why:"Maria is a person's name, so it needs a capital letter." },
+  { s:'My sister emma loves books.',    bad:2, why:"Emma is a person's name, so it needs a capital letter." },
+  { s:'Can you help ben find it?',      bad:3, why:"Ben is a person's name, so it needs a capital letter." },
+  { s:'The teacher is Mrs. lopez.',     bad:4, why:"Lopez is a person's name, so it needs a capital letter." },
+  { s:'I gave the ball to sam.',        bad:5, why:"Sam is a person's name, so it needs a capital letter." },
+  { s:'my bike is red and shiny.',      bad:0, why:'The first word of a sentence always starts with a capital letter.' },
+];
+// Dates: days of the week, months, holidays.
+const FIX_DATES = [
+  { s:'We go to the park on friday.',      bad:6, why:'Days of the week like Friday always start with a capital letter.' },
+  { s:'My birthday is in july.',           bad:4, why:'Months like July always start with a capital letter.' },
+  { s:'School starts in september.',       bad:3, why:'Months like September always start with a capital letter.' },
+  { s:'We have art class on monday.',      bad:5, why:'Days of the week like Monday always start with a capital letter.' },
+  { s:'It snowed a lot in december.',      bad:5, why:'Months like December always start with a capital letter.' },
+  { s:'The party is next saturday.',       bad:4, why:'Days of the week like Saturday always start with a capital letter.' },
+  { s:'Flowers bloom in the spring.',      bad:-1, why:'Seasons do NOT need a capital letter — this one is already correct!' },
+  { s:'We rest on sunday morning.',        bad:3, why:'Days of the week like Sunday always start with a capital letter.' },
+  { s:'My class trip is in march.',        bad:5, why:'Months like March always start with a capital letter.' },
+  { s:'I love the fireworks in july.',     bad:5, why:'Months like July always start with a capital letter.' },
+];
+const FIX_PUNCT = [
+  { s:'I like to read books',        mark:'.', why:'This sentence TELLS something, so it ends with a period.' },
+  { s:'Where is my red hat',         mark:'?', why:'This sentence ASKS something, so it ends with a question mark.' },
+  { s:'Watch out for that bee',      mark:'!', why:'This sentence shows strong feeling, so it ends with an exclamation mark.' },
+  { s:'My cat sleeps all day',       mark:'.', why:'This sentence TELLS something, so it ends with a period.' },
+  { s:'Can we go outside now',       mark:'?', why:'This sentence ASKS something, so it ends with a question mark.' },
+  { s:'That was so much fun',        mark:'!', why:'This sentence shows strong feeling, so it ends with an exclamation mark.' },
+  { s:'The bus is coming',           mark:'.', why:'This sentence TELLS something, so it ends with a period.' },
+  { s:'What is your name',           mark:'?', why:'This sentence ASKS something, so it ends with a question mark.' },
+  { s:'Look at that huge dinosaur',  mark:'!', why:'This sentence shows strong feeling, so it ends with an exclamation mark.' },
+  { s:'We ate lunch at noon',        mark:'.', why:'This sentence TELLS something, so it ends with a period.' },
+  { s:'Do you want to play',         mark:'?', why:'This sentence ASKS something, so it ends with a question mark.' },
+  { s:'I found my lost puppy',       mark:'!', why:'This sentence shows strong feeling, so it ends with an exclamation mark.' },
+];
+
+const FIX_LEVEL_LABEL = {
+  1: 'Tap the word that needs a CAPITAL letter.',
+  2: 'Tap the punctuation mark that finishes the sentence.',
+  3: 'Fix the sentence — capitals and punctuation!',
+};
+
+function capWord(w) { return w.charAt(0).toUpperCase() + w.slice(1); }
+// Draw n items from a bank without repeats, topping up if the bank is small.
+function fixPick(bank, n) {
+  const out = [];
+  while (out.length < n) out.push(...shuf([...bank]).slice(0, n - out.length));
+  return out;
+}
+
+function startFixGame() {
+  const lv = S.fixLevel;
+  let items;
+  if (lv === 1)      items = fixPick(FIX_CAPS, 10).map(o => ({ ...o, kind:'cap' }));
+  else if (lv === 2) items = fixPick(FIX_PUNCT, 10).map(o => ({ ...o, kind:'punct' }));
+  else items = shuf([
+    ...fixPick(FIX_DATES, 5).map(o => ({ ...o, kind:'cap' })),
+    ...fixPick(FIX_PUNCT, 3).map(o => ({ ...o, kind:'punct' })),
+    ...fixPick(FIX_CAPS,  2).map(o => ({ ...o, kind:'cap' })),
+  ]);
+  S.fixRounds = items;
+  S.fixIdx = 0; S.fixScore = 0;
+  showScreen('screen-fix');
+  mascotSay(FIX_LEVEL_LABEL[lv]);
+  renderFixRound();
+}
+
+function renderFixRound() {
+  const r = S.fixRounds[S.fixIdx];
+  S.fixAnswered = false;
+  document.getElementById('fix-prog').textContent = `${S.fixIdx + 1} of 10`;
+  document.getElementById('fix-score-pill').textContent = `${S.fixScore} ✓`;
+  document.getElementById('fix-progress-fill').style.width = `${(S.fixIdx / 10) * 100}%`;
+  document.getElementById('fix-q').textContent = r.kind === 'cap'
+    ? 'Which word needs a CAPITAL letter?'
+    : 'How should this sentence end?';
+  document.getElementById('fix-hint').textContent = r.kind === 'cap'
+    ? (r.bad === -1 ? 'Careful — it might already be correct!' : 'Tap the word to fix it.')
+    : 'Tap the right mark.';
+  const sent = document.getElementById('fix-sentence');
+  const choices = document.getElementById('fix-choices');
+
+  if (r.kind === 'cap') {
+    const words = r.s.split(' ');
+    sent.innerHTML = words.map((w, i) => `<span class="fx-word" id="fx-w-${i}" onclick="answerFix(${i})">${w}</span>`).join(' ');
+    // "Already correct" items need a way to say so.
+    choices.innerHTML = r.bad === -1 || Math.random() < 0.35
+      ? `<button class="btn btn-secondary btn-full" style="margin-top:6px" onclick="answerFix(-1)">✅ It's already correct!</button>`
+      : '';
+  } else {
+    sent.innerHTML = `${r.s}<span id="fx-mark" style="color:#e11d48">___</span>`;
+    choices.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px">` +
+      ['.', '?', '!'].map(m =>
+        `<button class="dn-num-btn" id="fx-m-${m === '.' ? 'dot' : m === '?' ? 'q' : 'ex'}" style="font-size:30px" onclick="answerFix('${m}')">${m}</button>`).join('') + '</div>';
+  }
+  const fb = document.getElementById('fix-feedback');
+  fb.textContent = ''; fb.className = 'dn-feedback';
+  setTimeout(speakFixSentence, 350);
+}
+
+function speakFixSentence() {
+  const r = S.fixRounds[S.fixIdx];
+  if (r) speak(r.s.replace(/\s+/g, ' '));
+}
+
+function answerFix(val) {
+  if (S.fixAnswered) return;
+  const r = S.fixRounds[S.fixIdx];
+  const fb = document.getElementById('fix-feedback');
+  const correct = r.kind === 'cap' ? val === r.bad : val === r.mark;
+
+  if (correct) {
+    S.fixAnswered = true;
+    if (!r.retried) S.fixScore++;
+    if (r.kind === 'cap') {
+      const words = r.s.split(' ');
+      if (r.bad >= 0) words[r.bad] = capWord(words[r.bad]);
+      document.getElementById('fix-sentence').innerHTML = words.map((w, i) =>
+        `<span class="fx-word${i === r.bad ? ' fx-picked-ok' : ''}">${w}</span>`).join(' ');
+    } else {
+      const mark = document.getElementById('fx-mark');
+      mark.textContent = r.mark;
+      mark.style.color = '#16a34a';
+      const btn = document.getElementById(`fx-m-${r.mark === '.' ? 'dot' : r.mark === '?' ? 'q' : 'ex'}`);
+      if (btn) { btn.classList.add('dn-correct'); if (!r.retried) dnBurst(btn); }
+    }
+    document.querySelectorAll('#fix-choices button').forEach(b => b.disabled = true);
+    fb.textContent = `🎉 ${r.why}`;
+    fb.className = 'dn-feedback correct';
+    sfx('correct');
+    setAdvanceTimer(() => {
+      S.fixIdx++;
+      if (S.fixIdx >= 10) showFixResult();
+      else renderFixRound();
+    }, 2100);
+  } else {
+    r.retried = true;
+    if (r.kind === 'cap' && val >= 0) {
+      const el = document.getElementById(`fx-w-${val}`);
+      if (el) { el.classList.add('fx-picked-bad'); setTimeout(() => el.classList.remove('fx-picked-bad'), 900); }
+    } else if (r.kind === 'punct') {
+      const btn = document.getElementById(`fx-m-${val === '.' ? 'dot' : val === '?' ? 'q' : 'ex'}`);
+      if (btn) { btn.classList.add('dn-wrong'); btn.disabled = true; }
+    }
+    fb.textContent = r.kind === 'cap' ? 'Not that one — look again!' : 'Try another mark!';
+    fb.className = 'dn-feedback wrong';
+    sfx('wrong');
+  }
+}
+
+function showFixResult() {
+  S.fixgames++; S.totalGames++;
+  S.readingToday++; S.mathSinceRead = 0;
+  if (S.fixScore === 10) S.fixperfect++;
+  const pct = S.fixScore / 10;
+  const prevLevel = advanceLevel('fixLevel', 'fixLevelProg', pct, 3, 0.8, 0.4);
+  S.sessions.unshift({ topic:'Fix the Sentence', score:`${S.fixScore}/10`, date:new Date().toLocaleDateString(), level:S.fixLevel });
+  if (S.sessions.length > 100) S.sessions.pop();
+  awardCoins(coinsFor(S.fixScore, 10));
+  persist();
+  document.getElementById('fix-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
+  document.getElementById('fix-result-score').textContent = `${S.fixScore} / 10`;
+  document.getElementById('fix-result-msg').textContent = pct === 1 ? 'Editing star! ✏️' : pct >= 0.6 ? 'Great editing!' : 'Keep practicing!';
+  document.getElementById('fix-level-msg').innerHTML = levelChangeMsg('fixLevel', 'fixLevelProg', prevLevel);
+  sfx('win');
+  showScreen('screen-fixresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
 
@@ -6290,8 +7427,7 @@ function questPlays(topic) { return questSessionsToday().filter(s => s.topic ===
 // "Story" = anything not claimed by a named game (same convention as playedToday),
 // plus Reading Club books.
 function questStoriesToday() {
-  const named = ['Sight Words','Daily News','Math Time','Sound Boxes','Clock Time','Spelling','Rhyming','Science'];
-  return questSessionsToday().filter(s => s.topic === 'Reading Club' || !named.includes(s.topic)).length;
+  return questSessionsToday().filter(s => s.topic === 'Reading Club' || !NAMED_GAMES.includes(s.topic)).length;
 }
 function questSuperScore() {
   return questSessionsToday().some(s => {
@@ -6309,6 +7445,8 @@ const QUEST_POOL = [
   { id:'spell', icon:'🔤', label:'Build words in Spelling',       check: () => questPlays('Spelling') >= 1 },
   { id:'rhyme', icon:'🎵', label:'Find rhymes in Rhyme Time',     check: () => questPlays('Rhyming') >= 1 },
   { id:'sci',   icon:'🔬', label:'Discover in Science Fun',       check: () => questPlays('Science') >= 1 },
+  { id:'meas',  icon:'📏', label:'Measure something in Measure Up', check: () => questPlays('Measure Up') >= 1 },
+  { id:'fix',   icon:'✏️', label:'Fix a sentence',                check: () => questPlays('Fix the Sentence') >= 1 },
   { id:'star',  icon:'⭐', label:'Get a super score in any game', check: questSuperScore },
 ];
 

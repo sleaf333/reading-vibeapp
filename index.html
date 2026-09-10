@@ -2164,7 +2164,7 @@ const S = {
   readingToday:  parseInt(lsGet('rl_readingtoday','0')),
   mathSinceRead: parseInt(lsGet('rl_mathsinceread','0')),
   mathLastDate:  lsGet('rl_mathlastdate',''),
-  dnUnlockReq:   parseInt(lsGet('rl_dnunlockreq','2')),
+  dnUnlockReq:   parseInt(lsGet('rl_dnunlockreq','1')),
   mathBreakEvery:parseInt(lsGet('rl_mathbreakevery','5')),
   mathIntroSeen: lsJson('rl_mathintroseen', []),
   mathWarmupDone:lsJson('rl_mathwarmupdone', []),
@@ -2224,6 +2224,16 @@ const S = {
 
 // Bump math to minimum level 3 (parent-requested baseline)
 if (S.mathLevel < 3) { S.mathLevel = 3; lsSet('rl_mathlevel', '3'); }
+
+// One-time: lower the daily reading requirement to 1 (parent-requested).
+// Existing devices already have the old default saved, so changing the default
+// above would not reach them. Guarded by its own flag so that a parent who
+// later raises the value in Parent Corner is not overridden on the next load,
+// and written so that 0 ("off") is never silently turned back on.
+if (lsGet('rl_unlockreq_v2', '') !== '1') {
+  if (S.dnUnlockReq > 1) { S.dnUnlockReq = 1; lsSet('rl_dnunlockreq', '1'); }
+  lsSet('rl_unlockreq_v2', '1');
+}
 
 // Midnight reset for daily reading requirement
 (function() {

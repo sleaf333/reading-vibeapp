@@ -57,7 +57,7 @@
 
     /* ── TYPE ── */
     .page-title {
-      font-size: 30px; font-weight: 900; line-height: 1.2;
+      font-size: 25px; font-weight: 900; line-height: 1.2;
       background: linear-gradient(135deg, #ff6b6b, #a855f7);
       -webkit-background-clip: text; background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -76,12 +76,41 @@
     .lock-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--pr); cursor: pointer; color: var(--text); font-size: 13px; font-weight: 700; padding: 6px 14px; line-height: 1; white-space: nowrap; box-shadow: var(--shadow-sm); transition: transform 0.1s; }
     .lock-btn:active { transform: scale(0.95); background: var(--accent-lt); border-color: var(--accent); }
 
+    /* ── HOME UTILITY CHIPS ── */
+    /* Deliberately a different shape from the game tiles so the shop, the stats
+       view and the theme setting read as "my stuff", not as another thing to play. */
+    #home-utility { display:flex; gap:8px; margin-top:12px; }
+    .util-chip { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+                 border:1.5px solid var(--border); border-radius:14px; padding:9px 6px;
+                 background:rgba(255,255,255,0.66); backdrop-filter:blur(8px);
+                 -webkit-backdrop-filter:blur(8px); cursor:pointer; font-family:inherit;
+                 box-shadow:var(--shadow-sm); transition:transform .12s;
+                 -webkit-tap-highlight-color:transparent; min-width:0; }
+    .util-chip:active { transform:scale(0.95); }
+    .util-icon { font-size:21px; line-height:1.1; }
+    .util-text { font-size:11.5px; font-weight:800; color:var(--text); line-height:1.2;
+                 text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+                 max-width:100%; }
+    .util-meta { font-size:10.5px; font-weight:800; color:#9a6000; max-width:100%;
+                 overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    /* ── PARENT ACCESS (bottom of home) ── */
+    #home-parent-row { display:flex; justify-content:flex-end; margin:18px 0 6px; }
+    .parent-link { background:transparent; border:1.5px solid var(--border); border-radius:var(--pr);
+                   color:var(--muted); font-size:12px; font-weight:700; padding:6px 13px;
+                   cursor:pointer; font-family:inherit; opacity:0.75; transition:opacity .15s; }
+    .parent-link:active { opacity:1; }
+
     /* ── HOME GAME GRID ── */
-    #home-games { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    #home-games { margin-top: 16px; }
+    .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .home-section-label { font-size:13px; font-weight:900; color:var(--muted); letter-spacing:0.3px;
+                          margin:16px 2px 8px; }
+    #home-games > .home-section-label:first-child { margin-top:4px; }
     .home-card {
       position: relative; display: flex; flex-direction: column; align-items: center;
       justify-content: flex-start; gap: 8px; text-align: center;
-      border-radius: var(--r); padding: 20px 10px 16px; min-height: 138px;
+      border-radius: var(--r); padding: 14px 10px 12px; min-height: 112px;
       cursor: pointer; border: 1.5px solid;
       backdrop-filter: blur(10px) saturate(1.3);
       -webkit-backdrop-filter: blur(10px) saturate(1.3);
@@ -573,8 +602,7 @@
     @keyframes coinFloat { 0%{opacity:0;transform:translate(-50%,-30%) scale(0.6)} 18%{opacity:1;transform:translate(-50%,-50%) scale(1.15)} 70%{opacity:1} 100%{opacity:0;transform:translate(-50%,-150%) scale(1)} }
 
     /* ── MASCOT SPEECH BUBBLE ── */
-    #mascot-bubble { position:relative; max-width:200px; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:8px 12px; font-size:13px; font-weight:700; color:var(--text); box-shadow:var(--shadow-sm); opacity:0; transform:translateY(4px) scale(0.96); transition:all 0.2s; pointer-events:none; line-height:1.35; }
-    #mascot-bubble.show { opacity:1; transform:translateY(0) scale(1); }
+    .mascot-tip { color:var(--text); font-weight:800; }
 
     /* ── NEW HOME CARD COLORS ── */
     .hc-closet  { background: linear-gradient(150deg, rgba(255,240,248,0.78), rgba(252,221,238,0.56)); border-color: rgba(244,114,182,0.85); color:#9d174d; }
@@ -739,16 +767,16 @@
       animation: glamSweep 4.5s ease-in-out infinite;
     }
     @keyframes glamSweep { 0%{background-position:130% -30%} 60%{background-position:-30% 130%} 100%{background-position:-30% 130%} }
-    #home-games .home-card:nth-child(2)::after  { animation-delay: 0.55s; }
-    #home-games .home-card:nth-child(3)::after  { animation-delay: 1.10s; }
-    #home-games .home-card:nth-child(4)::after  { animation-delay: 1.65s; }
-    #home-games .home-card:nth-child(5)::after  { animation-delay: 0.30s; }
-    #home-games .home-card:nth-child(6)::after  { animation-delay: 0.85s; }
-    #home-games .home-card:nth-child(7)::after  { animation-delay: 1.40s; }
-    #home-games .home-card:nth-child(8)::after  { animation-delay: 1.95s; }
-    #home-games .home-card:nth-child(9)::after  { animation-delay: 0.45s; }
-    #home-games .home-card:nth-child(10)::after { animation-delay: 1.25s; }
-    #home-games .home-card:nth-child(11)::after { animation-delay: 0.70s; }
+    .home-grid .home-card:nth-child(2)::after  { animation-delay: 0.55s; }
+    .home-grid .home-card:nth-child(3)::after  { animation-delay: 1.10s; }
+    .home-grid .home-card:nth-child(4)::after  { animation-delay: 1.65s; }
+    .home-grid .home-card:nth-child(5)::after  { animation-delay: 0.30s; }
+    .home-grid .home-card:nth-child(6)::after  { animation-delay: 0.85s; }
+    .home-grid .home-card:nth-child(7)::after  { animation-delay: 1.40s; }
+    .home-grid .home-card:nth-child(8)::after  { animation-delay: 1.95s; }
+    .home-grid .home-card:nth-child(9)::after  { animation-delay: 0.45s; }
+    .home-grid .home-card:nth-child(10)::after { animation-delay: 1.25s; }
+    .home-grid .home-card:nth-child(11)::after { animation-delay: 0.70s; }
     .hc-reading .glam-holo { box-shadow: 0 0 8px rgba(59,130,246,.45),  0 0 18px rgba(59,130,246,.28); }
     .hc-sw      .glam-holo { box-shadow: 0 0 8px rgba(61,158,104,.50),  0 0 18px rgba(34,211,238,.28); }
     .hc-dn      .glam-holo { box-shadow: 0 0 8px rgba(252,211,77,.55),  0 0 18px rgba(252,211,77,.32); }
@@ -1066,19 +1094,31 @@
   <div class="home-header glam-stage-header">
     <div style="display:flex;align-items:center;gap:11px">
       <canvas id="mascot" width="128" height="128"
-        style="width:60px;height:60px;flex-shrink:0;cursor:pointer;filter:drop-shadow(0 4px 12px rgba(255,180,30,0.55))"></canvas>
+        style="width:50px;height:50px;flex-shrink:0;cursor:pointer;filter:drop-shadow(0 4px 12px rgba(255,180,30,0.55))"></canvas>
       <div>
-        <div class="page-title glam-stage-title">Juliana Reads! 🌟</div>
+        <div class="page-title glam-stage-title">Juliana Reads!</div>
         <div id="home-greeting" style="font-size:15px;color:var(--muted);margin-top:4px">Tap a game to start playing! 🎉</div>
-        <div id="mascot-bubble"></div>
       </div>
     </div>
     <div class="header-pills">
       <span id="home-streak-pill" class="pill" style="background:#fff1e0;color:#c2570c;display:none">🔥 0 days</span>
       <span class="coin-pill" onclick="openCloset()">🪙 <span class="coin-count">0</span></span>
       <button class="icon-toggle" id="mute-btn" onclick="toggleMute()" title="Sound on/off">🔊</button>
-      <button class="lock-btn" onclick="showScreen('screen-parent-entry')">🔒 Parent</button>
     </div>
+  </div>
+
+  <!-- Not games: the shop, a stats view and a setting. They were sitting in the
+       games grid at full tile size, which made a settings screen look as
+       important as Math Time. -->
+  <div id="home-utility">
+    <button class="util-chip" onclick="openCloset()">
+      <span class="util-icon">👗</span><span class="util-text">My Doll</span>
+      <span class="util-meta">🪙 <span class="coin-count">0</span></span></button>
+    <button class="util-chip" onclick="openProgress()">
+      <span class="util-icon">📈</span><span class="util-text">Progress</span></button>
+    <button class="util-chip" onclick="openThemePicker()">
+      <span class="util-icon" id="home-theme-icon">🌈</span><span class="util-text">Theme</span>
+      <span class="util-meta" id="home-theme-sub">Pick one</span></button>
   </div>
 
   <div id="quest-card">
@@ -1091,7 +1131,9 @@
     <div id="quest-claimed" style="display:none">🌟 What a show! New adventures tomorrow!</div>
   </div>
 
-  <div id="home-games">
+<div id="home-games">
+    <div class="home-section-label">📖 Reading</div>
+    <div class="home-grid">
     <div class="home-card hc-reading" onclick="showScreen('screen-topics')">
       <span class="home-done-badge" id="done-reading" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
@@ -1099,15 +1141,12 @@
       <div class="hc-name">Reading Stories</div>
       <div class="hc-sub" id="home-reading-level">Lv. 1</div>
     </div>
-
-    <div class="home-card hc-sw" onclick="startSwGameChoose()">
-      <span class="home-done-badge" id="done-sw" style="display:none">✓</span>
+    <div class="home-card hc-reader" onclick="openReaderList()">
       <span class="hc-chevron">›</span>
-      <div class="hc-icon">🎮</div>
-      <div class="hc-name">Sight Word Game</div>
-      <div class="hc-sub" id="home-sw-level">Lv. 1</div>
+      <div class="hc-icon">📚</div>
+      <div class="hc-name">Reading Club</div>
+      <div class="hc-sub" id="home-reader-sub">Little books</div>
     </div>
-
     <div class="home-card hc-dn" onclick="startDnGame()">
       <span class="home-done-badge" id="done-dn" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
@@ -1115,7 +1154,46 @@
       <div class="hc-name">Daily News</div>
       <div class="hc-sub" id="home-dn-level">Lv. 1</div>
     </div>
-
+    <div class="home-card hc-sw" onclick="startSwGameChoose()">
+      <span class="home-done-badge" id="done-sw" style="display:none">✓</span>
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">🎮</div>
+      <div class="hc-name">Sight Word Game</div>
+      <div class="hc-sub" id="home-sw-level">Lv. 1</div>
+    </div>
+    </div>
+    <div class="home-section-label">🔤 Words & Spelling</div>
+    <div class="home-grid">
+    <div class="home-card hc-sb" onclick="startSbGameChoose()">
+      <span class="home-done-badge" id="done-sb" style="display:none">✓</span>
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">📦</div>
+      <div class="hc-name">Sound Boxes</div>
+      <div class="hc-sub" id="home-sb-level">Lv. 1</div>
+    </div>
+    <div class="home-card hc-spell" onclick="startSpellGameChoose()">
+      <span class="home-done-badge" id="done-spell" style="display:none">✓</span>
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">🔤</div>
+      <div class="hc-name">Build a Word</div>
+      <div class="hc-sub" id="home-spell-level">Lv. 1</div>
+    </div>
+    <div class="home-card hc-rhyme" onclick="startRhymeGame()">
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">🎵</div>
+      <div class="hc-name">Rhyme Time</div>
+      <div class="hc-sub">Find the rhyme!</div>
+    </div>
+    <div class="home-card hc-fix" onclick="startFixGame()">
+      <span class="home-done-badge" id="done-fix" style="display:none">✓</span>
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">✏️</div>
+      <div class="hc-name">Fix the Sentence</div>
+      <div class="hc-sub" id="home-fix-level">Lv. 1</div>
+    </div>
+    </div>
+    <div class="home-section-label">🔢 Numbers & Science</div>
+    <div class="home-grid">
     <div class="home-card hc-math" id="math-home-card" onclick="startMathGameChoose()">
       <span class="home-done-badge" id="done-math" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
@@ -1124,15 +1202,6 @@
       <div class="hc-sub" id="home-math-level">Lv. 3</div>
       <div id="math-lock-badge" style="font-size:12px;font-weight:800;line-height:1.35"></div>
     </div>
-
-    <div class="home-card hc-sb" onclick="startSbGameChoose()">
-      <span class="home-done-badge" id="done-sb" style="display:none">✓</span>
-      <span class="hc-chevron">›</span>
-      <div class="hc-icon">📦</div>
-      <div class="hc-name">Sound Boxes</div>
-      <div class="hc-sub" id="home-sb-level">Lv. 1</div>
-    </div>
-
     <div class="home-card hc-clock" onclick="startClockGame()">
       <span class="home-done-badge" id="done-clock" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
@@ -1140,7 +1209,6 @@
       <div class="hc-name">Clock Time</div>
       <div class="hc-sub" id="home-clock-level">Lv. 1</div>
     </div>
-
     <div class="home-card hc-measure" onclick="startMeasureGameChoose()">
       <span class="home-done-badge" id="done-measure" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
@@ -1148,64 +1216,19 @@
       <div class="hc-name">Measure Up</div>
       <div class="hc-sub" id="home-measure-level">Lv. 1</div>
     </div>
-
-    <div class="home-card hc-spell" onclick="startSpellGameChoose()">
-      <span class="home-done-badge" id="done-spell" style="display:none">✓</span>
-      <span class="hc-chevron">›</span>
-      <div class="hc-icon">🔤</div>
-      <div class="hc-name">Build a Word</div>
-      <div class="hc-sub" id="home-spell-level">Lv. 1</div>
-    </div>
-
-    <div class="home-card hc-fix" onclick="startFixGame()">
-      <span class="home-done-badge" id="done-fix" style="display:none">✓</span>
-      <span class="hc-chevron">›</span>
-      <div class="hc-icon">✏️</div>
-      <div class="hc-name">Fix the Sentence</div>
-      <div class="hc-sub" id="home-fix-level">Lv. 1</div>
-    </div>
-
-    <div class="home-card hc-rhyme" onclick="startRhymeGame()">
-      <span class="hc-chevron">›</span>
-      <div class="hc-icon">🎵</div>
-      <div class="hc-name">Rhyme Time</div>
-      <div class="hc-sub">Find the rhyme!</div>
-    </div>
-
-    <div class="home-card hc-reader" onclick="openReaderList()">
-      <span class="hc-chevron">›</span>
-      <div class="hc-icon">📚</div>
-      <div class="hc-name">Reading Club</div>
-      <div class="hc-sub" id="home-reader-sub">Little books</div>
-    </div>
-
     <div class="home-card hc-science" onclick="startScienceGame()">
       <span class="hc-chevron">›</span>
       <div class="hc-icon">🔬</div>
       <div class="hc-name">Science Fun</div>
       <div class="hc-sub">Discover &amp; sort!</div>
     </div>
-
-    <div class="home-card hc-theme" onclick="openThemePicker()">
-      <span class="hc-chevron">›</span>
-      <div class="hc-icon" id="home-theme-icon">🌈</div>
-      <div class="hc-name">My Favourite Thing</div>
-      <div class="hc-sub" id="home-theme-sub">Pick a theme</div>
     </div>
+  </div>
 
-    <div class="home-card hc-progress" onclick="openProgress()">
-      <span class="hc-chevron">›</span>
-      <div class="hc-icon">📈</div>
-      <div class="hc-name">Getting Faster</div>
-      <div class="hc-sub" id="home-progress-sub">See how you improve</div>
-    </div>
-
-    <div class="home-card hc-closet" onclick="openCloset()">
-      <span class="hc-chevron">›</span>
-      <div class="hc-icon">👗</div>
-      <div class="hc-name">My Doll</div>
-      <div class="hc-sub" id="home-closet-sub">Dress up · 🪙 <span class="coin-count">0</span></div>
-    </div>
+  <!-- Parent access lives at the very bottom: reaching it takes a deliberate
+       scroll past every game, so it is not something she lands on by accident. -->
+  <div id="home-parent-row">
+    <button class="parent-link" onclick="showScreen('screen-parent-entry')">🔒 Parent Corner</button>
   </div>
 </div>
 
@@ -2989,8 +3012,8 @@ function refreshHome() {
     : hr < 18 ? 'Good afternoon, Juliana! 🌤️'
     : 'Good evening, Juliana! 🌙';
   // A notable streak gets celebrated in the greeting line, not just the corner pill.
-  document.getElementById('home-greeting').innerHTML =
-    S.streak >= 3 ? `🔥 <b>${S.streak}-day streak!</b> Keep it going, Juliana!` : greet;
+  _greetingHTML = S.streak >= 3 ? `🔥 <b>${S.streak}-day streak!</b> Keep it going, Juliana!` : greet;
+  document.getElementById('home-greeting').innerHTML = _greetingHTML;
   document.getElementById('home-reading-level').innerHTML = homeSub(S.level,      'Stories',      'levelProgress');
   document.getElementById('home-sw-level').innerHTML      = homeSub(S.swLevel,    'Sight Words',  'swLevelProg');
   document.getElementById('home-dn-level').innerHTML      = homeSub(S.dnLevel,    'Daily News',   'dnLevelProg');
@@ -6931,13 +6954,17 @@ const MASCOT_TIPS = [
   'Try Rhyme Time and Science Fun! 🎵🔬',
   "Finish Today's Adventure for a doll concert! 🎤",
 ];
+// The real greeting, kept separately so a tip can never become its own restore
+// baseline — reading it back off the element meant a second tip pinned the tip
+// in place and the greeting was gone for good.
+let _greetingHTML = '';
+
 function showMascotTip() {
-  const b = document.getElementById('mascot-bubble');
-  if (!b) return;
-  b.textContent = MASCOT_TIPS[Math.floor(Math.random() * MASCOT_TIPS.length)];
-  b.classList.add('show');
+  const g = document.getElementById('home-greeting');
+  if (!g) return;
   clearTimeout(window._mbTimer);
-  window._mbTimer = setTimeout(() => b.classList.remove('show'), 4200);
+  g.innerHTML = `<span class="mascot-tip">${MASCOT_TIPS[Math.floor(Math.random() * MASCOT_TIPS.length)]}</span>`;
+  window._mbTimer = setTimeout(() => { g.innerHTML = _greetingHTML; }, 4200);
 }
 // Speak a short bit of encouragement (used at game starts / wins).
 function mascotSay(text, doSpeak) {

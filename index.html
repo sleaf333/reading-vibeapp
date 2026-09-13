@@ -582,6 +582,7 @@
     .hc-rhyme   { background: linear-gradient(150deg, rgba(245,243,255,0.78), rgba(233,228,255,0.56)); border-color: rgba(167,139,250,0.85); color:#5b21b6; }
     .hc-reader  { background: linear-gradient(150deg, rgba(236,253,245,0.78), rgba(209,250,229,0.56)); border-color: rgba(52,211,153,0.85); color:#065f46; }
     .hc-science { background: linear-gradient(150deg, rgba(236,250,255,0.78), rgba(207,238,252,0.56)); border-color: rgba(56,189,248,0.85); color:#0c4a6e; }
+    .hc-progress{ background: linear-gradient(150deg, rgba(236,253,245,0.80), rgba(209,250,229,0.58)); border-color: rgba(16,185,129,0.85); color:#065f46; }
     .hc-measure { background: linear-gradient(150deg, rgba(254,252,232,0.80), rgba(254,243,199,0.58)); border-color: rgba(250,204,21,0.90); color:#854d0e; }
     .hc-fix     { background: linear-gradient(150deg, rgba(255,241,242,0.80), rgba(254,215,226,0.58)); border-color: rgba(244,63,94,0.85); color:#9f1239; }
 
@@ -605,6 +606,45 @@
     .fx-word.fx-picked-ok  { background:#bbf7d0; border-color:#22c55e; }
     .fx-word.fx-picked-bad { background:#fecaca; border-color:#ef4444; }
     .fx-hint { text-align:center; font-size:14px; font-weight:800; color:var(--muted); margin-bottom:4px; }
+
+    /* ── GETTING FASTER ── */
+    .prog-headline { text-align:center; font-size:17px; font-weight:800; color:var(--text);
+                     line-height:1.45; margin:4px 8px 14px; }
+    .prog-row { background:rgba(255,255,255,0.66); border:2px solid rgba(0,0,0,0.07);
+                border-radius:16px; padding:12px 14px; margin-bottom:10px; }
+    .prog-head { display:flex; justify-content:space-between; align-items:center;
+                 font-size:15px; font-weight:900; color:var(--text); margin-bottom:8px; gap:8px; }
+    .prog-known { font-size:11px; font-weight:800; color:var(--muted); white-space:nowrap; }
+    .prog-note { font-size:12px; font-weight:700; color:var(--muted); }
+    .prog-bars { display:flex; flex-direction:column; gap:5px; }
+    .prog-bar { display:flex; align-items:center; gap:8px; }
+    .prog-lab { font-size:11px; font-weight:800; color:var(--muted); width:32px; }
+    .prog-track { flex:1; height:14px; background:rgba(0,0,0,0.06); border-radius:7px; overflow:hidden; }
+    .prog-track i { display:block; height:100%; border-radius:7px; }
+    .prog-val { font-size:12px; font-weight:900; color:var(--text); width:44px; text-align:right; }
+    .prog-gain { margin-top:7px; font-size:13px; font-weight:900; color:#047857; }
+
+    /* ── DIFFICULTY CHOOSER ── */
+    .diff-grid { display:flex; flex-direction:column; gap:12px; margin-top:6px; }
+    .diff-btn { border:3px solid rgba(0,0,0,0.10); border-radius:20px; padding:18px 16px; cursor:pointer;
+                background:rgba(255,255,255,0.72); display:flex; align-items:center; gap:14px; text-align:left;
+                transition:transform .12s, box-shadow .15s; font-family:inherit; }
+    .diff-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 22px rgba(0,0,0,0.12); }
+    .diff-btn:disabled { cursor:default; }
+    .diff-icon { font-size:36px; line-height:1; }
+    .diff-label { font-size:20px; font-weight:900; color:var(--text); }
+    .diff-sub { font-size:13px; font-weight:700; color:var(--muted); }
+    .diff-mid  { border-color:rgba(250,204,21,0.85); background:linear-gradient(150deg,rgba(254,252,232,0.85),rgba(254,243,199,0.6)); }
+    .diff-hard { border-color:rgba(244,63,94,0.85);  background:linear-gradient(150deg,rgba(255,241,242,0.85),rgba(254,215,226,0.6)); }
+
+    /* ── PERSONAL BEST ── */
+    .best-pop { position:fixed; transform:translate(-50%,-100%); z-index:120; pointer-events:none;
+                font-size:15px; font-weight:900; color:#b45309; background:rgba(254,243,199,0.95);
+                border:2px solid rgba(250,204,21,0.9); border-radius:12px; padding:3px 10px;
+                animation:bestFloat 1.2s ease-out forwards; white-space:nowrap; }
+    @keyframes bestFloat { 0% { opacity:0; transform:translate(-50%,-70%) scale(0.8); }
+                           25% { opacity:1; transform:translate(-50%,-110%) scale(1.05); }
+                           100% { opacity:0; transform:translate(-50%,-160%) scale(1); } }
 
     /* ── DRESS-UP CLOSET ── */
     .closet-doll { display:flex; justify-content:center; margin:6px 0 4px; }
@@ -1031,7 +1071,7 @@
       <div class="hc-sub" id="home-reading-level">Lv. 1</div>
     </div>
 
-    <div class="home-card hc-sw" onclick="startSwGame()">
+    <div class="home-card hc-sw" onclick="startSwGameChoose()">
       <span class="home-done-badge" id="done-sw" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">🎮</div>
@@ -1047,7 +1087,7 @@
       <div class="hc-sub" id="home-dn-level">Lv. 1</div>
     </div>
 
-    <div class="home-card hc-math" id="math-home-card" onclick="startMathGame()">
+    <div class="home-card hc-math" id="math-home-card" onclick="startMathGameChoose()">
       <span class="home-done-badge" id="done-math" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon" id="math-card-icon">🔢</div>
@@ -1056,7 +1096,7 @@
       <div id="math-lock-badge" style="font-size:12px;font-weight:800;line-height:1.35"></div>
     </div>
 
-    <div class="home-card hc-sb" onclick="startSbGame()">
+    <div class="home-card hc-sb" onclick="startSbGameChoose()">
       <span class="home-done-badge" id="done-sb" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">📦</div>
@@ -1072,7 +1112,7 @@
       <div class="hc-sub" id="home-clock-level">Lv. 1</div>
     </div>
 
-    <div class="home-card hc-measure" onclick="startMeasureGame()">
+    <div class="home-card hc-measure" onclick="startMeasureGameChoose()">
       <span class="home-done-badge" id="done-measure" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">📏</div>
@@ -1080,7 +1120,7 @@
       <div class="hc-sub" id="home-measure-level">Lv. 1</div>
     </div>
 
-    <div class="home-card hc-spell" onclick="startSpellGame()">
+    <div class="home-card hc-spell" onclick="startSpellGameChoose()">
       <span class="home-done-badge" id="done-spell" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">🔤</div>
@@ -1115,6 +1155,13 @@
       <div class="hc-icon">🔬</div>
       <div class="hc-name">Science Fun</div>
       <div class="hc-sub">Discover &amp; sort!</div>
+    </div>
+
+    <div class="home-card hc-progress" onclick="openProgress()">
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">📈</div>
+      <div class="hc-name">Getting Faster</div>
+      <div class="hc-sub" id="home-progress-sub">See how you improve</div>
     </div>
 
     <div class="home-card hc-closet" onclick="openCloset()">
@@ -1589,6 +1636,27 @@
   </div>
   <button class="btn btn-primary btn-full" onclick="startScienceGame()">Play again</button>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ GETTING FASTER ═══ -->
+<div id="screen-progress" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">Getting Faster 📈</span></div>
+  <div id="progress-headline" class="prog-headline"></div>
+  <div id="progress-body"></div>
+</div>
+
+<!-- ═══ DIFFICULTY CHOOSER ═══ -->
+<div id="screen-difficulty" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">How do you want it?</span></div>
+  <div style="text-align:center;font-size:14px;color:var(--muted);font-weight:700;margin:2px 0 14px">You choose today!</div>
+  <div class="diff-grid">
+    <button class="diff-btn" id="diff-easy" onclick="pickDifficulty(-1)">
+      <div class="diff-icon">🌿</div><div class="diff-label">Easy</div><div class="diff-sub">Warm up</div></button>
+    <button class="diff-btn diff-mid" onclick="pickDifficulty(0)">
+      <div class="diff-icon">⭐</div><div class="diff-label">Just right</div><div class="diff-sub">Where I am</div></button>
+    <button class="diff-btn diff-hard" onclick="pickDifficulty(1)">
+      <div class="diff-icon">🔥</div><div class="diff-label">Challenge me</div><div class="diff-sub">Harder · more 🪙</div></button>
+  </div>
 </div>
 
 <!-- ═══ MEASURE UP ═══ -->
@@ -2202,6 +2270,9 @@ const S = {
   fixLevelProg:     parseInt(lsGet('rl_fixlevelprog','0')),
   fixgames:         parseInt(lsGet('rl_fixgames','0')),
   fixperfect:       parseInt(lsGet('rl_fixperfect','0')),
+  // per-item accuracy / latency / review schedule (see ITEM MEMORY)
+  items:            lsJson('rl_items', {}),
+  placed:           lsJson('rl_placed', []),
   // transient
   topic: null, title: '', story: '', words: [], quiz: [],
   quizIdx: 0, quizScore: 0, quizAnswered: false, newBadges: [],
@@ -2210,6 +2281,7 @@ const S = {
   rhymeRounds: [], rhymeIdx: 0, rhymeScore: 0, rhymeAnswered: false, rhymeTargetWord: '',
   scienceRounds: [], scienceIdx: 0, scienceScore: 0, scienceAnswered: false,
   readerBook: null, readerAloudActive: false,
+  diffDelta: 0,
   measureRounds: [], measureIdx: 0, measureScore: 0, measureAnswered: false, measureOrderPicks: [],
   fixRounds: [], fixIdx: 0, fixScore: 0, fixAnswered: false,
 
@@ -2315,6 +2387,8 @@ function persist() {
   lsSet('rl_fixlevelprog',     S.fixLevelProg);
   lsSet('rl_fixgames',         S.fixgames);
   lsSet('rl_fixperfect',       S.fixperfect);
+  lsSet('rl_items',            S.items);
+  lsSet('rl_placed',           S.placed);
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
@@ -2329,6 +2403,8 @@ function setAdvanceTimer(fn, ms) {
 }
 
 function showScreen(id) {
+  // A Challenge run must never silently carry into the next game.
+  if (id === 'screen-home') S.diffDelta = 0;
   clearTimeout(advanceTimer);
   advanceTimer = null;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -3108,14 +3184,298 @@ function goHomeFromReading() {
 
 // ─── LEVEL PROGRESSION ───────────────────────────────────────────────────────
 
+// ─── ITEM MEMORY ─────────────────────────────────────────────────────────────
+// Per-item accuracy and latency plus a Leitner review schedule. This is the
+// spine for two things the app previously had no way to express:
+//   * spaced review — once a level was cleared, its content was never served
+//     again, so forgetting happened silently;
+//   * fluency — only correctness was measured, so a slow, effortful correct
+//     answer looked identical to an automatic one.
+// Item ids are stable strings namespaced per game: 'sb:cat', 'sw:said',
+// 'spell:cake', 'math:7+8', 'clock:3:30'.
+
+const ITEM_CAP     = 2000;                  // keeps localStorage bounded
+const LEITNER_DAYS = [0, 1, 2, 4, 8, 16];   // review interval per box
+const DAY_MS       = 86400000;
+
+function itemStat(id) {
+  let it = S.items[id];
+  if (!it) {
+    it = { box:0, due:0, seen:0, right:0, missed:0, bestMs:0, medMs:0, firstMs:0, lastSeen:0 };
+    S.items[id] = it;
+  }
+  return it;
+}
+
+// `ms` is time to first answer; pass 0 when it isn't meaningful. Returns the
+// facts a caller needs to price the answer, since "was this a personal best"
+// and "did she just fix a known weak spot" are only knowable pre-update.
+function recordItem(id, correct, ms) {
+  const it = itemStat(id);
+  const now = Date.now();
+  const hadMissed = it.missed > 0;
+  const prevBest  = it.bestMs;
+  const wasNew    = it.seen === 0;
+  it.seen++;
+  it.lastSeen = now;
+  if (correct) { it.right++;  it.box = Math.min(LEITNER_DAYS.length - 1, it.box + 1); }
+  else         { it.missed++; it.box = 0; }
+  it.due = now + LEITNER_DAYS[it.box] * DAY_MS;
+  let personalBest = false;
+  if (correct && ms > 0) {
+    // Cheap running-median approximation — nudge toward the new sample rather
+    // than keeping a per-item history array.
+    it.medMs = it.medMs ? Math.round(it.medMs + (ms - it.medMs) * 0.3) : ms;
+    if (!it.firstMs) it.firstMs = ms;   // baseline for "you used to take..."
+    if (!prevBest || ms < prevBest) { it.bestMs = ms; personalBest = !!prevBest; }
+  }
+  if (Object.keys(S.items).length > ITEM_CAP) evictItems();
+  return { item: it, personalBest, recovered: correct && hadMissed, isNew: wasNew };
+}
+
+function evictItems() {
+  const keys = Object.keys(S.items);
+  if (keys.length <= ITEM_CAP) return;
+  keys.sort((a, b) => (S.items[a].lastSeen || 0) - (S.items[b].lastSeen || 0));
+  keys.slice(0, keys.length - ITEM_CAP).forEach(k => delete S.items[k]);
+}
+
+// Items of one game that are due for review, longest-overdue first.
+function dueItems(prefix, n) {
+  const now = Date.now(), p = prefix + ':';
+  return Object.keys(S.items)
+    .filter(id => id.startsWith(p) && S.items[id].seen > 0 && S.items[id].due <= now)
+    .sort((a, b) => S.items[a].due - S.items[b].due)
+    .slice(0, n);
+}
+
+// Weakest items of one game: least accurate first, slowest as tiebreak.
+function weakItems(prefix, n) {
+  const p = prefix + ':';
+  return Object.keys(S.items)
+    .filter(id => id.startsWith(p) && S.items[id].missed > 0)
+    .sort((a, b) => {
+      const A = S.items[a], B = S.items[b];
+      return (A.right / A.seen) - (B.right / B.seen) || (B.medMs || 0) - (A.medMs || 0);
+    })
+    .slice(0, n);
+}
+
+// Mastered = accurate AND fast AND survived at least one spaced gap. Speed is
+// deliberately never sufficient on its own: hammering a single proxy metric is
+// how a program produces children who look fluent early and stall later.
+function isMastered(id, fastMs) {
+  const it = S.items[id];
+  if (!it || it.seen < 3) return false;
+  return (it.right / it.seen) >= 0.9 && it.box >= 2 &&
+         (!fastMs || (it.medMs && it.medMs <= fastMs));
+}
+
+// Answer latency. One timer is enough because only one round is on screen.
+let _roundStartMs = 0;
+function markRoundStart() { _roundStartMs = Date.now(); }
+function roundElapsed()   { return _roundStartMs ? Date.now() - _roundStartMs : 0; }
+
+// ─── EARNING ─────────────────────────────────────────────────────────────────
+// Coins used to be paid per round played (score*2 + a perfect bonus), which is
+// the edutainment objective function: it pays for showing up. These pay for
+// cognitively demanding work instead — fixing a known weak spot, getting
+// genuinely faster, or taking on something new — and pay nothing for easy reps
+// on material already mastered. The doll closet is unchanged; only what fills
+// the purse has moved.
+// Rates are calibrated so a week of practice earns roughly what the old
+// pay-per-round formula did (~±15%), because the dress-up closet prices were
+// set against that income and a child who suddenly cannot afford anything is a
+// child who stops playing. What changes is not how much she earns but which
+// work earns it.
+const EARN = { recovered:5, fresh:2, best:3, bestCap:6, floor:3 };
+
+let _earn = { coins:0, bests:0, recovered:0, effort:0 };
+function resetEarn() { _earn = { coins:0, bests:0, recovered:0, effort:0 }; }
+function earnFor(res, firstTry) {
+  let c = 0;
+  if (firstTry) {
+    if (res.recovered)  { c += EARN.recovered; _earn.recovered++; _earn.effort++; } // fixed a weak spot
+    else if (res.isNew) { c += EARN.fresh;     _earn.effort++; }                    // took on something new
+  }
+  // Beating your own time pays whether or not it was a clean first try, but is
+  // capped so one easy item can't be farmed.
+  if (res.personalBest && _earn.bests < EARN.bestCap) { c += EARN.best; _earn.bests++; }
+  _earn.coins += c;
+  return c;
+}
+// Small floor so a session is never worth literally nothing. A session she
+// chose to make hard pays more. Occasionally a small surprise is added on top:
+// deliberately unannounced and deliberately not a rarity-tiered box you open —
+// an unexpected bonus lifts motivation without teaching a six-year-old to pull
+// a lever, and unexpected rewards also avoid the overjustification trap that
+// promised ones fall into.
+function sessionPayout() {
+  const mult = (DIFF[String(S.diffDelta || 0)] || DIFF['0']).mult;
+  let total = Math.round((_earn.coins + EARN.floor) * mult);
+  _earn.surprise = (_earn.effort >= 3 && Math.random() < 0.12) ? randInt(5, 12) : 0;
+  if (_earn.surprise) setTimeout(() => showToast(`🎁 Surprise! +${_earn.surprise} bonus coins`), 900);
+  return total + _earn.surprise;
+}
+
+// ─── "GETTING FASTER" ────────────────────────────────────────────────────────
+// Children cannot perceive their own improvement — it happens too slowly and
+// they have no record of yesterday. A child who is ahead of her class gets no
+// signal from her peers either. Now that every answer is timed, the app can
+// show her the one thing she can't otherwise see: that she is measurably
+// quicker than she used to be. This reads the store only; nothing here can
+// change a level or a payout.
+const SPEED_GROUPS = [
+  { prefix:'sw',      icon:'🎮', name:'Sight Words' },
+  { prefix:'sb',      icon:'📦', name:'Sound Boxes' },
+  { prefix:'spell',   icon:'🔤', name:'Build a Word' },
+  { prefix:'math',    icon:'🔢', name:'Math Time' },
+  { prefix:'clock',   icon:'🕐', name:'Clock Time' },
+  { prefix:'measure', icon:'📏', name:'Measure Up' },
+  { prefix:'rhyme',   icon:'🎵', name:'Rhyme Time' },
+  { prefix:'fix',     icon:'✏️', name:'Fix the Sentence' },
+];
+
+function speedSummary(prefix) {
+  const p = prefix + ':';
+  const ids = Object.keys(S.items).filter(id => id.startsWith(p));
+  if (!ids.length) return null;
+  // Only items with both a first and a current time can show a change.
+  const timed = ids.filter(id => S.items[id].firstMs && S.items[id].medMs && S.items[id].seen > 1);
+  const known = ids.filter(id => isMastered(id)).length;
+  if (!timed.length) return { ids: ids.length, timed: 0, known };
+  const then = timed.reduce((a, id) => a + S.items[id].firstMs, 0) / timed.length;
+  const now  = timed.reduce((a, id) => a + S.items[id].medMs,   0) / timed.length;
+  return { ids: ids.length, timed: timed.length, known, then, now,
+           pct: then > 0 ? Math.round((1 - now / then) * 100) : 0 };
+}
+
+function secs(ms) { return (ms / 1000).toFixed(1) + 's'; }
+
+function renderProgress() {
+  const rows = SPEED_GROUPS.map(g => [g, speedSummary(g.prefix)]).filter(([, s]) => s && s.ids);
+  const box = document.getElementById('progress-body');
+  if (!rows.length) {
+    box.innerHTML = `<div style="text-align:center;padding:30px 12px;font-size:15px;font-weight:700;color:var(--muted)">
+      Play a few games and come back — this is where you'll see yourself getting faster! 🚀</div>`;
+    document.getElementById('progress-headline').textContent = '';
+    return;
+  }
+  const faster = rows.filter(([, s]) => s.pct > 0);
+  const best   = faster.sort((a, b) => b[1].pct - a[1].pct)[0];
+  document.getElementById('progress-headline').innerHTML = best
+    ? `You are <b>${best[1].pct}% faster</b> at ${best[0].name} than when you started! ⚡`
+    : 'Keep going — your times are still settling in.';
+
+  box.innerHTML = rows.map(([g, s]) => {
+    if (!s.timed) return `<div class="prog-row"><div class="prog-head"><span>${g.icon} ${g.name}</span>
+      <span class="prog-known">${s.ids} practised</span></div>
+      <div class="prog-note">Play again to see your speed change</div></div>`;
+    const gain = s.pct > 0;
+    const w = Math.max(6, Math.min(100, Math.round((s.now / s.then) * 100)));
+    return `<div class="prog-row">
+      <div class="prog-head"><span>${g.icon} ${g.name}</span>
+        <span class="prog-known">${s.known} mastered</span></div>
+      <div class="prog-bars">
+        <div class="prog-bar"><span class="prog-lab">then</span><div class="prog-track"><i style="width:100%;background:#cbd5e1"></i></div><span class="prog-val">${secs(s.then)}</span></div>
+        <div class="prog-bar"><span class="prog-lab">now</span><div class="prog-track"><i style="width:${w}%;background:${gain ? '#34d399' : '#fbbf24'}"></i></div><span class="prog-val">${secs(s.now)}</span></div>
+      </div>
+      ${gain ? `<div class="prog-gain">⚡ ${s.pct}% faster</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function openProgress() { renderProgress(); showScreen('screen-progress'); }
+
+// ─── CHOICE ──────────────────────────────────────────────────────────────────
+// Autonomy is the motivation lever this app had none of: it decided everything
+// and she just complied. Letting her pick the difficulty costs one tap and,
+// per self-determination theory, buys more than the tap costs — children pick
+// harder work when the choice is theirs than when it is assigned to them.
+// The choice applies to the deck only; her real level, and how it advances,
+// are untouched, so a brave day can't accidentally promote or demote her.
+const DIFF = {
+  '-1': { label:'Easy',        icon:'🌿', sub:'Warm up',        mult:1   },
+  '0':  { label:'Just right',  icon:'⭐', sub:'Where I am',     mult:1   },
+  '1':  { label:'Challenge me',icon:'🔥', sub:'Something hard', mult:1.5 },
+};
+let _pendingStart = null, _pendingLevel = 1;
+
+function chooseDifficulty(currentLevel, startFn) {
+  _pendingStart = startFn;
+  _pendingLevel = currentLevel;
+  document.getElementById('diff-easy').disabled = currentLevel <= 1;
+  document.getElementById('diff-easy').style.opacity = currentLevel <= 1 ? 0.4 : '';
+  showScreen('screen-difficulty');
+}
+function pickDifficulty(delta) {
+  S.diffDelta = delta;
+  const fn = _pendingStart; _pendingStart = null;
+  if (fn) fn();
+}
+// Effective level for THIS session's deck. Never written back to state.
+function sessionLevel(base, maxLv) {
+  return Math.max(1, Math.min(maxLv, base + (S.diffDelta || 0)));
+}
+
+// ─── SPACED REVIEW ───────────────────────────────────────────────────────────
+// Part of every deck is reserved for material that is due to come back. Without
+// this, clearing a level retired its content permanently and the forgetting was
+// invisible — she could "know" short-a words in October and have quietly lost
+// them by December with nothing in the app ever noticing.
+const REVIEW_SHARE = 0.3;
+
+// Build a deck of `size` from `pool`, filling up to 30% of it with due items.
+// `keyOf` maps a pool entry to its item id; entries whose id isn't in the pool
+// any more (content removed, level changed) are simply skipped.
+function deckWithReview(pool, size, prefix, keyOf) {
+  const want = Math.min(Math.floor(size * REVIEW_SHARE), Math.max(0, size - 1));
+  const due  = dueItems(prefix, want);
+  const byId = new Map(pool.map(e => [keyOf(e), e]));
+  const review = due.map(id => byId.get(id)).filter(Boolean);
+  const seen = new Set(review.map(keyOf));
+  const fresh = shuf(pool.filter(e => !seen.has(keyOf(e)))).slice(0, size - review.length);
+  return shuf([...review, ...fresh]);
+}
+
+// A beat-your-own-time moment. Deliberately loud: getting faster on something
+// you already knew is the one win the app previously had no way to celebrate.
+function flashBest(el) {
+  if (!el) return;
+  const tag = document.createElement('div');
+  tag.className = 'best-pop';
+  tag.textContent = '⚡ Faster!';
+  (el.parentElement || document.body).appendChild(tag);
+  const r = el.getBoundingClientRect();
+  tag.style.left = `${r.left + r.width / 2}px`;
+  tag.style.top  = `${r.top}px`;
+  setTimeout(() => tag.remove(), 1200);
+  sfx('coin');
+}
+
+// Round-advance pacing. Hoven's framing: to get a child through a hoop you can
+// raise the reward or lower the hoop — this is the hoop. Across the 100+ hours
+// a skill like reading takes, a second of dead air after every answer is an
+// enormous tax, so routine correct answers move on briskly and the long pause
+// is kept only where something is actually being explained.
+const DELAY = { correct: 700, wrong: 1400, teach: 2100 };
+
 function advanceLevel(levelKey, progKey, pct, maxLv, upThresh, downThresh) {
   maxLv     = maxLv     || 5;
   upThresh  = upThresh  || 0.9;
   downThresh= downThresh|| 0.5;
   const prev = S[levelKey];
   if (pct >= upThresh && S[levelKey] < maxLv) {
-    S[progKey]++;
-    if (S[progKey] >= 3) { S[levelKey]++; S[progKey] = 0; }
+    // A flawless session counts as a whole level rather than a third of one.
+    // Three clean sessions per level is right for a child meeting material for
+    // the first time, but it is exactly what makes an app tedious for a child
+    // who is already past it — she had to prove the same thing three times
+    // before seeing anything new. A perfect round says she knows it; believe
+    // her the first time. The loop lets progress carry over so a run of
+    // perfect sessions climbs steadily instead of capping at one level a time.
+    S[progKey] += (pct === 1 ? 3 : 1);
+    while (S[progKey] >= 3 && S[levelKey] < maxLv) { S[levelKey]++; S[progKey] -= 3; }
+    if (S[levelKey] >= maxLv) S[progKey] = 0;
   } else if (pct < downThresh && S[levelKey] > 1) {
     S[levelKey]--; S[progKey] = 0;
   }
@@ -3297,10 +3657,12 @@ function renderBadges() {
 
 // ─── SIGHT WORD GAME ─────────────────────────────────────────────────────────
 
+// Home-card entry: choose a difficulty first, then run the real start function.
+function startSwGameChoose() { chooseDifficulty(S.swLevel, startSwGame); }
 function startSwGame() {
-  const pool = S.swLevel >= 3 ? [...SW_EASY, ...SW_HARD] : [...SW_EASY];
-  const shuffled = pool.sort(() => Math.random() - 0.5);
-  S.swWords = shuffled.slice(0, 10);
+  resetEarn();
+  const pool = sessionLevel(S.swLevel, 5) >= 3 ? [...SW_EASY, ...SW_HARD] : [...SW_EASY];
+  S.swWords = deckWithReview(pool, 10, 'sw', w => `sw:${w}`);
   S.swIdx   = 0;
   S.swScore = 0;
   showScreen('screen-swgame');
@@ -3321,6 +3683,7 @@ function renderSwRound() {
   document.getElementById('sw-choices').innerHTML = choices.map((c, i) =>
     `<button class="sw-choice" onclick="answerSw(this,${i})" data-word="${c}">${c}</button>`).join('');
 
+  markRoundStart();
   setTimeout(speakSwWord, 350);
 }
 
@@ -3332,15 +3695,20 @@ function answerSw(el, idx) {
   if (S.swAnswered) return;
   S.swAnswered = true;
   const correct = S.swCurrentWord;
+  const isRight = el.dataset.word === correct;
   document.querySelectorAll('.sw-choice').forEach(b => b.disabled = true);
-  if (el.dataset.word === correct) {
+  const res = recordItem(`sw:${correct}`, isRight, roundElapsed());
+  if (isRight) {
     el.classList.add('correct');
     S.swScore++;
+    earnFor(res, true);
+    if (res.personalBest) flashBest(el);
   } else {
     el.classList.add('wrong');
     document.querySelectorAll('.sw-choice').forEach(b => { if (b.dataset.word === correct) b.classList.add('correct'); });
   }
-  setAdvanceTimer(() => { S.swIdx++; S.swIdx < 10 ? renderSwRound() : showSwResult(); }, 850);
+  setAdvanceTimer(() => { S.swIdx++; S.swIdx < 10 ? renderSwRound() : showSwResult(); },
+                  isRight ? DELAY.correct : DELAY.wrong);
 }
 
 function showSwResult() {
@@ -3363,7 +3731,7 @@ function showSwResult() {
       <div><div class="nb-name">New badge: ${b.name}</div><div class="nb-desc">${b.desc}</div></div>
     </div>`).join('');
 
-  awardCoins(coinsFor(S.swScore, 10)); sfx('win');
+  awardCoins(sessionPayout()); sfx('win');
   showScreen('screen-swresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
@@ -3941,6 +4309,7 @@ function verifyDnArticle(a) {
 }
 
 function startDnGame() {
+  resetEarn();
   if (_loadingBusy) return;
   if (!S.apiKey) {
     showScreen('screen-loading');
@@ -4806,6 +5175,7 @@ function dismissMathIntro() {
   startMathGameNow();
 }
 
+function startMathGameChoose() { chooseDifficulty(S.mathLevel, startMathGame); }
 function startMathGame() {
   const lock = mathLockState();
   if (lock === 'daily') {
@@ -4831,9 +5201,32 @@ function startMathGame() {
   startMathGameNow();
 }
 
+// Rebuild a round from a stored arithmetic-fact id so a fact she got wrong
+// actually comes back. Only the per-instance fact ids can be reconstructed;
+// skill-grain ids ('math:pv_expand') carry no operands and are skipped, which
+// is fine because their category comes round again on its own.
+function mathRoundFromId(id) {
+  const m = /^math:(\d+)([+\-x/])(\d+)$/.exec(id);
+  if (!m) return null;
+  const a = +m[1], b = +m[3], op = m[2];
+  const ctx  = MATH_CONTEXTS[randInt(0, MATH_CONTEXTS.length - 1)];
+  const name = ctx.names[randInt(0, ctx.names.length - 1)];
+  if (op === '+' || op === '-')
+    return { type:'standard', a, b, op, answer: op === '+' ? a + b : a - b,
+             showVisual:false, showWord:true, ctx, name, isReview:true };
+  if (op === 'x') return { type:'multiply', a, b, answer:a * b, ctx, name, isReview:true };
+  if (b === 0) return null;
+  return { type:'division', dividend:a, divisor:b, answer:a / b, ctx, name, isReview:true };
+}
+
 function startMathGameNow() {
-  const deck = buildMathDeck(Math.min(S.mathLevel, 16));
+  resetEarn();
+  const deck = buildMathDeck(sessionLevel(S.mathLevel, 16));
   S.mathRounds  = deck.map(cat => generateMathRound(cat));
+  // Swap a few generated rounds for facts that are due to come back.
+  const due = dueItems('math', 3).map(mathRoundFromId).filter(Boolean);
+  due.forEach((r, i) => { if (i < S.mathRounds.length) S.mathRounds[i] = r; });
+  if (due.length) S.mathRounds = shuf(S.mathRounds);
   S.mathIdx     = 0;
   S.mathScore   = 0;
   S.mathAnswered = false;
@@ -4928,6 +5321,7 @@ function renderMathRound() {
                       : equation.length > 13 ? '44px' : '';
 
   renderMathNumpad(r);
+  markRoundStart();
 }
 
 function renderMathNumpad(r) {
@@ -5012,6 +5406,30 @@ function renderMathNumpad(r) {
   ).join('');
 }
 
+// Item grain is deliberately mixed. Arithmetic facts are tracked per instance,
+// because "7 + 8" is itself the thing worth knowing and worth reviewing. The
+// procedurally-generated skills (place value, comparison, number names) are
+// tracked per skill instead — their exact operands are random, so per-instance
+// rows would be singletons that never come up for review and would just fill
+// the store.
+function mathItemId(r) {
+  switch (r.type) {
+    case 'standard':       return `math:${r.a}${r.op}${r.b}`;
+    case 'doubles':        return `math:${r.a}+${r.b}`;
+    case 'missing_addend': return `math:${r.known}+?=${r.total}`;
+    case 'three_add':      return `math:${r.a}+${r.b}+${r.c}`;
+    case 'multiply':       return `math:${r.a}x${r.b}`;
+    case 'division':       return `math:${r.dividend}/${r.divisor}`;
+    case 'teen_decomp':    return `math:teen${r.total}${r.sub}`;
+    case 'ten_more_less':  return `math:${r.n}${r.more ? '+' : '-'}${r.step}`;
+    case 'groups':         return `math:grp${r.rows}x${r.cols}`;
+    case 'skip_count':     return `math:skip${r.step}`;
+    case 'place_value':    return `math:pv_${r.subtype}`;
+    case 'time_read':      return `math:time${r.h}:${r.m}`;
+    default:               return `math:${r.type}`;   // skill grain
+  }
+}
+
 function answerMath(num) {
   if (S.mathAnswered) return;
   S.mathAnswered = true;
@@ -5029,14 +5447,17 @@ function answerMath(num) {
     if (!r.retried) S.mathScore++;
     fb.textContent = r.retried ? 'Got it!' : '🎉 Correct!';
     fb.className = 'dn-feedback correct';
+    const res = recordItem(mathItemId(r), !r.retried, roundElapsed());
+    earnFor(res, !r.retried);
     setAdvanceTimer(() => {
       S.mathIdx++;
       if (S.mathIdx >= 10) showMathResult();
       else renderMathRound();
-    }, 1300);
+    }, DELAY.correct);
     if (chosen) {
       chosen.classList.add('dn-correct');
       if (!r.retried) { dnBurst(chosen); burstReward(chosen, ['⭐','🎉','✨','💯','🌟','🎊']); }
+      if (res.personalBest) flashBest(chosen);
     }
   } else {
     r.retried = true;
@@ -5078,7 +5499,7 @@ function showMathResult() {
       <div><div class="nb-name">New badge: ${b.name}</div><div class="nb-desc">${b.desc}</div></div>
     </div>`).join('');
   document.getElementById('math-progress-fill').style.width = '100%';
-  awardCoins(coinsFor(S.mathScore, 10)); sfx('win');
+  awardCoins(sessionPayout()); sfx('win');
   showScreen('screen-mathresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
@@ -5336,6 +5757,7 @@ function startClockGame() {
 }
 
 function startClockGameNow() {
+  resetEarn();
   S.watchTestMode = false;
   S.clockRounds   = Array.from({length: 10}, () => generateClockRound(S.clockLevel));
   S.clockIdx      = 0;
@@ -5453,11 +5875,14 @@ function answerClockFace(btn) {
     fb.className = 'dn-feedback correct';
     btn.classList.add('cf-correct');
     if (!r.retried) dnBurst(btn);
+    const res = recordItem(`clock:${r.kind}`, !r.retried, roundElapsed());
+    earnFor(res, !r.retried);
+    if (res.personalBest) flashBest(btn);
     setAdvanceTimer(() => {
       S.clockIdx++;
       if (S.clockIdx >= 10) showClockResult();
       else renderClockRound();
-    }, 1300);
+    }, DELAY.correct);
   } else {
     r.retried = true;
     if (isNextHourMistake(r.h, r.m, h, m)) {
@@ -5537,6 +5962,7 @@ function tapClockPos(n) {
     S.clockPhase = 'done';
     document.querySelector('#clock-visual svg').outerHTML = svgClockSet(r);
     if (!r.retried) S.clockScore++;
+    earnFor(recordItem(`clock:${r.kind}`, !r.retried, roundElapsed()), !r.retried);
     fb.textContent = r.retried ? 'Got it!' : '🎉 Correct!';
     fb.className = 'dn-feedback correct';
     if (!r.retried) {
@@ -5616,6 +6042,7 @@ function answerClock(num) {
   const fb = document.getElementById('clock-feedback');
   if (correct) {
     if (!r.retried) S.clockScore++;
+    earnFor(recordItem(`clock:${r.kind}`, !r.retried, roundElapsed()), !r.retried);
     fb.textContent = r.retried ? 'Got it!' : '🎉 Correct!';
     fb.className = 'dn-feedback correct';
     if (chosen) { chosen.classList.add('dn-correct'); if (!r.retried) dnBurst(chosen); }
@@ -5665,7 +6092,7 @@ function showClockResult() {
   ).join('');
   document.getElementById('clock-progress-fill').style.width = '100%';
   updateWatchStrip();
-  awardCoins(coinsFor(S.clockScore, 10)); sfx('win');
+  awardCoins(sessionPayout()); sfx('win');
   showScreen('screen-clockresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
@@ -5945,6 +6372,8 @@ function dismissSbIntro() {
   startSbGameNow();
 }
 
+// Home-card entry: choose a difficulty first, then run the real start function.
+function startSbGameChoose() { chooseDifficulty(S.sbLevel, startSbGame); }
 function startSbGame() {
   if (!S.sbIntroSeen.includes(S.sbLevel)) {
     return showSbIntro(S.sbLevel);
@@ -5953,11 +6382,11 @@ function startSbGame() {
 }
 
 function startSbGameNow() {
+  resetEarn();
   // L6 reuses the full word pool but adds distractor tiles in renderSbRound.
-  const lv = Math.min(S.sbLevel, 5);
+  const lv = Math.min(sessionLevel(S.sbLevel, 6), 5);
   const pool = SB_WORDS.filter(w => w.lv <= lv);
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
-  S.sbWords    = shuffled.slice(0, 8);
+  S.sbWords    = deckWithReview(pool, 8, 'sb', w => `sb:${w.word}`);
   S.sbIdx      = 0;
   S.sbScore    = 0;
   S.sbSelected = null;
@@ -6121,12 +6550,15 @@ function blendSbBox(boxIdx) {
     fb.innerHTML = `You read <strong style="font-size:1.3em">${w.word}</strong>! 🎉`;
     fb.className = 'dn-feedback correct';
     setTimeout(() => speak(w.word), 500);
+    const res = recordItem(`sb:${w.word}`, S.sbWordPerfect, roundElapsed());
+    earnFor(res, S.sbWordPerfect);
+    if (res.personalBest) flashBest(box);
     setAdvanceTimer(() => {
       if (S.sbWordPerfect) S.sbScore++;
       S.sbIdx++;
       if (S.sbIdx >= S.sbWords.length) showSbResult();
       else renderSbRound();
-    }, 1600);
+    }, DELAY.correct);
   }
 }
 
@@ -6151,7 +6583,7 @@ function showSbResult() {
     `<div class="new-badge"><span class="nb-emoji">${b.icon}</span><div><div class="nb-name">${b.name}</div><div class="nb-desc">${b.desc}</div></div></div>`
   ).join('');
   refreshHome();
-  awardCoins(coinsFor(S.sbScore, total)); sfx('win');
+  awardCoins(sessionPayout()); sfx('win');
   showScreen('screen-sbresult');
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
@@ -6268,6 +6700,9 @@ function updateMuteBtn() {
 }
 
 // ─── COINS ────────────────────────────────────────────────────────────────────
+// Legacy flat payout. Still used by Reading Stories and Daily News only: their
+// content is generated fresh every session, so there is no stable item to price
+// per-effort or to schedule for review. Every drill game uses sessionPayout().
 function coinsFor(score, total) { return score * 2 + (score === total ? 5 : 0); }
 function awardCoins(n) {
   if (n <= 0) return;
@@ -6435,8 +6870,11 @@ const VOWEL_SORT = [
   { word:'net',  emoji:'🥅', long:false }, { word:'bone', emoji:'🦴', long:true  },
 ];
 
+// Home-card entry: choose a difficulty first, then run the real start function.
+function startSpellGameChoose() { chooseDifficulty(S.spellLevel, startSpellGame); }
 function startSpellGame() {
-  if (S.spellLevel >= 4) {
+  resetEarn();
+  if (sessionLevel(S.spellLevel, 4) >= 4) {
     // Vowel Power: spelling long-vowel words, swapping vowels to make new
     // words, and telling short from long — the three 1st-grade vowel skills.
     S.spellRounds = shuf([
@@ -6445,8 +6883,8 @@ function startSpellGame() {
       ...shuf([...VOWEL_SORT]).slice(0, 2).map(o => ({ kind:'sortv', ...o })),
     ]);
   } else {
-    const pool = SPELL_WORDS[S.spellLevel] || SPELL_WORDS[1];
-    const picks = shuf([...pool]).slice(0, 8);
+    const pool = SPELL_WORDS[sessionLevel(S.spellLevel, 4)] || SPELL_WORDS[1];
+    const picks = deckWithReview(pool, 8, 'spell', ([w]) => `spell:${w}`);
     while (picks.length < 8) picks.push(pool[randInt(0, pool.length - 1)]);
     S.spellRounds = picks.map(([word, emoji]) => ({ kind:'spell', word, emoji }));
   }
@@ -6459,6 +6897,7 @@ function startSpellGame() {
 function renderSpellRound() {
   const r = S.spellRounds[S.spellIdx];
   S.spellBuilt = []; S.spellRetried = false;
+  markRoundStart();
   document.getElementById('spell-prog').textContent = `${S.spellIdx + 1} of ${S.spellRounds.length}`;
   document.getElementById('spell-score-pill').textContent = `${S.spellScore} ✓`;
   document.getElementById('spell-progress-fill').style.width = `${(S.spellIdx / S.spellRounds.length) * 100}%`;
@@ -6511,7 +6950,14 @@ function nextSpellRound() {
     S.spellIdx++;
     if (S.spellIdx >= S.spellRounds.length) showSpellResult();
     else renderSpellRound();
-  }, 1500);
+  }, DELAY.correct);
+}
+// Shared by all three round kinds in Build a Word.
+function scoreSpellItem(id, el) {
+  const clean = !S.spellRetried;
+  const res = recordItem(id, clean, roundElapsed());
+  earnFor(res, clean);
+  if (res.personalBest) flashBest(el);
 }
 function answerVowelSwap(ch) {
   const r = S.spellRounds[S.spellIdx];
@@ -6526,6 +6972,7 @@ function answerVowelSwap(ch) {
     fb.innerHTML = `Yes! <strong style="font-size:1.3em">${r.to.toUpperCase()}</strong> 🌟`;
     fb.className = 'dn-feedback correct';
     setTimeout(() => speak(r.to), 250);
+    scoreSpellItem(`vowel:${r.from}>${r.to}`, document.getElementById('spell-emoji'));
     nextSpellRound();
   } else {
     S.spellRetried = true;
@@ -6547,6 +6994,7 @@ function answerVowelSort(v) {
       ? `Yes! <b>${r.word.toUpperCase()}</b> has a LONG vowel — it says its own name. 🌟`
       : `Yes! <b>${r.word.toUpperCase()}</b> has a SHORT vowel. 🌟`;
     fb.className = 'dn-feedback correct';
+    scoreSpellItem(`vsort:${r.word}`, document.getElementById('spell-emoji'));
     nextSpellRound();
   } else {
     S.spellRetried = true;
@@ -6579,6 +7027,7 @@ function checkSpell() {
     dnBurst(document.getElementById('spell-emoji'));
     document.querySelectorAll('#spell-slots .sb-box').forEach(b => b.classList.add('sb-correct'));
     setTimeout(() => speak(S.spellTarget), 250);
+    scoreSpellItem(`spell:${S.spellTarget}`, document.getElementById('spell-emoji'));
     nextSpellRound();
   } else {
     S.spellRetried = true;
@@ -6603,7 +7052,7 @@ function showSpellResult() {
   const prev = advanceLevel('spellLevel', 'spellLevelProg', pct, 4);
   S.sessions.unshift({ topic: 'Spelling', score: `${S.spellScore}/${total}`, date: new Date().toLocaleDateString(), level: S.spellLevel });
   if (S.sessions.length > 100) S.sessions.pop();
-  awardCoins(coinsFor(S.spellScore, total));
+  awardCoins(sessionPayout());
   persist();
   document.getElementById('spell-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
   document.getElementById('spell-result-score').textContent = `${S.spellScore} / ${total}`;
@@ -6628,6 +7077,7 @@ const RHYME_FAMILIES = [
   { key:'ing', words:[['ring','💍'],['king','🤴'],['wing','🪽']] },
 ];
 function startRhymeGame() {
+  resetEarn();
   S.rhymeRounds = [];
   for (let i = 0; i < 10; i++) S.rhymeRounds.push(makeRhymeRound());
   S.rhymeIdx = 0; S.rhymeScore = 0;
@@ -6656,6 +7106,7 @@ function renderRhymeRound() {
   fb.textContent = ''; fb.className = 'dn-feedback';
   document.getElementById('rhyme-choices').innerHTML = r.choices.map((c, i) =>
     `<button class="emoji-choice" style="font-size:24px;font-weight:900" onclick="answerRhyme(${i})">${c[1]}<div style="font-size:18px;margin-top:4px">${c[0]}</div></button>`).join('');
+  markRoundStart();
   setTimeout(() => speak(r.target[0]), 350);
 }
 function answerRhyme(i) {
@@ -6672,8 +7123,12 @@ function answerRhyme(i) {
     fb.innerHTML = `${r.answer[0]} rhymes with ${r.target[0]}! 🎉`;
     fb.className = 'dn-feedback correct';
     dnBurst(btns[i]);
-    setAdvanceTimer(() => { S.rhymeIdx++; if (S.rhymeIdx >= 10) showRhymeResult(); else renderRhymeRound(); }, 1400);
+    const res = recordItem(`rhyme:${r.key || r.target[0]}`, !r.retried, roundElapsed());
+    earnFor(res, !r.retried);
+    if (res.personalBest) flashBest(btns[i]);
+    setAdvanceTimer(() => { S.rhymeIdx++; if (S.rhymeIdx >= 10) showRhymeResult(); else renderRhymeRound(); }, DELAY.correct);
   } else {
+    r.retried = true;
     btns[i].classList.add('ec-wrong');
     btns[i].disabled = true;
     fb.textContent = 'Listen again — try another!';
@@ -6688,7 +7143,7 @@ function showRhymeResult() {
   const pct = S.rhymeScore / 10;
   S.sessions.unshift({ topic: 'Rhyming', score: `${S.rhymeScore}/10`, date: new Date().toLocaleDateString(), level: 1 });
   if (S.sessions.length > 100) S.sessions.pop();
-  awardCoins(coinsFor(S.rhymeScore, 10));
+  awardCoins(sessionPayout());
   persist();
   document.getElementById('rhyme-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
   document.getElementById('rhyme-result-score').textContent = `${S.rhymeScore} / 10`;
@@ -6812,6 +7267,8 @@ const MEASURE_LEVEL_INTROS = {
        visual:'0 — 5 — 10', body:'A number line turns adding and subtracting into hops. Start on a number, hop along the line, and see where you land!' },
 };
 
+// Home-card entry: choose a difficulty first, then run the real start function.
+function startMeasureGameChoose() { chooseDifficulty(S.measureLevel, startMeasureGame); }
 function startMeasureGame() {
   if (!S.measureIntroSeen.includes(S.measureLevel)) return showMeasureIntro(S.measureLevel);
   startMeasureGameNow();
@@ -6832,8 +7289,10 @@ function dismissMeasureIntro() {
   startMeasureGameNow();
 }
 function startMeasureGameNow() {
+  resetEarn();
   S.measureRounds = [];
-  for (let i = 0; i < 10; i++) S.measureRounds.push(makeMeasureRound(S.measureLevel, i));
+  const mlv = sessionLevel(S.measureLevel, 4);
+  for (let i = 0; i < 10; i++) S.measureRounds.push(makeMeasureRound(mlv, i));
   S.measureIdx = 0; S.measureScore = 0;
   showScreen('screen-measure');
   mascotSay(MEASURE_LEVEL_INTROS[S.measureLevel]?.headline || 'Let\'s measure!');
@@ -6942,6 +7401,7 @@ function renderMeasureRound() {
   const fb = document.getElementById('measure-feedback');
   fb.textContent = ''; fb.className = 'dn-feedback';
   renderMeasureChoices();
+  markRoundStart();
   setTimeout(() => speak(r.q), 350);
 }
 function renderMeasureChoices() {
@@ -6974,6 +7434,7 @@ function answerMeasure(val) {
       if (S.measureOrderPicks.length === r.seq.length) {
         S.measureAnswered = true;
         if (!r.retried) S.measureScore++;
+        earnFor(recordItem(`measure:${r.kind}`, !r.retried, roundElapsed()), !r.retried);
         fb.textContent = `🎉 ${r.explain}`;
         fb.className = 'dn-feedback correct';
         sfx('correct');
@@ -7000,6 +7461,7 @@ function answerMeasure(val) {
   if (correct) {
     S.measureAnswered = true;
     if (!r.retried) S.measureScore++;
+    earnFor(recordItem(`measure:${r.kind}`, !r.retried, roundElapsed()), !r.retried);
     document.querySelectorAll('#measure-choices button').forEach(b => b.disabled = true);
     if (btn) { btn.classList.add(r.kind === 'num' ? 'dn-correct' : 'ec-correct'); if (!r.retried) dnBurst(btn); }
     fb.textContent = `🎉 ${r.explain}`;
@@ -7028,7 +7490,7 @@ function showMeasureResult() {
   const prevLevel = advanceLevel('measureLevel', 'measureLevelProg', pct, 4, 0.8, 0.4);
   S.sessions.unshift({ topic:'Measure Up', score:`${S.measureScore}/10`, date:new Date().toLocaleDateString(), level:S.measureLevel });
   if (S.sessions.length > 100) S.sessions.pop();
-  awardCoins(coinsFor(S.measureScore, 10));
+  awardCoins(sessionPayout());
   persist();
   document.getElementById('measure-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
   document.getElementById('measure-result-score').textContent = `${S.measureScore} / 10`;
@@ -7103,6 +7565,7 @@ function fixPick(bank, n) {
 }
 
 function startFixGame() {
+  resetEarn();
   const lv = S.fixLevel;
   let items;
   if (lv === 1)      items = fixPick(FIX_CAPS, 10).map(o => ({ ...o, kind:'cap' }));
@@ -7149,6 +7612,7 @@ function renderFixRound() {
   }
   const fb = document.getElementById('fix-feedback');
   fb.textContent = ''; fb.className = 'dn-feedback';
+  markRoundStart();
   setTimeout(speakFixSentence, 350);
 }
 
@@ -7166,6 +7630,7 @@ function answerFix(val) {
   if (correct) {
     S.fixAnswered = true;
     if (!r.retried) S.fixScore++;
+    earnFor(recordItem(`fix:${r.s}`, !r.retried, roundElapsed()), !r.retried);
     if (r.kind === 'cap') {
       const words = r.s.split(' ');
       if (r.bad >= 0) words[r.bad] = capWord(words[r.bad]);
@@ -7210,7 +7675,7 @@ function showFixResult() {
   const prevLevel = advanceLevel('fixLevel', 'fixLevelProg', pct, 3, 0.8, 0.4);
   S.sessions.unshift({ topic:'Fix the Sentence', score:`${S.fixScore}/10`, date:new Date().toLocaleDateString(), level:S.fixLevel });
   if (S.sessions.length > 100) S.sessions.pop();
-  awardCoins(coinsFor(S.fixScore, 10));
+  awardCoins(sessionPayout());
   persist();
   document.getElementById('fix-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
   document.getElementById('fix-result-score').textContent = `${S.fixScore} / 10`;
@@ -7241,6 +7706,7 @@ const SCIENCE_ROUNDS = [
   { q:'Which one is a baby butterfly?', choices:[['🐛',1],['🐝',0],['🐞',0],['🕷️',0]], fact:'A caterpillar grows up to become a butterfly!' },
 ];
 function startScienceGame() {
+  resetEarn();
   S.scienceRounds = shuf([...SCIENCE_ROUNDS]).slice(0, 10);
   S.scienceIdx = 0; S.scienceScore = 0;
   showScreen('screen-science');
@@ -7275,10 +7741,14 @@ function answerScience(btn) {
     fb.textContent = '🎉 Correct!';
     fb.className = 'dn-feedback correct';
     dnBurst(btn);
+    const res = recordItem(`sci:${r.q}`, !r.retried, roundElapsed());
+    earnFor(res, !r.retried);
+    if (res.personalBest) flashBest(btn);
     const factEl = document.getElementById('science-fact');
     factEl.className = 'sci-fact'; factEl.textContent = '💡 ' + r.fact; factEl.style.display = '';
     speakFactThenAdvance(r.fact);
   } else {
+    r.retried = true;
     btn.classList.add('ec-wrong');
     btn.disabled = true;
     fb.textContent = 'Try again!';
@@ -7319,7 +7789,7 @@ function showScienceResult() {
   const pct = S.scienceScore / 10;
   S.sessions.unshift({ topic: 'Science', score: `${S.scienceScore}/10`, date: new Date().toLocaleDateString(), level: 1 });
   if (S.sessions.length > 100) S.sessions.pop();
-  awardCoins(coinsFor(S.scienceScore, 10));
+  awardCoins(sessionPayout());
   persist();
   document.getElementById('science-result-stars').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
   document.getElementById('science-result-score').textContent = `${S.scienceScore} / 10`;

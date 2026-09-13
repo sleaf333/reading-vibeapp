@@ -16,7 +16,7 @@
       --surface: #ffffff;
       --border: #e8e0d5;
       --text: #1e1e1e;
-      --muted: #9a8f82;
+      --muted: #64594e;
       --accent: #3d9e68;
       --accent-lt: #eaf5f0;
       --r: 18px;
@@ -152,7 +152,7 @@
     /* Colored frosted glass: translucent so the living sky + particles glow
        through, while each game keeps its identifying tint. */
     .hc-reading { background: linear-gradient(150deg, rgba(237,245,255,0.70), rgba(219,234,254,0.52)); border-color: rgba(147,197,253,0.85); color: #1e3a8a; }
-    .hc-sw      { background: linear-gradient(150deg, rgba(237,249,244,0.70), rgba(214,240,230,0.52)); border-color: rgba(61,158,104,0.75); color: var(--accent); animation: featurePulse 3s ease-in-out infinite; }
+    .hc-sw      { background: linear-gradient(150deg, rgba(237,249,244,0.70), rgba(214,240,230,0.52)); border-color: rgba(61,158,104,0.75); color: #166534; animation: featurePulse 3s ease-in-out infinite; }
     .hc-dn      { background: linear-gradient(150deg, rgba(255,253,231,0.72), rgba(255,248,196,0.54)); border-color: rgba(240,200,32,0.85); color: #78350f; }
     .hc-math    { background: linear-gradient(150deg, rgba(239,246,255,0.70), rgba(219,234,254,0.52)); border-color: rgba(147,197,253,0.85); color: #1e3a5f; }
     .hc-sb      { background: linear-gradient(150deg, rgba(240,253,244,0.70), rgba(220,252,231,0.52)); border-color: rgba(134,239,172,0.85); color: #166534; }
@@ -1097,7 +1097,7 @@
         style="width:50px;height:50px;flex-shrink:0;cursor:pointer;filter:drop-shadow(0 4px 12px rgba(255,180,30,0.55))"></canvas>
       <div>
         <div class="page-title glam-stage-title">Juliana Reads!</div>
-        <div id="home-greeting" style="font-size:15px;color:var(--muted);margin-top:4px">Tap a game to start playing! 🎉</div>
+        <div id="home-greeting" style="font-size:15px;color:var(--muted);font-weight:600;margin-top:4px">Tap a game to start playing! 🎉</div>
       </div>
     </div>
     <div class="header-pills">
@@ -3060,7 +3060,7 @@ function refreshHome() {
   if (lock === 'daily') {
     card.style.opacity = '0.55';
     icon.textContent = '🔒';
-    badge.innerHTML = `<span style="color:#e05050">${S.readingToday}/${S.dnUnlockReq} reading games today</span>`;
+    badge.innerHTML = `<span style="color:#b91c1c">${S.readingToday}/${S.dnUnlockReq} reading games today</span>`;
   } else if (lock === 'break') {
     card.style.opacity = '0.55';
     icon.textContent = '📖';

@@ -3244,6 +3244,26 @@ function earnFor(res, firstTry) {
 // Small floor so a session is never worth literally nothing.
 function sessionPayout() { return _earn.coins + EARN.floor; }
 
+// ─── SPACED REVIEW ───────────────────────────────────────────────────────────
+// Part of every deck is reserved for material that is due to come back. Without
+// this, clearing a level retired its content permanently and the forgetting was
+// invisible — she could "know" short-a words in October and have quietly lost
+// them by December with nothing in the app ever noticing.
+const REVIEW_SHARE = 0.3;
+
+// Build a deck of `size` from `pool`, filling up to 30% of it with due items.
+// `keyOf` maps a pool entry to its item id; entries whose id isn't in the pool
+// any more (content removed, level changed) are simply skipped.
+function deckWithReview(pool, size, prefix, keyOf) {
+  const want = Math.min(Math.floor(size * REVIEW_SHARE), Math.max(0, size - 1));
+  const due  = dueItems(prefix, want);
+  const byId = new Map(pool.map(e => [keyOf(e), e]));
+  const review = due.map(id => byId.get(id)).filter(Boolean);
+  const seen = new Set(review.map(keyOf));
+  const fresh = shuf(pool.filter(e => !seen.has(keyOf(e)))).slice(0, size - review.length);
+  return shuf([...review, ...fresh]);
+}
+
 // A beat-your-own-time moment. Deliberately loud: getting faster on something
 // you already knew is the one win the app previously had no way to celebrate.
 function flashBest(el) {
@@ -3272,8 +3292,16 @@ function advanceLevel(levelKey, progKey, pct, maxLv, upThresh, downThresh) {
   downThresh= downThresh|| 0.5;
   const prev = S[levelKey];
   if (pct >= upThresh && S[levelKey] < maxLv) {
-    S[progKey]++;
-    if (S[progKey] >= 3) { S[levelKey]++; S[progKey] = 0; }
+    // A flawless session counts as a whole level rather than a third of one.
+    // Three clean sessions per level is right for a child meeting material for
+    // the first time, but it is exactly what makes an app tedious for a child
+    // who is already past it — she had to prove the same thing three times
+    // before seeing anything new. A perfect round says she knows it; believe
+    // her the first time. The loop lets progress carry over so a run of
+    // perfect sessions climbs steadily instead of capping at one level a time.
+    S[progKey] += (pct === 1 ? 3 : 1);
+    while (S[progKey] >= 3 && S[levelKey] < maxLv) { S[levelKey]++; S[progKey] -= 3; }
+    if (S[levelKey] >= maxLv) S[progKey] = 0;
   } else if (pct < downThresh && S[levelKey] > 1) {
     S[levelKey]--; S[progKey] = 0;
   }
@@ -3458,8 +3486,7 @@ function renderBadges() {
 function startSwGame() {
   resetEarn();
   const pool = S.swLevel >= 3 ? [...SW_EASY, ...SW_HARD] : [...SW_EASY];
-  const shuffled = pool.sort(() => Math.random() - 0.5);
-  S.swWords = shuffled.slice(0, 10);
+  S.swWords = deckWithReview(pool, 10, 'sw', w => `sw:${w}`);
   S.swIdx   = 0;
   S.swScore = 0;
   showScreen('screen-swgame');
@@ -4997,10 +5024,32 @@ function startMathGame() {
   startMathGameNow();
 }
 
+// Rebuild a round from a stored arithmetic-fact id so a fact she got wrong
+// actually comes back. Only the per-instance fact ids can be reconstructed;
+// skill-grain ids ('math:pv_expand') carry no operands and are skipped, which
+// is fine because their category comes round again on its own.
+function mathRoundFromId(id) {
+  const m = /^math:(\d+)([+\-x/])(\d+)$/.exec(id);
+  if (!m) return null;
+  const a = +m[1], b = +m[3], op = m[2];
+  const ctx  = MATH_CONTEXTS[randInt(0, MATH_CONTEXTS.length - 1)];
+  const name = ctx.names[randInt(0, ctx.names.length - 1)];
+  if (op === '+' || op === '-')
+    return { type:'standard', a, b, op, answer: op === '+' ? a + b : a - b,
+             showVisual:false, showWord:true, ctx, name, isReview:true };
+  if (op === 'x') return { type:'multiply', a, b, answer:a * b, ctx, name, isReview:true };
+  if (b === 0) return null;
+  return { type:'division', dividend:a, divisor:b, answer:a / b, ctx, name, isReview:true };
+}
+
 function startMathGameNow() {
   resetEarn();
   const deck = buildMathDeck(Math.min(S.mathLevel, 16));
   S.mathRounds  = deck.map(cat => generateMathRound(cat));
+  // Swap a few generated rounds for facts that are due to come back.
+  const due = dueItems('math', 3).map(mathRoundFromId).filter(Boolean);
+  due.forEach((r, i) => { if (i < S.mathRounds.length) S.mathRounds[i] = r; });
+  if (due.length) S.mathRounds = shuf(S.mathRounds);
   S.mathIdx     = 0;
   S.mathScore   = 0;
   S.mathAnswered = false;
@@ -6158,8 +6207,7 @@ function startSbGameNow() {
   // L6 reuses the full word pool but adds distractor tiles in renderSbRound.
   const lv = Math.min(S.sbLevel, 5);
   const pool = SB_WORDS.filter(w => w.lv <= lv);
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
-  S.sbWords    = shuffled.slice(0, 8);
+  S.sbWords    = deckWithReview(pool, 8, 'sb', w => `sb:${w.word}`);
   S.sbIdx      = 0;
   S.sbScore    = 0;
   S.sbSelected = null;
@@ -6655,7 +6703,7 @@ function startSpellGame() {
     ]);
   } else {
     const pool = SPELL_WORDS[S.spellLevel] || SPELL_WORDS[1];
-    const picks = shuf([...pool]).slice(0, 8);
+    const picks = deckWithReview(pool, 8, 'spell', ([w]) => `spell:${w}`);
     while (picks.length < 8) picks.push(pool[randInt(0, pool.length - 1)]);
     S.spellRounds = picks.map(([word, emoji]) => ({ kind:'spell', word, emoji }));
   }

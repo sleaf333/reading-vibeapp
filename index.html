@@ -582,6 +582,7 @@
     .hc-rhyme   { background: linear-gradient(150deg, rgba(245,243,255,0.78), rgba(233,228,255,0.56)); border-color: rgba(167,139,250,0.85); color:#5b21b6; }
     .hc-reader  { background: linear-gradient(150deg, rgba(236,253,245,0.78), rgba(209,250,229,0.56)); border-color: rgba(52,211,153,0.85); color:#065f46; }
     .hc-science { background: linear-gradient(150deg, rgba(236,250,255,0.78), rgba(207,238,252,0.56)); border-color: rgba(56,189,248,0.85); color:#0c4a6e; }
+    .hc-theme   { background: linear-gradient(150deg, rgba(253,244,255,0.80), rgba(243,232,255,0.58)); border-color: rgba(192,132,252,0.85); color:#6b21a8; }
     .hc-progress{ background: linear-gradient(150deg, rgba(236,253,245,0.80), rgba(209,250,229,0.58)); border-color: rgba(16,185,129,0.85); color:#065f46; }
     .hc-measure { background: linear-gradient(150deg, rgba(254,252,232,0.80), rgba(254,243,199,0.58)); border-color: rgba(250,204,21,0.90); color:#854d0e; }
     .hc-fix     { background: linear-gradient(150deg, rgba(255,241,242,0.80), rgba(254,215,226,0.58)); border-color: rgba(244,63,94,0.85); color:#9f1239; }
@@ -606,6 +607,34 @@
     .fx-word.fx-picked-ok  { background:#bbf7d0; border-color:#22c55e; }
     .fx-word.fx-picked-bad { background:#fecaca; border-color:#ef4444; }
     .fx-hint { text-align:center; font-size:14px; font-weight:800; color:var(--muted); margin-bottom:4px; }
+
+    /* ── REAL-LIFE REWARDS ── */
+    .rr-grid { display:flex; flex-direction:column; gap:9px; }
+    .rr-item { display:flex; align-items:center; gap:11px; text-align:left; font-family:inherit; cursor:pointer;
+               border:2px solid rgba(250,204,21,0.75); border-radius:15px; padding:11px 13px;
+               background:linear-gradient(150deg,rgba(254,252,232,0.9),rgba(254,243,199,0.65));
+               transition:transform .12s; width:100%; }
+    .rr-item:hover { transform:translateY(-2px); }
+    .rr-locked { opacity:0.5; border-color:rgba(0,0,0,0.12); background:rgba(255,255,255,0.6); }
+    .rr-emoji { font-size:26px; line-height:1; }
+    .rr-label { flex:1; font-size:14px; font-weight:800; color:var(--text); line-height:1.3; }
+    .rr-cost { font-size:13px; font-weight:900; color:#854d0e; white-space:nowrap; }
+    .rr-pending { background:#fecdd3; color:#9f1239; font-size:11px; font-weight:900;
+                  padding:2px 8px; border-radius:8px; margin-left:6px; }
+    .voucher { display:flex; align-items:center; gap:10px; padding:9px 11px; margin-bottom:8px;
+               border:2px solid rgba(244,63,94,0.45); border-radius:14px; background:rgba(255,241,242,0.8); }
+    .voucher-emoji { font-size:24px; }
+    .voucher-label { font-size:13px; font-weight:900; color:var(--text); line-height:1.3; }
+    .voucher-meta { font-size:11px; font-weight:700; color:var(--muted); }
+
+    /* ── INTEREST THEME PICKER ── */
+    .theme-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+    .theme-btn { border:3px solid rgba(0,0,0,0.10); border-radius:18px; padding:16px 10px; cursor:pointer;
+                 background:rgba(255,255,255,0.72); font-family:inherit; transition:transform .12s, box-shadow .15s; }
+    .theme-btn:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,0.12); }
+    .theme-on { border-color:rgba(16,185,129,0.9); background:linear-gradient(150deg,rgba(236,253,245,0.9),rgba(209,250,229,0.6)); }
+    .theme-icon { font-size:38px; line-height:1.1; }
+    .theme-name { font-size:14px; font-weight:900; color:var(--text); margin-top:5px; }
 
     /* ── GETTING FASTER ── */
     .prog-headline { text-align:center; font-size:17px; font-weight:800; color:var(--text);
@@ -1157,6 +1186,13 @@
       <div class="hc-sub">Discover &amp; sort!</div>
     </div>
 
+    <div class="home-card hc-theme" onclick="openThemePicker()">
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon" id="home-theme-icon">🌈</div>
+      <div class="hc-name">My Favourite Thing</div>
+      <div class="hc-sub" id="home-theme-sub">Pick a theme</div>
+    </div>
+
     <div class="home-card hc-progress" onclick="openProgress()">
       <span class="hc-chevron">›</span>
       <div class="hc-icon">📈</div>
@@ -1555,6 +1591,7 @@
   </div>
   <div class="closet-doll" id="closet-doll"></div>
   <div style="text-align:center;font-size:13px;color:var(--muted);font-weight:700;margin-bottom:4px">Tap an item to wear it. Earn 🪙 by playing games!</div>
+  <div id="real-rewards"></div>
   <div id="closet-items"></div>
 </div>
 
@@ -1636,6 +1673,14 @@
   </div>
   <button class="btn btn-primary btn-full" onclick="startScienceGame()">Play again</button>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ INTEREST THEME PICKER ═══ -->
+<div id="screen-theme" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">What are you into?</span></div>
+  <div style="text-align:center;font-size:14px;color:var(--muted);font-weight:700;margin:2px 0 14px">
+    Your games will fill up with it!</div>
+  <div class="theme-grid" id="theme-grid"></div>
 </div>
 
 <!-- ═══ GETTING FASTER ═══ -->
@@ -1901,6 +1946,14 @@
     <span class="pc-level-label">⌚ Watch Quest</span>
     <span class="pc-lvl-val" id="pc-watch-status">0/5 pieces</span>
   </div>
+
+  <div class="divider"></div>
+  <div class="section-title">Real-life rewards</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:600">
+    What her coins can buy in the real world, and what she has bought but not yet been given.
+  </div>
+  <div id="pc-vouchers" style="margin-bottom:14px"></div>
+  <div id="pc-rewards"></div>
 
   <div class="divider"></div>
   <div class="section-title">Grade-level map</div>
@@ -2198,6 +2251,22 @@ function lsJson(k, def) {
   try { return JSON.parse(localStorage.getItem(k)) || def; } catch { return def; }
 }
 
+// ─── REAL-LIFE REWARDS ───────────────────────────────────────────────────────
+// Coins buy pixel dresses, which is fine, and they now also buy things that
+// exist in the house. A six-year-old's exchange rate between "purple gown" and
+// "I choose what's for dinner" is not close, and this quietly converts the
+// app's currency into family currency. Buying one mints a voucher; the parent
+// sees it in Parent Corner and marks it done once it has actually happened —
+// the app deliberately cannot mark its own promises as kept.
+const DEFAULT_REAL_REWARDS = [
+  { id:'story',   emoji:'📖', label:'15 extra minutes of bedtime story', cost:40  },
+  { id:'dinner',  emoji:'🍝', label:'You pick tonight\'s dinner',        cost:70  },
+  { id:'movie',   emoji:'🍿', label:'You choose the movie',              cost:60  },
+  { id:'latenight',emoji:'🌙',label:'Stay up 15 minutes late',           cost:90  },
+  { id:'outing',  emoji:'🎡', label:'You pick the weekend outing',       cost:150 },
+  { id:'onetoone',emoji:'💛', label:'One hour of just you and Dad',      cost:100 },
+];
+
 const S = {
   level:    parseInt(lsGet('rl_level','1')),
   levelProgress: parseInt(lsGet('rl_levelprog','0')),
@@ -2271,6 +2340,9 @@ const S = {
   fixgames:         parseInt(lsGet('rl_fixgames','0')),
   fixperfect:       parseInt(lsGet('rl_fixperfect','0')),
   // per-item accuracy / latency / review schedule (see ITEM MEMORY)
+  theme:            lsGet('rl_theme', 'none'),
+  realRewards:      lsJson('rl_realrewards', DEFAULT_REAL_REWARDS),
+  vouchers:         lsJson('rl_vouchers', []),
   items:            lsJson('rl_items', {}),
   placed:           lsJson('rl_placed', []),
   // transient
@@ -2387,6 +2459,9 @@ function persist() {
   lsSet('rl_fixlevelprog',     S.fixLevelProg);
   lsSet('rl_fixgames',         S.fixgames);
   lsSet('rl_fixperfect',       S.fixperfect);
+  lsSet('rl_theme',            S.theme);
+  lsSet('rl_realrewards',      S.realRewards);
+  lsSet('rl_vouchers',         S.vouchers);
   lsSet('rl_items',            S.items);
   lsSet('rl_placed',           S.placed);
 }
@@ -2926,6 +3001,8 @@ function refreshHome() {
   document.getElementById('home-measure-level').innerHTML = homeSub(S.measureLevel, 'Measure Up',      'measureLevelProg');
   document.getElementById('home-fix-level').innerHTML     = homeSub(S.fixLevel,     'Fix the Sentence','fixLevelProg');
   document.getElementById('home-reader-sub').textContent  = `${S.readerDone.length}/${READER_BOOKS.length} books read`;
+  document.getElementById('home-theme-icon').textContent = theme().icon;
+  document.getElementById('home-theme-sub').textContent  = theme().name;
   updateCoinDisplays();
   updateMuteBtn();
   showMascotTip();
@@ -3832,6 +3909,8 @@ function renderParentCorner() {
   document.getElementById('backup-code').style.display = 'none';
 
   renderHeatmap();
+  renderParentRewards();
+  renderParentVouchers();
   renderGradeMap();
   renderStandards();
 
@@ -4538,6 +4617,124 @@ function showDnResult() {
 
 // ─── MATH TIME ───────────────────────────────────────────────────────────────
 
+// ─── INTEREST THEMES ─────────────────────────────────────────────────────────
+// The same curriculum wearing her clothes. A word problem about ponies teaches
+// exactly what a word problem about apples teaches, so this is personalisation
+// that costs nothing pedagogically — and whatever a six-year-old is obsessed
+// with this month is the cheapest attention you will ever buy. She picks it
+// herself, which is also one more place the app lets her decide something.
+const THEMES = {
+  none: { name:'A bit of everything', icon:'🌈' },
+
+  horses: { name:'Horses', icon:'🐴',
+    contexts:[
+      { emoji:'🐴', singular:'pony',     plural:'ponies',    names:['Luna','Maya'] },
+      { emoji:'🥕', singular:'carrot',   plural:'carrots',   names:['Ella','Sam']  },
+      { emoji:'🏆', singular:'ribbon',   plural:'ribbons',   names:['Ava','Leo']   },
+      { emoji:'🌾', singular:'hay bale', plural:'hay bales', names:['Mia','Ben']   },
+    ],
+    objects:[{ emoji:'🐴', name:'pony', color:'#a16207' }, { emoji:'🥕', name:'carrot', color:'#fb923c' },
+             { emoji:'🎀', name:'ribbon', color:'#c084fc' }, { emoji:'🪢', name:'rope', color:'#d4a373' }],
+    reward:['🐴','🏇','🌾','🏆','✨'] },
+
+  space: { name:'Space', icon:'🚀',
+    contexts:[
+      { emoji:'⭐', singular:'star',   plural:'stars',   names:['Nova','Orion'] },
+      { emoji:'🪐', singular:'planet', plural:'planets', names:['Luna','Vega']  },
+      { emoji:'🚀', singular:'rocket', plural:'rockets', names:['Max','Ada']    },
+      { emoji:'👽', singular:'alien',  plural:'aliens',  names:['Zed','Mia']    },
+    ],
+    objects:[{ emoji:'🚀', name:'rocket', color:'#f87171' }, { emoji:'☄️', name:'comet', color:'#fbbf24' },
+             { emoji:'🛸', name:'saucer', color:'#a3e635' }, { emoji:'🪐', name:'planet', color:'#c084fc' }],
+    reward:['🚀','⭐','🪐','🌙','✨'] },
+
+  dinos: { name:'Dinosaurs', icon:'🦕',
+    contexts:[
+      { emoji:'🦕', singular:'dinosaur', plural:'dinosaurs', names:['Rex','Maya'] },
+      { emoji:'🦴', singular:'bone',     plural:'bones',     names:['Sam','Ava']  },
+      { emoji:'🥚', singular:'egg',      plural:'eggs',      names:['Leo','Mia']  },
+      { emoji:'🌿', singular:'fern',     plural:'ferns',     names:['Ella','Ben'] },
+    ],
+    objects:[{ emoji:'🦕', name:'dino', color:'#4ade80' }, { emoji:'🦴', name:'bone', color:'#e5e7eb' },
+             { emoji:'🌿', name:'fern', color:'#22c55e' }, { emoji:'🥚', name:'egg', color:'#fde68a' }],
+    reward:['🦕','🦖','🌋','🦴','⭐'] },
+
+  ocean: { name:'Ocean', icon:'🐬',
+    contexts:[
+      { emoji:'🐬', singular:'dolphin',  plural:'dolphins',  names:['Marina','Kai'] },
+      { emoji:'🐚', singular:'shell',    plural:'shells',    names:['Pearl','Mia']  },
+      { emoji:'🐠', singular:'fish',     plural:'fish',      names:['Finn','Ava']   },
+      { emoji:'🦀', singular:'crab',     plural:'crabs',     names:['Sandy','Leo']  },
+    ],
+    objects:[{ emoji:'🐟', name:'fish', color:'#38bdf8' }, { emoji:'🐚', name:'shell', color:'#fbcfe8' },
+             { emoji:'🦑', name:'squid', color:'#c084fc' }, { emoji:'🌊', name:'wave', color:'#0ea5e9' }],
+    reward:['🐬','🌊','🐠','🐚','✨'] },
+
+  cats: { name:'Cats & Dogs', icon:'🐱',
+    contexts:[
+      { emoji:'🐱', singular:'kitten', plural:'kittens', names:['Whiskers','Mia'] },
+      { emoji:'🐶', singular:'puppy',  plural:'puppies', names:['Rex','Ava']      },
+      { emoji:'🦴', singular:'treat',  plural:'treats',  names:['Sam','Leo']      },
+      { emoji:'🧶', singular:'yarn ball', plural:'yarn balls', names:['Luna','Zoe'] },
+    ],
+    objects:[{ emoji:'🐱', name:'cat', color:'#fbbf24' }, { emoji:'🦴', name:'bone', color:'#e5e7eb' },
+             { emoji:'🧶', name:'yarn', color:'#f472b6' }, { emoji:'🐶', name:'puppy', color:'#d4a373' }],
+    reward:['🐱','🐶','🐾','🧶','💖'] },
+
+  fairy: { name:'Fairies & Magic', icon:'🧚',
+    contexts:[
+      { emoji:'🧚', singular:'fairy',  plural:'fairies', names:['Belle','Luna'] },
+      { emoji:'🔮', singular:'crystal',plural:'crystals',names:['Sage','Mia']   },
+      { emoji:'🍄', singular:'mushroom',plural:'mushrooms',names:['Pip','Ava']  },
+      { emoji:'⭐', singular:'wish',   plural:'wishes',  names:['Star','Ella']  },
+    ],
+    objects:[{ emoji:'🪄', name:'wand', color:'#c084fc' }, { emoji:'🍄', name:'mushroom', color:'#f87171' },
+             { emoji:'🎀', name:'ribbon', color:'#f472b6' }, { emoji:'🔮', name:'crystal', color:'#a78bfa' }],
+    reward:['🧚','✨','🔮','🌈','💫'] },
+
+  bugs: { name:'Bugs & Butterflies', icon:'🦋',
+    contexts:[
+      { emoji:'🦋', singular:'butterfly', plural:'butterflies', names:['Mia','Ava'] },
+      { emoji:'🐛', singular:'caterpillar',plural:'caterpillars',names:['Sam','Leo']},
+      { emoji:'🐞', singular:'ladybug',   plural:'ladybugs',    names:['Ella','Zoe']},
+      { emoji:'🌼', singular:'daisy',     plural:'daisies',     names:['Luna','Ben']},
+    ],
+    objects:[{ emoji:'🐛', name:'caterpillar', color:'#a3e635' }, { emoji:'🌿', name:'leaf', color:'#22c55e' },
+             { emoji:'🪶', name:'feather', color:'#93c5fd' }, { emoji:'🌼', name:'daisy', color:'#fde68a' }],
+    reward:['🦋','🐞','🌼','🌿','✨'] },
+
+  sports: { name:'Sports & Dance', icon:'⚽',
+    contexts:[
+      { emoji:'⚽', singular:'ball',   plural:'balls',   names:['Jay','Sam']  },
+      { emoji:'🏅', singular:'medal',  plural:'medals',  names:['Ava','Leo']  },
+      { emoji:'🩰', singular:'ribbon', plural:'ribbons', names:['Mia','Ella'] },
+      { emoji:'🏀', singular:'hoop',   plural:'hoops',   names:['Max','Zoe']  },
+    ],
+    objects:[{ emoji:'⚽', name:'ball', color:'#e5e7eb' }, { emoji:'🏒', name:'stick', color:'#a16207' },
+             { emoji:'🎀', name:'ribbon', color:'#f472b6' }, { emoji:'🏅', name:'medal', color:'#fbbf24' }],
+    reward:['⚽','🏅','🎉','⭐','💪'] },
+};
+
+function theme()          { return THEMES[S.theme] || THEMES.none; }
+function activeContexts() { return theme().contexts || MATH_CONTEXTS; }
+function activeObjects()  { return theme().objects  || MU_OBJECTS; }
+function themeReward()    { return theme().reward   || ['⭐','🎉','✨','💯','🌟','🎊']; }
+
+function setTheme(id) {
+  S.theme = id;
+  lsSet('rl_theme', id);
+  renderThemePicker();
+  showToast(`${THEMES[id].icon} ${THEMES[id].name}!`);
+  setTimeout(() => showScreen('screen-home'), 700);
+}
+function renderThemePicker() {
+  document.getElementById('theme-grid').innerHTML = Object.entries(THEMES).map(([id, t]) =>
+    `<button class="theme-btn ${S.theme === id ? 'theme-on' : ''}" onclick="setTheme('${id}')">
+       <div class="theme-icon">${t.icon}</div><div class="theme-name">${t.name}</div>
+     </button>`).join('');
+}
+function openThemePicker() { renderThemePicker(); showScreen('screen-theme'); }
+
 const MATH_CONTEXTS = [
   { emoji:'🍎', singular:'apple',      plural:'apples',      names:['Luna','Maya'] },
   { emoji:'⭐', singular:'star',       plural:'stars',       names:['Max','Leo'] },
@@ -4647,7 +4844,7 @@ function buildMathDeck(lv) {
 
 function generateMathRound(cat) {
   const lv = Math.min(S.mathLevel, 16);
-  const ctx = MATH_CONTEXTS[randInt(0, MATH_CONTEXTS.length - 1)];
+  const ctx = (cs => cs[randInt(0, cs.length - 1)])(activeContexts());
   const name = ctx.names[randInt(0, ctx.names.length - 1)];
   let a, b, op;
 
@@ -5209,7 +5406,7 @@ function mathRoundFromId(id) {
   const m = /^math:(\d+)([+\-x/])(\d+)$/.exec(id);
   if (!m) return null;
   const a = +m[1], b = +m[3], op = m[2];
-  const ctx  = MATH_CONTEXTS[randInt(0, MATH_CONTEXTS.length - 1)];
+  const ctx  = (cs => cs[randInt(0, cs.length - 1)])(activeContexts());
   const name = ctx.names[randInt(0, ctx.names.length - 1)];
   if (op === '+' || op === '-')
     return { type:'standard', a, b, op, answer: op === '+' ? a + b : a - b,
@@ -5456,7 +5653,7 @@ function answerMath(num) {
     }, DELAY.correct);
     if (chosen) {
       chosen.classList.add('dn-correct');
-      if (!r.retried) { dnBurst(chosen); burstReward(chosen, ['⭐','🎉','✨','💯','🌟','🎊']); }
+      if (!r.retried) { dnBurst(chosen); burstReward(chosen, themeReward()); }
       if (res.personalBest) flashBest(chosen);
     }
   } else {
@@ -6714,6 +6911,8 @@ function awardCoins(n) {
 }
 function updateCoinDisplays() {
   document.querySelectorAll('.coin-count').forEach(el => el.textContent = S.coins);
+  const cl = document.getElementById('screen-closet');
+  if (cl && cl.classList.contains('active')) renderRealRewards();
 }
 function floatCoins(n) {
   const el = document.createElement('div');
@@ -6795,7 +6994,101 @@ function dollSVG(o, size) {
     ${acc ? `<text x="100" y="50" font-size="34" text-anchor="middle">${acc}</text>` : ''}
   </svg>`;
 }
-function openCloset() { showScreen('screen-closet'); }
+
+function renderRealRewards() {
+  const box = document.getElementById('real-rewards');
+  if (!box) return;
+  const pending = S.vouchers.filter(v => !v.redeemed).length;
+  box.innerHTML = `<div class="closet-cat-label">✨ Real life treats${
+      pending ? ` <span class="rr-pending">${pending} waiting</span>` : ''}</div>
+    <div class="rr-grid">` + S.realRewards.map(r => {
+      const afford = S.coins >= r.cost;
+      return `<button class="rr-item ${afford ? '' : 'rr-locked'}" onclick="buyRealReward('${r.id}')">
+        <div class="rr-emoji">${r.emoji}</div>
+        <div class="rr-label">${r.label}</div>
+        <div class="rr-cost">🪙 ${r.cost}</div></button>`;
+    }).join('') + '</div>';
+}
+
+function buyRealReward(id) {
+  const r = S.realRewards.find(x => x.id === id);
+  if (!r) return;
+  if (S.coins < r.cost) { showToast(`You need 🪙 ${r.cost - S.coins} more!`); sfx('wrong'); return; }
+  if (!confirm(`Spend ${r.cost} coins on "${r.label}"?`)) return;
+  S.coins -= r.cost;
+  S.vouchers.unshift({ vid: 'v' + Date.now(), id: r.id, emoji: r.emoji, label: r.label,
+                       cost: r.cost, date: new Date().toLocaleDateString(), redeemed: false });
+  if (S.vouchers.length > 60) S.vouchers.pop();
+  persist();
+  updateCoinDisplays();
+  renderRealRewards();
+  sfx('win');
+  spawnConfetti('YESSS!');
+  showToast(`🎟️ Show this to Dad: ${r.label}`);
+}
+
+// Parent side: mark a promise actually kept, and tune the prices.
+function redeemVoucher(vid) {
+  const v = S.vouchers.find(x => x.vid === vid);
+  if (!v) return;
+  v.redeemed = true;
+  persist();
+  renderParentVouchers();
+}
+function setRewardCost(id, delta) {
+  const r = S.realRewards.find(x => x.id === id);
+  if (!r) return;
+  r.cost = Math.max(5, r.cost + delta);
+  persist();
+  renderParentRewards();
+}
+function addRealReward() {
+  const label = prompt('What is the reward?');
+  if (!label || !label.trim()) return;
+  const cost = parseInt(prompt('How many coins should it cost?', '60'), 10);
+  if (!Number.isFinite(cost) || cost < 1) return;
+  S.realRewards.push({ id: 'r' + Date.now(), emoji: '🎁', label: label.trim(), cost });
+  persist();
+  renderParentRewards();
+}
+function removeRealReward(id) {
+  S.realRewards = S.realRewards.filter(x => x.id !== id);
+  persist();
+  renderParentRewards();
+}
+function renderParentRewards() {
+  const box = document.getElementById('pc-rewards');
+  if (!box) return;
+  box.innerHTML = S.realRewards.map(r => `
+    <div class="pc-level-row">
+      <span class="pc-level-label" style="font-size:13px">${r.emoji} ${r.label}</span>
+      <div class="pc-level-ctrl">
+        <button class="pc-lvl-btn" onclick="setRewardCost('${r.id}',-10)">−</button>
+        <span class="pc-lvl-val">🪙 ${r.cost}</span>
+        <button class="pc-lvl-btn" onclick="setRewardCost('${r.id}',10)">+</button>
+        <button class="pc-lvl-btn" onclick="removeRealReward('${r.id}')" title="Remove">✕</button>
+      </div>
+    </div>`).join('') +
+    `<button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="addRealReward()">+ Add a reward</button>`;
+}
+function renderParentVouchers() {
+  const box = document.getElementById('pc-vouchers');
+  if (!box) return;
+  const pending = S.vouchers.filter(v => !v.redeemed);
+  const done    = S.vouchers.filter(v => v.redeemed).slice(0, 5);
+  box.innerHTML = (pending.length
+    ? pending.map(v => `<div class="voucher">
+        <span class="voucher-emoji">${v.emoji}</span>
+        <div style="flex:1"><div class="voucher-label">${v.label}</div>
+          <div class="voucher-meta">Bought ${v.date} for 🪙 ${v.cost}</div></div>
+        <button class="btn btn-secondary btn-sm" onclick="redeemVoucher('${v.vid}')">Done</button>
+      </div>`).join('')
+    : `<div style="font-size:13px;color:var(--muted);font-weight:700;padding:6px 0">Nothing waiting to be redeemed.</div>`)
+    + (done.length ? `<div style="font-size:11px;color:var(--muted);font-weight:800;margin-top:10px">
+        Recently redeemed: ${done.map(v => v.emoji).join(' ')}</div>` : '');
+}
+
+function openCloset() { renderRealRewards(); showScreen('screen-closet'); }
 function renderCloset() {
   updateCoinDisplays();
   document.getElementById('closet-doll').innerHTML = dollSVG(S.dollOutfit);
@@ -7300,7 +7593,7 @@ function startMeasureGameNow() {
 }
 
 function makeMeasureRound(lv, i) {
-  const pick = n => shuf([...MU_OBJECTS]).slice(0, n);
+  const pick = n => shuf([...activeObjects()]).slice(0, n);
   if (lv === 1) {
     // Alternate: direct comparison, ordering three, indirect comparison.
     const kind = i % 3;

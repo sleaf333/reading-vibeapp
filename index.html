@@ -582,6 +582,7 @@
     .hc-rhyme   { background: linear-gradient(150deg, rgba(245,243,255,0.78), rgba(233,228,255,0.56)); border-color: rgba(167,139,250,0.85); color:#5b21b6; }
     .hc-reader  { background: linear-gradient(150deg, rgba(236,253,245,0.78), rgba(209,250,229,0.56)); border-color: rgba(52,211,153,0.85); color:#065f46; }
     .hc-science { background: linear-gradient(150deg, rgba(236,250,255,0.78), rgba(207,238,252,0.56)); border-color: rgba(56,189,248,0.85); color:#0c4a6e; }
+    .hc-progress{ background: linear-gradient(150deg, rgba(236,253,245,0.80), rgba(209,250,229,0.58)); border-color: rgba(16,185,129,0.85); color:#065f46; }
     .hc-measure { background: linear-gradient(150deg, rgba(254,252,232,0.80), rgba(254,243,199,0.58)); border-color: rgba(250,204,21,0.90); color:#854d0e; }
     .hc-fix     { background: linear-gradient(150deg, rgba(255,241,242,0.80), rgba(254,215,226,0.58)); border-color: rgba(244,63,94,0.85); color:#9f1239; }
 
@@ -605,6 +606,36 @@
     .fx-word.fx-picked-ok  { background:#bbf7d0; border-color:#22c55e; }
     .fx-word.fx-picked-bad { background:#fecaca; border-color:#ef4444; }
     .fx-hint { text-align:center; font-size:14px; font-weight:800; color:var(--muted); margin-bottom:4px; }
+
+    /* ── GETTING FASTER ── */
+    .prog-headline { text-align:center; font-size:17px; font-weight:800; color:var(--text);
+                     line-height:1.45; margin:4px 8px 14px; }
+    .prog-row { background:rgba(255,255,255,0.66); border:2px solid rgba(0,0,0,0.07);
+                border-radius:16px; padding:12px 14px; margin-bottom:10px; }
+    .prog-head { display:flex; justify-content:space-between; align-items:center;
+                 font-size:15px; font-weight:900; color:var(--text); margin-bottom:8px; gap:8px; }
+    .prog-known { font-size:11px; font-weight:800; color:var(--muted); white-space:nowrap; }
+    .prog-note { font-size:12px; font-weight:700; color:var(--muted); }
+    .prog-bars { display:flex; flex-direction:column; gap:5px; }
+    .prog-bar { display:flex; align-items:center; gap:8px; }
+    .prog-lab { font-size:11px; font-weight:800; color:var(--muted); width:32px; }
+    .prog-track { flex:1; height:14px; background:rgba(0,0,0,0.06); border-radius:7px; overflow:hidden; }
+    .prog-track i { display:block; height:100%; border-radius:7px; }
+    .prog-val { font-size:12px; font-weight:900; color:var(--text); width:44px; text-align:right; }
+    .prog-gain { margin-top:7px; font-size:13px; font-weight:900; color:#047857; }
+
+    /* ── DIFFICULTY CHOOSER ── */
+    .diff-grid { display:flex; flex-direction:column; gap:12px; margin-top:6px; }
+    .diff-btn { border:3px solid rgba(0,0,0,0.10); border-radius:20px; padding:18px 16px; cursor:pointer;
+                background:rgba(255,255,255,0.72); display:flex; align-items:center; gap:14px; text-align:left;
+                transition:transform .12s, box-shadow .15s; font-family:inherit; }
+    .diff-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 22px rgba(0,0,0,0.12); }
+    .diff-btn:disabled { cursor:default; }
+    .diff-icon { font-size:36px; line-height:1; }
+    .diff-label { font-size:20px; font-weight:900; color:var(--text); }
+    .diff-sub { font-size:13px; font-weight:700; color:var(--muted); }
+    .diff-mid  { border-color:rgba(250,204,21,0.85); background:linear-gradient(150deg,rgba(254,252,232,0.85),rgba(254,243,199,0.6)); }
+    .diff-hard { border-color:rgba(244,63,94,0.85);  background:linear-gradient(150deg,rgba(255,241,242,0.85),rgba(254,215,226,0.6)); }
 
     /* ── PERSONAL BEST ── */
     .best-pop { position:fixed; transform:translate(-50%,-100%); z-index:120; pointer-events:none;
@@ -1040,7 +1071,7 @@
       <div class="hc-sub" id="home-reading-level">Lv. 1</div>
     </div>
 
-    <div class="home-card hc-sw" onclick="startSwGame()">
+    <div class="home-card hc-sw" onclick="startSwGameChoose()">
       <span class="home-done-badge" id="done-sw" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">🎮</div>
@@ -1056,7 +1087,7 @@
       <div class="hc-sub" id="home-dn-level">Lv. 1</div>
     </div>
 
-    <div class="home-card hc-math" id="math-home-card" onclick="startMathGame()">
+    <div class="home-card hc-math" id="math-home-card" onclick="startMathGameChoose()">
       <span class="home-done-badge" id="done-math" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon" id="math-card-icon">🔢</div>
@@ -1065,7 +1096,7 @@
       <div id="math-lock-badge" style="font-size:12px;font-weight:800;line-height:1.35"></div>
     </div>
 
-    <div class="home-card hc-sb" onclick="startSbGame()">
+    <div class="home-card hc-sb" onclick="startSbGameChoose()">
       <span class="home-done-badge" id="done-sb" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">📦</div>
@@ -1081,7 +1112,7 @@
       <div class="hc-sub" id="home-clock-level">Lv. 1</div>
     </div>
 
-    <div class="home-card hc-measure" onclick="startMeasureGame()">
+    <div class="home-card hc-measure" onclick="startMeasureGameChoose()">
       <span class="home-done-badge" id="done-measure" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">📏</div>
@@ -1089,7 +1120,7 @@
       <div class="hc-sub" id="home-measure-level">Lv. 1</div>
     </div>
 
-    <div class="home-card hc-spell" onclick="startSpellGame()">
+    <div class="home-card hc-spell" onclick="startSpellGameChoose()">
       <span class="home-done-badge" id="done-spell" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
       <div class="hc-icon">🔤</div>
@@ -1124,6 +1155,13 @@
       <div class="hc-icon">🔬</div>
       <div class="hc-name">Science Fun</div>
       <div class="hc-sub">Discover &amp; sort!</div>
+    </div>
+
+    <div class="home-card hc-progress" onclick="openProgress()">
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">📈</div>
+      <div class="hc-name">Getting Faster</div>
+      <div class="hc-sub" id="home-progress-sub">See how you improve</div>
     </div>
 
     <div class="home-card hc-closet" onclick="openCloset()">
@@ -1598,6 +1636,27 @@
   </div>
   <button class="btn btn-primary btn-full" onclick="startScienceGame()">Play again</button>
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
+<!-- ═══ GETTING FASTER ═══ -->
+<div id="screen-progress" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">Getting Faster 📈</span></div>
+  <div id="progress-headline" class="prog-headline"></div>
+  <div id="progress-body"></div>
+</div>
+
+<!-- ═══ DIFFICULTY CHOOSER ═══ -->
+<div id="screen-difficulty" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">How do you want it?</span></div>
+  <div style="text-align:center;font-size:14px;color:var(--muted);font-weight:700;margin:2px 0 14px">You choose today!</div>
+  <div class="diff-grid">
+    <button class="diff-btn" id="diff-easy" onclick="pickDifficulty(-1)">
+      <div class="diff-icon">🌿</div><div class="diff-label">Easy</div><div class="diff-sub">Warm up</div></button>
+    <button class="diff-btn diff-mid" onclick="pickDifficulty(0)">
+      <div class="diff-icon">⭐</div><div class="diff-label">Just right</div><div class="diff-sub">Where I am</div></button>
+    <button class="diff-btn diff-hard" onclick="pickDifficulty(1)">
+      <div class="diff-icon">🔥</div><div class="diff-label">Challenge me</div><div class="diff-sub">Harder · more 🪙</div></button>
+  </div>
 </div>
 
 <!-- ═══ MEASURE UP ═══ -->
@@ -2222,6 +2281,7 @@ const S = {
   rhymeRounds: [], rhymeIdx: 0, rhymeScore: 0, rhymeAnswered: false, rhymeTargetWord: '',
   scienceRounds: [], scienceIdx: 0, scienceScore: 0, scienceAnswered: false,
   readerBook: null, readerAloudActive: false,
+  diffDelta: 0,
   measureRounds: [], measureIdx: 0, measureScore: 0, measureAnswered: false, measureOrderPicks: [],
   fixRounds: [], fixIdx: 0, fixScore: 0, fixAnswered: false,
 
@@ -2343,6 +2403,8 @@ function setAdvanceTimer(fn, ms) {
 }
 
 function showScreen(id) {
+  // A Challenge run must never silently carry into the next game.
+  if (id === 'screen-home') S.diffDelta = 0;
   clearTimeout(advanceTimer);
   advanceTimer = null;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -3139,7 +3201,7 @@ const DAY_MS       = 86400000;
 function itemStat(id) {
   let it = S.items[id];
   if (!it) {
-    it = { box:0, due:0, seen:0, right:0, missed:0, bestMs:0, medMs:0, lastSeen:0 };
+    it = { box:0, due:0, seen:0, right:0, missed:0, bestMs:0, medMs:0, firstMs:0, lastSeen:0 };
     S.items[id] = it;
   }
   return it;
@@ -3164,6 +3226,7 @@ function recordItem(id, correct, ms) {
     // Cheap running-median approximation — nudge toward the new sample rather
     // than keeping a per-item history array.
     it.medMs = it.medMs ? Math.round(it.medMs + (ms - it.medMs) * 0.3) : ms;
+    if (!it.firstMs) it.firstMs = ms;   // baseline for "you used to take..."
     if (!prevBest || ms < prevBest) { it.bestMs = ms; personalBest = !!prevBest; }
   }
   if (Object.keys(S.items).length > ITEM_CAP) evictItems();
@@ -3241,8 +3304,119 @@ function earnFor(res, firstTry) {
   _earn.coins += c;
   return c;
 }
-// Small floor so a session is never worth literally nothing.
-function sessionPayout() { return _earn.coins + EARN.floor; }
+// Small floor so a session is never worth literally nothing. A session she
+// chose to make hard pays more. Occasionally a small surprise is added on top:
+// deliberately unannounced and deliberately not a rarity-tiered box you open —
+// an unexpected bonus lifts motivation without teaching a six-year-old to pull
+// a lever, and unexpected rewards also avoid the overjustification trap that
+// promised ones fall into.
+function sessionPayout() {
+  const mult = (DIFF[String(S.diffDelta || 0)] || DIFF['0']).mult;
+  let total = Math.round((_earn.coins + EARN.floor) * mult);
+  _earn.surprise = (_earn.effort >= 3 && Math.random() < 0.12) ? randInt(5, 12) : 0;
+  if (_earn.surprise) setTimeout(() => showToast(`🎁 Surprise! +${_earn.surprise} bonus coins`), 900);
+  return total + _earn.surprise;
+}
+
+// ─── "GETTING FASTER" ────────────────────────────────────────────────────────
+// Children cannot perceive their own improvement — it happens too slowly and
+// they have no record of yesterday. A child who is ahead of her class gets no
+// signal from her peers either. Now that every answer is timed, the app can
+// show her the one thing she can't otherwise see: that she is measurably
+// quicker than she used to be. This reads the store only; nothing here can
+// change a level or a payout.
+const SPEED_GROUPS = [
+  { prefix:'sw',      icon:'🎮', name:'Sight Words' },
+  { prefix:'sb',      icon:'📦', name:'Sound Boxes' },
+  { prefix:'spell',   icon:'🔤', name:'Build a Word' },
+  { prefix:'math',    icon:'🔢', name:'Math Time' },
+  { prefix:'clock',   icon:'🕐', name:'Clock Time' },
+  { prefix:'measure', icon:'📏', name:'Measure Up' },
+  { prefix:'rhyme',   icon:'🎵', name:'Rhyme Time' },
+  { prefix:'fix',     icon:'✏️', name:'Fix the Sentence' },
+];
+
+function speedSummary(prefix) {
+  const p = prefix + ':';
+  const ids = Object.keys(S.items).filter(id => id.startsWith(p));
+  if (!ids.length) return null;
+  // Only items with both a first and a current time can show a change.
+  const timed = ids.filter(id => S.items[id].firstMs && S.items[id].medMs && S.items[id].seen > 1);
+  const known = ids.filter(id => isMastered(id)).length;
+  if (!timed.length) return { ids: ids.length, timed: 0, known };
+  const then = timed.reduce((a, id) => a + S.items[id].firstMs, 0) / timed.length;
+  const now  = timed.reduce((a, id) => a + S.items[id].medMs,   0) / timed.length;
+  return { ids: ids.length, timed: timed.length, known, then, now,
+           pct: then > 0 ? Math.round((1 - now / then) * 100) : 0 };
+}
+
+function secs(ms) { return (ms / 1000).toFixed(1) + 's'; }
+
+function renderProgress() {
+  const rows = SPEED_GROUPS.map(g => [g, speedSummary(g.prefix)]).filter(([, s]) => s && s.ids);
+  const box = document.getElementById('progress-body');
+  if (!rows.length) {
+    box.innerHTML = `<div style="text-align:center;padding:30px 12px;font-size:15px;font-weight:700;color:var(--muted)">
+      Play a few games and come back — this is where you'll see yourself getting faster! 🚀</div>`;
+    document.getElementById('progress-headline').textContent = '';
+    return;
+  }
+  const faster = rows.filter(([, s]) => s.pct > 0);
+  const best   = faster.sort((a, b) => b[1].pct - a[1].pct)[0];
+  document.getElementById('progress-headline').innerHTML = best
+    ? `You are <b>${best[1].pct}% faster</b> at ${best[0].name} than when you started! ⚡`
+    : 'Keep going — your times are still settling in.';
+
+  box.innerHTML = rows.map(([g, s]) => {
+    if (!s.timed) return `<div class="prog-row"><div class="prog-head"><span>${g.icon} ${g.name}</span>
+      <span class="prog-known">${s.ids} practised</span></div>
+      <div class="prog-note">Play again to see your speed change</div></div>`;
+    const gain = s.pct > 0;
+    const w = Math.max(6, Math.min(100, Math.round((s.now / s.then) * 100)));
+    return `<div class="prog-row">
+      <div class="prog-head"><span>${g.icon} ${g.name}</span>
+        <span class="prog-known">${s.known} mastered</span></div>
+      <div class="prog-bars">
+        <div class="prog-bar"><span class="prog-lab">then</span><div class="prog-track"><i style="width:100%;background:#cbd5e1"></i></div><span class="prog-val">${secs(s.then)}</span></div>
+        <div class="prog-bar"><span class="prog-lab">now</span><div class="prog-track"><i style="width:${w}%;background:${gain ? '#34d399' : '#fbbf24'}"></i></div><span class="prog-val">${secs(s.now)}</span></div>
+      </div>
+      ${gain ? `<div class="prog-gain">⚡ ${s.pct}% faster</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function openProgress() { renderProgress(); showScreen('screen-progress'); }
+
+// ─── CHOICE ──────────────────────────────────────────────────────────────────
+// Autonomy is the motivation lever this app had none of: it decided everything
+// and she just complied. Letting her pick the difficulty costs one tap and,
+// per self-determination theory, buys more than the tap costs — children pick
+// harder work when the choice is theirs than when it is assigned to them.
+// The choice applies to the deck only; her real level, and how it advances,
+// are untouched, so a brave day can't accidentally promote or demote her.
+const DIFF = {
+  '-1': { label:'Easy',        icon:'🌿', sub:'Warm up',        mult:1   },
+  '0':  { label:'Just right',  icon:'⭐', sub:'Where I am',     mult:1   },
+  '1':  { label:'Challenge me',icon:'🔥', sub:'Something hard', mult:1.5 },
+};
+let _pendingStart = null, _pendingLevel = 1;
+
+function chooseDifficulty(currentLevel, startFn) {
+  _pendingStart = startFn;
+  _pendingLevel = currentLevel;
+  document.getElementById('diff-easy').disabled = currentLevel <= 1;
+  document.getElementById('diff-easy').style.opacity = currentLevel <= 1 ? 0.4 : '';
+  showScreen('screen-difficulty');
+}
+function pickDifficulty(delta) {
+  S.diffDelta = delta;
+  const fn = _pendingStart; _pendingStart = null;
+  if (fn) fn();
+}
+// Effective level for THIS session's deck. Never written back to state.
+function sessionLevel(base, maxLv) {
+  return Math.max(1, Math.min(maxLv, base + (S.diffDelta || 0)));
+}
 
 // ─── SPACED REVIEW ───────────────────────────────────────────────────────────
 // Part of every deck is reserved for material that is due to come back. Without
@@ -3483,9 +3657,11 @@ function renderBadges() {
 
 // ─── SIGHT WORD GAME ─────────────────────────────────────────────────────────
 
+// Home-card entry: choose a difficulty first, then run the real start function.
+function startSwGameChoose() { chooseDifficulty(S.swLevel, startSwGame); }
 function startSwGame() {
   resetEarn();
-  const pool = S.swLevel >= 3 ? [...SW_EASY, ...SW_HARD] : [...SW_EASY];
+  const pool = sessionLevel(S.swLevel, 5) >= 3 ? [...SW_EASY, ...SW_HARD] : [...SW_EASY];
   S.swWords = deckWithReview(pool, 10, 'sw', w => `sw:${w}`);
   S.swIdx   = 0;
   S.swScore = 0;
@@ -4999,6 +5175,7 @@ function dismissMathIntro() {
   startMathGameNow();
 }
 
+function startMathGameChoose() { chooseDifficulty(S.mathLevel, startMathGame); }
 function startMathGame() {
   const lock = mathLockState();
   if (lock === 'daily') {
@@ -5044,7 +5221,7 @@ function mathRoundFromId(id) {
 
 function startMathGameNow() {
   resetEarn();
-  const deck = buildMathDeck(Math.min(S.mathLevel, 16));
+  const deck = buildMathDeck(sessionLevel(S.mathLevel, 16));
   S.mathRounds  = deck.map(cat => generateMathRound(cat));
   // Swap a few generated rounds for facts that are due to come back.
   const due = dueItems('math', 3).map(mathRoundFromId).filter(Boolean);
@@ -6195,6 +6372,8 @@ function dismissSbIntro() {
   startSbGameNow();
 }
 
+// Home-card entry: choose a difficulty first, then run the real start function.
+function startSbGameChoose() { chooseDifficulty(S.sbLevel, startSbGame); }
 function startSbGame() {
   if (!S.sbIntroSeen.includes(S.sbLevel)) {
     return showSbIntro(S.sbLevel);
@@ -6205,7 +6384,7 @@ function startSbGame() {
 function startSbGameNow() {
   resetEarn();
   // L6 reuses the full word pool but adds distractor tiles in renderSbRound.
-  const lv = Math.min(S.sbLevel, 5);
+  const lv = Math.min(sessionLevel(S.sbLevel, 6), 5);
   const pool = SB_WORDS.filter(w => w.lv <= lv);
   S.sbWords    = deckWithReview(pool, 8, 'sb', w => `sb:${w.word}`);
   S.sbIdx      = 0;
@@ -6691,9 +6870,11 @@ const VOWEL_SORT = [
   { word:'net',  emoji:'🥅', long:false }, { word:'bone', emoji:'🦴', long:true  },
 ];
 
+// Home-card entry: choose a difficulty first, then run the real start function.
+function startSpellGameChoose() { chooseDifficulty(S.spellLevel, startSpellGame); }
 function startSpellGame() {
   resetEarn();
-  if (S.spellLevel >= 4) {
+  if (sessionLevel(S.spellLevel, 4) >= 4) {
     // Vowel Power: spelling long-vowel words, swapping vowels to make new
     // words, and telling short from long — the three 1st-grade vowel skills.
     S.spellRounds = shuf([
@@ -6702,7 +6883,7 @@ function startSpellGame() {
       ...shuf([...VOWEL_SORT]).slice(0, 2).map(o => ({ kind:'sortv', ...o })),
     ]);
   } else {
-    const pool = SPELL_WORDS[S.spellLevel] || SPELL_WORDS[1];
+    const pool = SPELL_WORDS[sessionLevel(S.spellLevel, 4)] || SPELL_WORDS[1];
     const picks = deckWithReview(pool, 8, 'spell', ([w]) => `spell:${w}`);
     while (picks.length < 8) picks.push(pool[randInt(0, pool.length - 1)]);
     S.spellRounds = picks.map(([word, emoji]) => ({ kind:'spell', word, emoji }));
@@ -7086,6 +7267,8 @@ const MEASURE_LEVEL_INTROS = {
        visual:'0 — 5 — 10', body:'A number line turns adding and subtracting into hops. Start on a number, hop along the line, and see where you land!' },
 };
 
+// Home-card entry: choose a difficulty first, then run the real start function.
+function startMeasureGameChoose() { chooseDifficulty(S.measureLevel, startMeasureGame); }
 function startMeasureGame() {
   if (!S.measureIntroSeen.includes(S.measureLevel)) return showMeasureIntro(S.measureLevel);
   startMeasureGameNow();
@@ -7108,7 +7291,8 @@ function dismissMeasureIntro() {
 function startMeasureGameNow() {
   resetEarn();
   S.measureRounds = [];
-  for (let i = 0; i < 10; i++) S.measureRounds.push(makeMeasureRound(S.measureLevel, i));
+  const mlv = sessionLevel(S.measureLevel, 4);
+  for (let i = 0; i < 10; i++) S.measureRounds.push(makeMeasureRound(mlv, i));
   S.measureIdx = 0; S.measureScore = 0;
   showScreen('screen-measure');
   mascotSay(MEASURE_LEVEL_INTROS[S.measureLevel]?.headline || 'Let\'s measure!');

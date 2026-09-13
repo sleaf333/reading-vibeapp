@@ -655,6 +655,28 @@
     .voucher-label { font-size:13px; font-weight:900; color:var(--text); line-height:1.3; }
     .voucher-meta { font-size:11px; font-weight:700; color:var(--muted); }
 
+    /* ── TIME BACK / CHECK-IN ── */
+    .tb-wrap { max-width:380px; margin:0 auto; padding:48px 22px; text-align:center;
+               display:flex; flex-direction:column; align-items:center; }
+    .tb-emoji { font-size:62px; line-height:1.1; }
+    .tb-head { font-size:28px; font-weight:900; color:var(--text); margin-top:10px; }
+    .tb-sub { font-size:16px; font-weight:700; color:var(--muted); margin-top:8px; }
+    .tb-streak { font-size:15px; font-weight:900; color:#c2570c; margin-top:6px; }
+    .tb-msg { font-size:17px; font-weight:800; color:var(--text); margin-top:16px; line-height:1.5; }
+    .ci-goal { font-size:34px; font-weight:900; color:var(--accent); margin-top:4px; }
+
+    /* ── TODAY STRIP ── */
+    #today-strip { display:flex; align-items:center; gap:10px; margin-top:12px;
+                   background:rgba(255,255,255,0.66); border:1.5px solid var(--border);
+                   border-radius:14px; padding:10px 13px; }
+    #today-strip.today-done { border-color:rgba(16,185,129,0.85);
+                   background:linear-gradient(150deg,rgba(236,253,245,0.9),rgba(209,250,229,0.6)); }
+    .ts-label { font-size:13px; font-weight:900; color:var(--text); white-space:nowrap; }
+    .ts-dots { display:flex; gap:5px; flex:1; }
+    .ts-dot { width:13px; height:13px; border-radius:50%; background:rgba(0,0,0,0.11); }
+    .ts-dot.on { background:#10b981; }
+    .ts-count { font-size:12px; font-weight:800; color:var(--muted); white-space:nowrap; }
+
     /* ── INTEREST THEME PICKER ── */
     .theme-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
     .theme-btn { border:3px solid rgba(0,0,0,0.10); border-radius:18px; padding:16px 10px; cursor:pointer;
@@ -1120,6 +1142,8 @@
       <span class="util-icon" id="home-theme-icon">🌈</span><span class="util-text">Theme</span>
       <span class="util-meta" id="home-theme-sub">Pick one</span></button>
   </div>
+
+  <div id="today-strip"></div>
 
   <div id="quest-card">
     <div class="quest-head">
@@ -1698,6 +1722,31 @@
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
 </div>
 
+<!-- ═══ TIME BACK (daily goal reached) ═══ -->
+<div id="screen-timeback" class="screen">
+  <div class="tb-wrap">
+    <div class="tb-emoji">🎉</div>
+    <div class="tb-head">You're all done!</div>
+    <div class="tb-sub">You finished <b id="tb-count">3 activities</b> today.</div>
+    <div class="tb-streak" id="tb-streak"></div>
+    <div class="tb-msg">Now the rest of the day is yours.<br>Go and play! 🌳</div>
+    <button class="btn btn-primary btn-full" style="margin-top:18px" onclick="showScreen('screen-home')">Okay!</button>
+    <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Actually, one more game</button>
+  </div>
+</div>
+
+<!-- ═══ MORNING CHECK-IN ═══ -->
+<div id="screen-checkin" class="screen">
+  <div class="tb-wrap">
+    <div class="tb-emoji" id="ci-emoji2">☀️</div>
+    <div class="tb-head" id="ci-greet">Good morning, Juliana!</div>
+    <div class="tb-msg" style="margin-top:6px">Today's goal:</div>
+    <div class="ci-goal"><span id="ci-goal-n">3</span> activities</div>
+    <div class="tb-sub" id="ci-streak"></div>
+    <button class="btn btn-primary btn-full" style="margin-top:18px" onclick="dismissCheckin()">Let's go! →</button>
+  </div>
+</div>
+
 <!-- ═══ INTEREST THEME PICKER ═══ -->
 <div id="screen-theme" class="screen">
   <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">What are you into?</span></div>
@@ -1996,6 +2045,21 @@
   <div class="section-title">Sound &amp; music</div>
   <div style="font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600">The 🔊 button on the home screen mutes all game sounds. Background music is gentle and optional.</div>
   <button class="btn btn-secondary btn-full" id="pc-music-btn" onclick="toggleMusic()">🎵 Music: Off</button>
+
+  <div class="divider"></div>
+  <div class="section-title">Daily goal</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:600">
+    How many activities count as a finished day. When she hits it the app tells her she is done
+    and to go and play. Set to 0 to turn it off.
+  </div>
+  <div class="pc-level-row">
+    <span class="pc-level-label">🎯 Activities per day</span>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setDailyGoal(-1)">−</button>
+      <span class="pc-lvl-val" id="pc-daily-goal">3</span>
+      <button class="pc-lvl-btn" onclick="setDailyGoal(+1)">+</button>
+    </div>
+  </div>
 
   <div class="divider"></div>
   <div class="section-title">Math access rules</div>
@@ -2325,6 +2389,9 @@ const S = {
   mathSinceRead: parseInt(lsGet('rl_mathsinceread','0')),
   mathLastDate:  lsGet('rl_mathlastdate',''),
   dnUnlockReq:   parseInt(lsGet('rl_dnunlockreq','1')),
+  dailyGoal:     parseInt(lsGet('rl_dailygoal','3')),
+  timeBackDate:  lsGet('rl_timebackdate',''),
+  checkinDate:   lsGet('rl_checkindate',''),
   mathBreakEvery:parseInt(lsGet('rl_mathbreakevery','5')),
   mathIntroSeen: lsJson('rl_mathintroseen', []),
   mathWarmupDone:lsJson('rl_mathwarmupdone', []),
@@ -2449,6 +2516,8 @@ function persist() {
   lsSet('rl_mathsinceread',  S.mathSinceRead);
   lsSet('rl_mathlastdate',   S.mathLastDate);
   lsSet('rl_dnunlockreq',    S.dnUnlockReq);
+  lsSet('rl_dailygoal',      S.dailyGoal);
+  lsSet('rl_timebackdate',   S.timeBackDate);
   lsSet('rl_mathbreakevery', S.mathBreakEvery);
   lsSet('rl_mathintroseen',  S.mathIntroSeen);
   lsSet('rl_mathwarmupdone', S.mathWarmupDone);
@@ -2501,6 +2570,10 @@ function setAdvanceTimer(fn, ms) {
 }
 
 function showScreen(id) {
+  // Heading home having just met the day's goal earns the Time Back moment.
+  // Checked here rather than in each result handler so it lands after the
+  // game's own celebration instead of on top of it.
+  if (id === 'screen-home' && maybeTimeBack()) { showTimeBack(); return; }
   // A Challenge run must never silently carry into the next game.
   if (id === 'screen-home') S.diffDelta = 0;
   clearTimeout(advanceTimer);
@@ -3030,6 +3103,7 @@ function refreshHome() {
   updateMuteBtn();
   showMascotTip();
   renderQuests();
+  renderTodayStrip();
 
   // Live mini-clock of the current time, in place of the 🕐 emoji.
   const now = new Date();
@@ -3410,8 +3484,14 @@ function earnFor(res, firstTry) {
 // an unexpected bonus lifts motivation without teaching a six-year-old to pull
 // a lever, and unexpected rewards also avoid the overjustification trap that
 // promised ones fall into.
+// Coming back tomorrow is worth something. Alpha pays its students for habits
+// and routine rather than for grades, on the grounds that consistency is the
+// thing that actually compounds — this is the same idea in coin form. Capped at
+// seven days so it stays a nudge rather than a punishment for one missed day.
+function streakMult() { return 1 + Math.min(S.streak || 0, 7) * 0.07; }
+
 function sessionPayout() {
-  const mult = (DIFF[String(S.diffDelta || 0)] || DIFF['0']).mult;
+  const mult = (DIFF[String(S.diffDelta || 0)] || DIFF['0']).mult * streakMult();
   let total = Math.round((_earn.coins + EARN.floor) * mult);
   _earn.surprise = (_earn.effort >= 3 && Math.random() < 0.12) ? randInt(5, 12) : 0;
   if (_earn.surprise) setTimeout(() => showToast(`🎁 Surprise! +${_earn.surprise} bonus coins`), 900);
@@ -3923,6 +4003,7 @@ function renderParentCorner() {
   document.getElementById('pc-watch-status').textContent = S.watchEarned ? `Earned ${S.watchEarned}` : `${S.watchPieces.length}/5 pieces`;
   const mb = document.getElementById('pc-music-btn');
   if (mb) mb.textContent = S.musicOn ? '🎵 Music: On' : '🎵 Music: Off';
+  document.getElementById('pc-daily-goal').textContent  = S.dailyGoal === 0 ? 'Off' : S.dailyGoal;
   document.getElementById('pc-unlock-req').textContent  = S.dnUnlockReq === 0 ? 'Off' : S.dnUnlockReq;
   document.getElementById('pc-break-every').textContent = S.mathBreakEvery === 0 ? 'Off' : S.mathBreakEvery;
   document.getElementById('api-key-input').value    = S.apiKey;
@@ -4114,6 +4195,13 @@ function setGameLevel(levelKey, progKey, delta) {
   if (el) el.innerHTML = `Lv. ${next}${gradeTag(levelKey, next)}`;
 }
 
+function setDailyGoal(delta) {
+  S.dailyGoal = Math.max(0, Math.min(10, S.dailyGoal + delta));
+  persist();
+  document.getElementById('pc-daily-goal').textContent = S.dailyGoal === 0 ? 'Off' : S.dailyGoal;
+  renderTodayStrip();
+}
+
 function setMathRule(key, lsKey, min, max, delta) {
   const next = Math.min(max, Math.max(min, S[key] + delta));
   if (next === S[key]) return;
@@ -4215,13 +4303,88 @@ function confirmReset() {
   location.reload();
 }
 
+// ─── TIME BACK ───────────────────────────────────────────────────────────────
+// Alpha School's strongest lever, by their own account: finish your work to
+// mastery and the rest of the day is yours. They renamed their whole pitch from
+// "2x learning" to "2-hour learning" because getting time back motivated
+// families more than learning more did.
+//
+// Every other reward in this app pays her to keep playing. This one pays her to
+// be finished — which is the only reward that cannot quietly turn into a reason
+// to sit in front of a screen longer.
+function dailyDone() {
+  const today = new Date().toLocaleDateString();
+  return S.sessions.filter(x => x.date === today).length;
+}
+function dailyGoalMet() { return S.dailyGoal > 0 && dailyDone() >= S.dailyGoal; }
+
+function renderTodayStrip() {
+  const el = document.getElementById('today-strip');
+  if (!el) return;
+  if (S.dailyGoal <= 0) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  const done = dailyDone(), goal = S.dailyGoal, met = done >= goal;
+  el.classList.toggle('today-done', met);
+  const dots = Array.from({ length: goal }, (_, i) =>
+    `<span class="ts-dot${i < done ? ' on' : ''}"></span>`).join('');
+  el.innerHTML = met
+    ? `<span class="ts-label">✅ All done today!</span>
+       <span class="ts-dots">${dots}</span>
+       <span class="ts-count">go play 🌳</span>`
+    : `<span class="ts-label">🎯 Today's goal</span>
+       <span class="ts-dots">${dots}</span>
+       <span class="ts-count">${done} of ${goal}</span>`;
+}
+
+// Once a day, on opening: name the goal out loud so it's a target she's aiming
+// at rather than an open-ended session that only ends when an adult says so.
+function maybeCheckin() {
+  const today = new Date().toLocaleDateString();
+  if (S.checkinDate === today || dailyDone() > 0) return false;
+  S.checkinDate = today;
+  lsSet('rl_checkindate', today);
+  const hr = new Date().getHours();
+  document.getElementById('ci-emoji2').textContent = hr < 12 ? '☀️' : hr < 18 ? '🌤️' : '🌙';
+  document.getElementById('ci-greet').textContent =
+    `Good ${hr < 12 ? 'morning' : hr < 18 ? 'afternoon' : 'evening'}, Juliana!`;
+  document.getElementById('ci-goal-n').textContent = S.dailyGoal;
+  document.getElementById('ci-streak').textContent =
+    S.streak >= 2 ? `🔥 ${S.streak} days in a row — keep it going!` : '';
+  showScreen('screen-checkin');
+  return true;
+}
+function dismissCheckin() { showScreen('screen-home'); }
+
+// Fires once per day, the moment the goal is reached.
+function maybeTimeBack() {
+  const today = new Date().toLocaleDateString();
+  if (!dailyGoalMet() || S.timeBackDate === today) return false;
+  S.timeBackDate = today;
+  persist();
+  return true;
+}
+function showTimeBack() {
+  document.getElementById('tb-count').textContent = `${dailyDone()} activities`;
+  document.getElementById('tb-streak').textContent =
+    S.streak >= 2 ? `🔥 ${S.streak} days in a row` : '';
+  showScreen('screen-timeback');
+  sfx('win');
+  setTimeout(() => spawnConfetti('ALL DONE!'), 250);
+  speak("You're all done for today! Go and play.");
+}
+
 // ─── STREAK ───────────────────────────────────────────────────────────────────
 
 function updateStreak() {
   const today = new Date().toDateString();
   if (S.lastdate === today) return;
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
-  S.streak = S.lastdate === yesterday ? S.streak + 1 : 1;
+  const yesterday  = new Date(Date.now() - 86400000).toDateString();
+  const dayBefore  = new Date(Date.now() - 2 * 86400000).toDateString();
+  // One grace day: a sick day or a busy Saturday holds the streak instead of
+  // wiping it. Streak pressure is a real source of anxiety and she is six.
+  S.streak = (S.lastdate === yesterday) ? S.streak + 1
+           : (S.lastdate === dayBefore)  ? S.streak
+           : 1;
   S.lastdate = today;
   persist();
 }
@@ -5703,7 +5866,7 @@ function showMathResult() {
     S.mathWarmupDone.push(S.mathLevel);
   }
   const pct = S.mathScore / 10;
-  const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct, 16, 0.8, 0.4);
+  const prevLevel = advanceLevel('mathLevel', 'mathLevelProg', pct, 16, 0.9, 0.4);
   S.sessions.unshift({ topic: 'Math Time', score: `${S.mathScore}/10`, date: new Date().toLocaleDateString(), level: S.mathLevel });
   if (S.sessions.length > 100) S.sessions.pop();
   const newB = awardAll();
@@ -8313,6 +8476,7 @@ function concertTune() {
 }
 
 refreshHome();
+maybeCheckin();
 initHomeFx();
 initParticles();
 initMascot();

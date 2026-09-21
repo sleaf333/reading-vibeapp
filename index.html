@@ -1104,6 +1104,33 @@
       #lclk-shade path { transition: none; }
       #lclk-hour.pulse, #lclk-minhand.pulse { animation: none; }
     }
+    /* ── LANDSCAPE / WIDE-SHORT TABLETS ──
+       The app was laid out for a phone and the Fire tablets it actually runs on
+       are frequently held sideways, where the viewport is ~640x400: plenty of
+       width, almost no height. In that shape the two-column grid cost 3.6
+       screens of scrolling while half the display sat empty. Four columns puts
+       each of the three four-tile sections on exactly one row, and the chrome
+       shrinks to buy back the rest. Portrait is deliberately untouched. */
+    @media (orientation: landscape) and (min-width: 560px) {
+      body { max-width: 920px; padding: 0 14px 40px; }
+      .home-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+      .home-card { min-height: 92px; padding: 10px 6px 9px; gap: 5px; }
+      .home-card .hc-icon { font-size: 26px; }
+      .home-card .hc-name { font-size: 13px; line-height: 1.2; }
+      .home-card .hc-sub  { font-size: 10.5px; }
+      .home-section-label { margin: 10px 2px 5px; font-size: 12px; }
+      .home-header { padding-top: 14px; }
+      .page-title { font-size: 22px; }
+      #home-utility { margin-top: 9px; }
+      .util-chip { padding: 6px 6px; }
+      .util-icon { font-size: 18px; }
+      #today-strip { margin-top: 9px; padding: 7px 12px; }
+      #quest-card { margin-top: 10px; padding: 10px 14px 9px; }
+      .quest-row { padding: 2px 0; font-size: 13px; }
+      #home-parent-row { margin: 10px 0 4px; }
+      #home-games { margin-top: 10px; }
+    }
+
   </style>
 </head>
 <body>

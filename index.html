@@ -613,6 +613,7 @@
     .hc-theme   { background: linear-gradient(150deg, rgba(253,244,255,0.80), rgba(243,232,255,0.58)); border-color: rgba(192,132,252,0.85); color:#6b21a8; }
     .hc-progress{ background: linear-gradient(150deg, rgba(236,253,245,0.80), rgba(209,250,229,0.58)); border-color: rgba(16,185,129,0.85); color:#065f46; }
     .hc-measure { background: linear-gradient(150deg, rgba(254,252,232,0.80), rgba(254,243,199,0.58)); border-color: rgba(250,204,21,0.90); color:#854d0e; }
+    .hc-trace   { background: linear-gradient(150deg, rgba(245,243,255,0.80), rgba(226,222,254,0.58)); border-color: rgba(139,92,246,0.85); color:#5b21b6; }
     .hc-fix     { background: linear-gradient(150deg, rgba(255,241,242,0.80), rgba(254,215,226,0.58)); border-color: rgba(244,63,94,0.85); color:#9f1239; }
 
     /* ── MEASURE UP ── */
@@ -654,6 +655,23 @@
     .voucher-emoji { font-size:24px; }
     .voucher-label { font-size:13px; font-weight:900; color:var(--text); line-height:1.3; }
     .voucher-meta { font-size:11px; font-weight:700; color:var(--muted); }
+
+    /* ── MAGIC INK ── */
+    .trace-top { display:flex; align-items:center; justify-content:center; gap:14px; margin:8px 0 2px; }
+    .trace-letter { font-size:40px; font-weight:900; color:#5b21b6; line-height:1; }
+    .trace-prize { font-size:38px; line-height:1; min-width:42px; text-align:center; }
+    .trace-pop { animation: tracePop .5s cubic-bezier(.2,1.6,.4,1) both; }
+    @keyframes tracePop { 0%{transform:scale(0) rotate(-25deg);opacity:0} 100%{transform:scale(1) rotate(0);opacity:1} }
+    .trace-hint { text-align:center; font-size:14px; font-weight:800; color:var(--muted); min-height:20px; margin-bottom:4px; }
+    .trace-stage { position:relative; width:100%; height:56vh; min-height:240px;
+                   background:rgba(255,255,255,0.62); border:2px solid rgba(167,139,250,0.5);
+                   border-radius:20px; overflow:hidden; }
+    #trace-canvas { display:block; touch-action:none; -webkit-tap-highlight-color:transparent; }
+    @media (orientation: landscape) and (min-width: 560px) {
+      .trace-stage { height:62vh; min-height:200px; }
+      .trace-letter { font-size:30px; } .trace-prize { font-size:28px; }
+      .trace-top { margin:4px 0 0; } .trace-hint { font-size:12.5px; min-height:16px; }
+    }
 
     /* ── TIME BACK / CHECK-IN ── */
     .tb-wrap { max-width:380px; margin:0 auto; padding:48px 22px; text-align:center;
@@ -1235,6 +1253,14 @@
       <div class="hc-name">Rhyme Time</div>
       <div class="hc-sub">Find the rhyme!</div>
     </div>
+    <div class="home-card hc-trace" onclick="startTraceGameChoose()">
+      <span class="home-done-badge" id="done-trace" style="display:none">✓</span>
+      <span class="hc-chevron">›</span>
+      <div class="hc-icon">✍️</div>
+      <div class="hc-name">Magic Ink</div>
+      <div class="hc-sub" id="home-trace-level">Lv. 1</div>
+    </div>
+
     <div class="home-card hc-fix" onclick="startFixGame()">
       <span class="home-done-badge" id="done-fix" style="display:none">✓</span>
       <span class="hc-chevron">›</span>
@@ -1749,6 +1775,33 @@
   <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
 </div>
 
+<!-- ═══ MAGIC INK (letter tracing) ═══ -->
+<div id="screen-trace" class="screen">
+  <div class="sw-header">
+    <button class="btn-icon" onclick="showScreen('screen-home')" style="width:44px;height:44px;font-size:20px;border-radius:14px">✕</button>
+    <span class="sw-prog-text" id="trace-prog">1 of 8</span>
+    <span class="pill" style="background:#ede9fe;color:#5b21b6;font-weight:800" id="trace-score-pill">0 ✓</span>
+  </div>
+  <div class="dn-progress-bar"><div class="dn-progress-fill" id="trace-progress-fill" style="width:0%;background:linear-gradient(90deg,#8b5cf6,#c4b5fd)"></div></div>
+  <div class="trace-top">
+    <span class="trace-letter" id="trace-letter">A</span>
+    <span class="trace-prize" id="trace-prize"></span>
+  </div>
+  <div class="trace-hint" id="trace-hint">Start on the green dot and follow the line</div>
+  <div class="trace-stage"><canvas id="trace-canvas"></canvas></div>
+</div>
+<div id="screen-traceresult" class="screen">
+  <div class="back-row"><button class="btn-icon" onclick="showScreen('screen-home')">🏠</button><span class="screen-label">Magic Ink done! ✍️</span></div>
+  <div class="sw-result-center">
+    <div class="stars-row" id="trace-result-stars">⭐⭐⭐</div>
+    <div class="result-score" id="trace-result-score">8 / 8</div>
+    <div class="result-msg" id="trace-result-msg">Beautiful writing!</div>
+    <div id="trace-level-msg" style="margin-top:10px"></div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="startTraceGameChoose()">Play again</button>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="showScreen('screen-home')">Home</button>
+</div>
+
 <!-- ═══ TIME BACK (daily goal reached) ═══ -->
 <div id="screen-timeback" class="screen">
   <div class="tb-wrap">
@@ -2039,6 +2092,14 @@
       <button class="pc-lvl-btn" onclick="setGameLevel('fixLevel','fixLevelProg',-1)">−</button>
       <span class="pc-lvl-val" id="pc-fix-level">Lv. 1</span>
       <button class="pc-lvl-btn" onclick="setGameLevel('fixLevel','fixLevelProg',+1)">+</button>
+    </div>
+  </div>
+  <div class="pc-level-row">
+    <span class="pc-level-label">✍️ Magic Ink</span>
+    <div class="pc-level-ctrl">
+      <button class="pc-lvl-btn" onclick="setGameLevel('traceLevel','traceLevelProg',-1)">−</button>
+      <span class="pc-lvl-val" id="pc-trace-level">Lv. 1</span>
+      <button class="pc-lvl-btn" onclick="setGameLevel('traceLevel','traceLevelProg',+1)">+</button>
     </div>
   </div>
   <div class="pc-level-row">
@@ -2419,6 +2480,10 @@ const S = {
   dailyGoal:     parseInt(lsGet('rl_dailygoal','3')),
   timeBackDate:  lsGet('rl_timebackdate',''),
   checkinDate:   lsGet('rl_checkindate',''),
+  traceLevel:     parseInt(lsGet('rl_tracelevel','1')),
+  traceLevelProg: parseInt(lsGet('rl_tracelevelprog','0')),
+  tracegames:     parseInt(lsGet('rl_tracegames','0')),
+  traceperfect:   parseInt(lsGet('rl_traceperfect','0')),
   mathBreakEvery:parseInt(lsGet('rl_mathbreakevery','5')),
   mathIntroSeen: lsJson('rl_mathintroseen', []),
   mathWarmupDone:lsJson('rl_mathwarmupdone', []),
@@ -2473,6 +2538,7 @@ const S = {
   diffDelta: 0,
   measureRounds: [], measureIdx: 0, measureScore: 0, measureAnswered: false, measureOrderPicks: [],
   fixRounds: [], fixIdx: 0, fixScore: 0, fixAnswered: false,
+  traceRounds: [], traceIdx: 0, traceScore: 0,
 
   swWords: [], swIdx: 0, swScore: 0, swAnswered: false,
   dnRounds: [], dnRoundIdx: 0, dnStep: 0, dnScore: 0, dnAnswered: false, dnStepsPerArticle: 3,
@@ -2581,6 +2647,10 @@ function persist() {
   lsSet('rl_theme',            S.theme);
   lsSet('rl_realrewards',      S.realRewards);
   lsSet('rl_vouchers',         S.vouchers);
+  lsSet('rl_tracelevel',       S.traceLevel);
+  lsSet('rl_tracelevelprog',   S.traceLevelProg);
+  lsSet('rl_tracegames',       S.tracegames);
+  lsSet('rl_traceperfect',     S.traceperfect);
   lsSet('rl_items',            S.items);
   lsSet('rl_placed',           S.placed);
 }
@@ -2633,7 +2703,7 @@ function mathLockState() {
 // "Dinosaurs"), plus Reading Club books — so a game missing from here would
 // wrongly light up the Stories badge. Keep this as the single source of truth.
 const NAMED_GAMES = ['Sight Words','Daily News','Math Time','Sound Boxes','Clock Time',
-                     'Spelling','Rhyming','Science','Measure Up','Fix the Sentence'];
+                     'Spelling','Rhyming','Science','Measure Up','Fix the Sentence','Magic Ink'];
 
 function playedToday(topic) {
   const today = new Date().toLocaleDateString();
@@ -3123,6 +3193,7 @@ function refreshHome() {
   document.getElementById('home-spell-level').innerHTML   = homeSub(S.spellLevel, 'Spelling',     'spellLevelProg');
   document.getElementById('home-measure-level').innerHTML = homeSub(S.measureLevel, 'Measure Up',      'measureLevelProg');
   document.getElementById('home-fix-level').innerHTML     = homeSub(S.fixLevel,     'Fix the Sentence','fixLevelProg');
+  document.getElementById('home-trace-level').innerHTML   = homeSub(S.traceLevel,   'Magic Ink',       'traceLevelProg');
   document.getElementById('home-reader-sub').textContent  = `${S.readerDone.length}/${READER_BOOKS.length} books read`;
   document.getElementById('home-theme-icon').textContent = theme().icon;
   document.getElementById('home-theme-sub').textContent  = theme().name;
@@ -3140,7 +3211,7 @@ function refreshHome() {
   // "Done today" checkmark badges.
   [['done-reading','Stories'], ['done-sw','Sight Words'], ['done-dn','Daily News'],
    ['done-math','Math Time'], ['done-sb','Sound Boxes'], ['done-clock','Clock Time'],
-   ['done-measure','Measure Up'], ['done-fix','Fix the Sentence']]
+   ['done-measure','Measure Up'], ['done-fix','Fix the Sentence'], ['done-trace','Magic Ink']]
     .forEach(([id, topic]) => {
       document.getElementById(id).style.display = playedToday(topic) ? '' : 'none';
     });
@@ -3541,6 +3612,7 @@ const SPEED_GROUPS = [
   { prefix:'measure', icon:'📏', name:'Measure Up' },
   { prefix:'rhyme',   icon:'🎵', name:'Rhyme Time' },
   { prefix:'fix',     icon:'✏️', name:'Fix the Sentence' },
+  { prefix:'trace',   icon:'✍️', name:'Magic Ink' },
 ];
 
 function speedSummary(prefix) {
@@ -3990,6 +4062,7 @@ const HM_GAMES = [
   { label: '🕐 Clock Time',  test: s => s.topic === 'Clock Time'  },
   { label: '📏 Measure Up',  test: s => s.topic === 'Measure Up'  },
   { label: '✏️ Fix Sentence',test: s => s.topic === 'Fix the Sentence' },
+  { label: '✍️ Magic Ink',   test: s => s.topic === 'Magic Ink' },
 ];
 
 function renderHeatmap() {
@@ -4071,6 +4144,7 @@ const GRADE_BANDS = {
   spellLevel:   { name:'🔤 Build a Word',     bands:[[1,'Grade 1'],[2,'Grade 1–2'],[4,'Grade 2']] },
   measureLevel: { name:'📏 Measure Up',       bands:[[2,'Grade 1'],[4,'Grade 2']] },
   fixLevel:     { name:'✏️ Fix the Sentence', bands:[[1,'Grade 1'],[3,'Grade 1–2']] },
+  traceLevel:   { name:'✍️ Magic Ink',       bands:[[1,'Pre-K–K'],[2,'Grade 1'],[3,'Grade 1–2']] },
 };
 const GRADE_COLORS = {
   'Pre-K–K':      ['#f1f5f9','#475569'],
@@ -4202,11 +4276,11 @@ function renderStandards() {
      </div>` + html;
 }
 
-const LEVEL_CAPS = { mathLevel:16, clockLevel:4, sbLevel:6, spellLevel:4, measureLevel:4, fixLevel:3 };
+const LEVEL_CAPS = { mathLevel:16, clockLevel:4, sbLevel:6, spellLevel:4, measureLevel:4, fixLevel:3, traceLevel:3 };
 const LEVEL_EL_IDS = {
   level:'pc-level', swLevel:'pc-sw-level', dnLevel:'pc-dn-level', mathLevel:'pc-math-level',
   sbLevel:'pc-sb-level', clockLevel:'pc-clock-level', spellLevel:'pc-spell-level',
-  measureLevel:'pc-measure-level', fixLevel:'pc-fix-level',
+  measureLevel:'pc-measure-level', fixLevel:'pc-fix-level', traceLevel:'pc-trace-level',
 };
 
 function setGameLevel(levelKey, progKey, delta) {
@@ -8011,6 +8085,429 @@ function showMeasureResult() {
   if (pct === 1) setTimeout(spawnConfetti, 250);
 }
 
+// ─── MAGIC INK (letter formation) ────────────────────────────────────────────
+// The one motor skill the app never touched: she could recognise and spell
+// letters but never had to *form* one. This is also the only activity that is
+// properly native to the tablet she actually uses — a finger on glass.
+//
+// Fire 7 / HD 8 are budget devices, so this is Canvas2D with a pooled, bounded
+// particle list and no per-frame allocation. No WebGL, no thousand-particle
+// bursts. And there is no stylus on a Fire tablet, so every tolerance below is
+// set for a six-year-old's fingertip, not a pen.
+
+// Points along an arc, so curved letters don't need hand-listed coordinates.
+function arcPts(cx, cy, r, a0, a1, n) {
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const a = a0 + (a1 - a0) * (i / n);
+    out.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]);
+  }
+  return out;
+}
+const PI = Math.PI;
+
+// Each letter is a list of strokes, each stroke a polyline in a 0..1 box,
+// listed in the order a child is taught to write them (top-down, left-right).
+const LETTERS = {
+  A: [[[0.5,0],[0.12,1]], [[0.5,0],[0.88,1]], [[0.26,0.66],[0.74,0.66]]],
+  B: [[[0.2,0],[0.2,1]], arcPts(0.2,0.25,0.28,-PI/2,PI/2,10), arcPts(0.2,0.75,0.3,-PI/2,PI/2,10)],
+  C: [arcPts(0.52,0.5,0.4,-PI*0.35,PI*0.35,16).reverse()],
+  D: [[[0.2,0],[0.2,1]], arcPts(0.2,0.5,0.45,-PI/2,PI/2,14)],
+  E: [[[0.78,0],[0.22,0]], [[0.22,0],[0.22,1]], [[0.22,0.5],[0.66,0.5]], [[0.22,1],[0.78,1]]],
+  F: [[[0.78,0],[0.22,0]], [[0.22,0],[0.22,1]], [[0.22,0.5],[0.66,0.5]]],
+  G: [arcPts(0.52,0.5,0.4,-PI*0.35,PI*0.42,16).reverse(), [[0.52,0.55],[0.92,0.55]]],
+  H: [[[0.2,0],[0.2,1]], [[0.8,0],[0.8,1]], [[0.2,0.52],[0.8,0.52]]],
+  I: [[[0.5,0],[0.5,1]]],
+  J: [[[0.7,0],[0.7,0.72]], arcPts(0.45,0.72,0.25,0,PI*0.9,8)],
+  K: [[[0.22,0],[0.22,1]], [[0.8,0],[0.22,0.55]], [[0.34,0.45],[0.8,1]]],
+  L: [[[0.24,0],[0.24,1],[0.8,1]]],
+  M: [[[0.16,1],[0.16,0],[0.5,0.62],[0.84,0],[0.84,1]]],
+  N: [[[0.2,1],[0.2,0],[0.8,1],[0.8,0]]],
+  O: [arcPts(0.5,0.5,0.4,-PI/2,PI*1.5,22)],
+  P: [[[0.22,0],[0.22,1]], arcPts(0.22,0.28,0.3,-PI/2,PI/2,10)],
+  Q: [arcPts(0.5,0.5,0.4,-PI/2,PI*1.5,22), [[0.62,0.7],[0.92,1]]],
+  R: [[[0.22,0],[0.22,1]], arcPts(0.22,0.28,0.3,-PI/2,PI/2,10), [[0.34,0.56],[0.82,1]]],
+  S: [arcPts(0.52,0.26,0.26,PI*0.35,PI*1.15,10).concat(arcPts(0.48,0.74,0.26,-PI*0.85,PI*0.35,10))],
+  T: [[[0.12,0],[0.88,0]], [[0.5,0],[0.5,1]]],
+  U: [[[0.2,0],[0.2,0.62]], arcPts(0.5,0.62,0.3,PI,0,10), [[0.8,0.62],[0.8,0]]],
+  V: [[[0.14,0],[0.5,1],[0.86,0]]],
+  W: [[[0.08,0],[0.3,1],[0.5,0.35],[0.7,1],[0.92,0]]],
+  X: [[[0.18,0],[0.82,1]], [[0.82,0],[0.18,1]]],
+  Y: [[[0.18,0],[0.5,0.5]], [[0.82,0],[0.5,0.5],[0.5,1]]],
+  Z: [[[0.18,0],[0.82,0],[0.18,1],[0.82,1]]],
+  // Lowercase: the shapes that differ most from their capitals.
+  a: [arcPts(0.46,0.62,0.26,-PI*0.15,PI*1.75,18), [[0.72,0.36],[0.72,1]]],
+  c: [arcPts(0.54,0.62,0.28,-PI*0.35,PI*0.35,14).reverse()],
+  e: [[[0.24,0.62],[0.8,0.62]], arcPts(0.52,0.62,0.28,0,PI*1.5,16)],
+  g: [arcPts(0.46,0.62,0.26,-PI*0.15,PI*1.75,18), [[0.72,0.36],[0.72,1.05]]],
+  h: [[[0.24,0],[0.24,1]], arcPts(0.5,0.62,0.26,PI,0,9), [[0.76,0.62],[0.76,1]]],
+  i: [[[0.5,0.38],[0.5,1]], [[0.5,0.16],[0.5,0.2]]],
+  l: [[[0.5,0],[0.5,1]]],
+  m: [[[0.16,0.38],[0.16,1]], arcPts(0.33,0.6,0.17,PI,0,7), [[0.5,0.6],[0.5,1]], arcPts(0.67,0.6,0.17,PI,0,7), [[0.84,0.6],[0.84,1]]],
+  n: [[[0.26,0.38],[0.26,1]], arcPts(0.5,0.6,0.24,PI,0,9), [[0.74,0.6],[0.74,1]]],
+  o: [arcPts(0.5,0.62,0.28,-PI/2,PI*1.5,20)],
+  r: [[[0.3,0.38],[0.3,1]], arcPts(0.52,0.6,0.22,PI,-PI*0.25,7)],
+  s: [arcPts(0.52,0.52,0.2,PI*0.35,PI*1.15,9).concat(arcPts(0.48,0.86,0.2,-PI*0.85,PI*0.35,9))],
+  t: [[[0.5,0.1],[0.5,1]], [[0.28,0.38],[0.72,0.38]]],
+  u: [[[0.26,0.38],[0.26,0.76]], arcPts(0.5,0.76,0.24,PI,0,9), [[0.74,0.38],[0.74,1]]],
+  v: [[[0.2,0.38],[0.5,1],[0.8,0.38]]],
+  w: [[[0.12,0.38],[0.32,1],[0.5,0.6],[0.68,1],[0.88,0.38]]],
+  z: [[[0.24,0.38],[0.76,0.38],[0.24,1],[0.76,1]]],
+};
+
+// What each letter turns into when she finishes it.
+const LETTER_PRIZE = {
+  A:['🍎','apple'], B:['🎈','balloon'], C:['🐱','cat'], D:['🐶','dog'], E:['🐘','elephant'],
+  F:['🐸','frog'], G:['🍇','grapes'], H:['🏠','house'], I:['🍦','ice cream'], J:['🤹','juggler'],
+  K:['🪁','kite'], L:['🦁','lion'], M:['🌙','moon'], N:['🪺','nest'], O:['🐙','octopus'],
+  P:['🐧','penguin'], Q:['👑','queen'], R:['🌈','rainbow'], S:['☀️','sun'], T:['🌳','tree'],
+  U:['☂️','umbrella'], V:['🎻','violin'], W:['🐋','whale'], X:['🎸','x-ray'], Y:['🪀','yo-yo'],
+  Z:['🦓','zebra'],
+  a:['🐜','ant'], c:['☁️','cloud'], e:['🥚','egg'], g:['🐐','goat'], h:['🎩','hat'],
+  i:['🏝️','island'], l:['🍃','leaf'], m:['🍄','mushroom'], n:['📓','notebook'], o:['🦉','owl'],
+  r:['🤖','robot'], s:['🐍','snake'], t:['🐯','tiger'], u:['🦄','unicorn'], v:['🌋','volcano'],
+  w:['🍉','watermelon'], z:['⚡','zap'],
+};
+
+const TRACE_LEVELS = {
+  1: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+  2: 'acegh ilmnorstuvwz'.replace(/ /g,'').split(''),
+  3: null,   // her name + short words, assembled at start
+};
+
+// ── geometry ────────────────────────────────────────────────────────────────
+function tracePath(stroke, box) {         // 0..1 polyline -> screen points
+  return stroke.map(([x, y]) => [box.x + x * box.s, box.y + y * box.s]);
+}
+function distToSeg(px, py, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay;
+  const L = dx * dx + dy * dy;
+  let t = L ? ((px - ax) * dx + (py - ay) * dy) / L : 0;
+  t = Math.max(0, Math.min(1, t));
+  const cx = ax + t * dx, cy = ay + t * dy;
+  return { d: Math.hypot(px - cx, py - cy), t };
+}
+// Nearest point on a polyline, returned as {dist, progress 0..1}.
+function nearestOnPath(pts, px, py) {
+  let best = { d: Infinity, prog: 0 }, acc = 0;
+  const segLens = [], total = (() => {
+    let t = 0;
+    for (let i = 1; i < pts.length; i++) {
+      const L = Math.hypot(pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1]);
+      segLens.push(L); t += L;
+    }
+    return t || 1;
+  })();
+  for (let i = 1; i < pts.length; i++) {
+    const r = distToSeg(px, py, pts[i-1][0], pts[i-1][1], pts[i][0], pts[i][1]);
+    if (r.d < best.d) best = { d: r.d, prog: (acc + r.t * segLens[i-1]) / total };
+    acc += segLens[i-1];
+  }
+  return best;
+}
+
+// ── state ───────────────────────────────────────────────────────────────────
+const TRACE = {
+  canvas:null, ctx:null, box:null, letter:null, strokes:[], si:0,
+  drawn:[], cur:null, parts:[], raf:null, tries:0, done:false,
+  maxProg:0, strayed:false, prize:null, celebrating:0,
+};
+
+function traceBox() {
+  const c = TRACE.canvas, w = c.width / TRACE.dpr, h = c.height / TRACE.dpr;
+  const s = Math.min(w * 0.72, h * (w > h ? 0.88 : 0.62));   // wide-and-short needs more of the height
+  return { x: (w - s) / 2, y: (h - s) / 2 - h * 0.02, s, w, h };
+}
+
+function traceDraw() {
+  const { ctx, box } = TRACE;
+  const w = box.w, h = box.h;
+  ctx.clearRect(0, 0, w, h);
+
+  // guide strokes: done ones solid and faint, the current one dashed and bright
+  TRACE.strokes.forEach((st, i) => {
+    const pts = tracePath(st, box);
+    ctx.beginPath();
+    pts.forEach(([x, y], k) => k ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+    ctx.lineWidth = box.s * 0.14;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.setLineDash(i === TRACE.si ? [box.s * 0.045, box.s * 0.05] : []);
+    ctx.strokeStyle = i < TRACE.si ? 'rgba(167,139,250,0.30)'
+                    : i === TRACE.si ? 'rgba(148,163,184,0.75)' : 'rgba(203,213,225,0.35)';
+    ctx.stroke();
+    ctx.setLineDash([]);
+    if (i === TRACE.si) {                            // where to start
+      const [sx, sy] = pts[0];
+      ctx.beginPath(); ctx.arc(sx, sy, box.s * 0.055, 0, 7);
+      ctx.fillStyle = '#22c55e'; ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = `700 ${box.s * 0.06}px Nunito, sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(i + 1), sx, sy + 1);
+    }
+  });
+
+  // her ink
+  const inkOf = (pts, alpha) => {
+    if (pts.length < 2) return;
+    ctx.beginPath();
+    pts.forEach(([x, y], k) => k ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+    ctx.lineWidth = box.s * 0.105; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = `rgba(139,92,246,${alpha})`;
+    ctx.shadowColor = 'rgba(167,139,250,0.9)'; ctx.shadowBlur = box.s * 0.06;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  };
+  TRACE.drawn.forEach(p => inkOf(p, 0.95));
+  if (TRACE.cur) inkOf(TRACE.cur, 0.95);
+
+  // particles
+  for (const p of TRACE.parts) {
+    if (p.life <= 0) continue;
+    ctx.globalAlpha = Math.max(0, p.life / p.max);
+    ctx.font = `${p.sz}px serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(p.ch, p.x, p.y);
+    ctx.globalAlpha = 1;
+  }
+}
+
+function traceTick() {
+  let alive = false;
+  for (const p of TRACE.parts) {
+    if (p.life <= 0) continue;
+    alive = true;
+    p.x += p.vx; p.y += p.vy; p.vy += 0.22; p.life--;
+  }
+  if (TRACE.celebrating > 0) TRACE.celebrating--;
+  traceDraw();
+  TRACE.raf = (alive || TRACE.celebrating > 0) ? requestAnimationFrame(traceTick) : null;
+}
+function traceAnimate() { if (!TRACE.raf) TRACE.raf = requestAnimationFrame(traceTick); }
+
+// Bounded and pooled — these tablets have no headroom for a thousand sprites.
+function traceBurst(x, y, chars, n) {
+  for (let i = 0; i < n; i++) {
+    if (TRACE.parts.length > 160) TRACE.parts.shift();
+    const a = Math.random() * 7, sp = 1.5 + Math.random() * 3.5;
+    TRACE.parts.push({ ch: chars[i % chars.length], x, y,
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 2,
+      sz: 12 + Math.random() * 14, life: 40 + Math.random() * 25, max: 60 });
+  }
+  traceAnimate();
+}
+
+// ── input + validation ──────────────────────────────────────────────────────
+// Tolerance is set for a fingertip on a cheap tablet, not a stylus. A stroke
+// only fails on genuine wandering or going backwards; wobble is accepted, and
+// nothing here can ever permanently block her (see traceStrokeFailed).
+const TRACE_TOL = 0.30;      // corridor width, as a fraction of letter size
+const TRACE_BACK = 0.22;     // how far backwards counts as reversing
+
+function traceXY(e) {
+  const r = TRACE.canvas.getBoundingClientRect();
+  const t = (e.touches && e.touches[0]) || e;
+  return [t.clientX - r.left, t.clientY - r.top];
+}
+
+function traceStart(e) {
+  if (TRACE.done || TRACE.si >= TRACE.strokes.length) return;
+  e.preventDefault();
+  const [x, y] = traceXY(e);
+  const pts = tracePath(TRACE.strokes[TRACE.si], TRACE.box);
+  const near = nearestOnPath(pts, x, y);
+  // Must begin near the start dot, or the numbering means nothing.
+  if (near.d > TRACE.box.s * TRACE_TOL * 1.4 || near.prog > 0.3) {
+    traceHint('Start on the green dot!');
+    return;
+  }
+  TRACE.cur = [[x, y]]; TRACE.maxProg = near.prog; TRACE.strayed = false;
+  traceDraw();
+}
+
+function traceMove(e) {
+  if (!TRACE.cur) return;
+  e.preventDefault();
+  const [x, y] = traceXY(e);
+  const last = TRACE.cur[TRACE.cur.length - 1];
+  if (Math.hypot(x - last[0], y - last[1]) < 2) return;   // cheap throttle
+  TRACE.cur.push([x, y]);
+  const pts = tracePath(TRACE.strokes[TRACE.si], TRACE.box);
+  const near = nearestOnPath(pts, x, y);
+  if (near.d > TRACE.box.s * TRACE_TOL) TRACE.strayed = true;
+  if (near.prog < TRACE.maxProg - TRACE_BACK) TRACE.strayed = true;  // went backwards
+  TRACE.maxProg = Math.max(TRACE.maxProg, near.prog);
+  traceDraw();
+}
+
+function traceEnd(e) {
+  if (!TRACE.cur) return;
+  if (e) e.preventDefault();
+  const reached = TRACE.maxProg >= 0.82;      // got most of the way along
+  const ok = reached && !TRACE.strayed && TRACE.cur.length > 3;
+  if (ok) {
+    TRACE.drawn.push(TRACE.cur);
+    TRACE.cur = null;
+    TRACE.si++;
+    sfx('pop');
+    const box = TRACE.box;
+    const p = tracePath(TRACE.strokes[TRACE.si - 1], box);
+    traceBurst(p[p.length - 1][0], p[p.length - 1][1], ['✨','⭐'], 6);
+    if (TRACE.si >= TRACE.strokes.length) traceComplete();
+    else { traceHint('Nice! Now stroke ' + (TRACE.si + 1)); traceDraw(); }
+  } else {
+    TRACE.cur = null;
+    traceStrokeFailed(reached);
+  }
+}
+
+// Never a dead end. Two misses and it offers to show her, then moves on.
+function traceStrokeFailed(reached) {
+  TRACE.tries++;
+  sfx('wrong');
+  if (TRACE.tries >= 2) {
+    traceHint('Let me show you — watch the line!');
+    traceShowStroke();
+  } else {
+    traceHint(reached ? 'Close! Try to stay on the line.' : 'Follow the line all the way.');
+    traceDraw();
+  }
+}
+
+// Animate the correct stroke, then count it and continue.
+function traceShowStroke() {
+  const pts = tracePath(TRACE.strokes[TRACE.si], TRACE.box);
+  let i = 0;
+  TRACE.cur = [pts[0]];
+  const step = () => {
+    i += Math.max(1, Math.round(pts.length / 22));
+    TRACE.cur = pts.slice(0, Math.min(i, pts.length));
+    traceDraw();
+    if (i < pts.length) setTimeout(step, 45);
+    else setTimeout(() => {
+      TRACE.drawn.push(pts); TRACE.cur = null; TRACE.si++; TRACE.tries = 0;
+      if (TRACE.si >= TRACE.strokes.length) traceComplete();
+      else { traceHint('Your turn — stroke ' + (TRACE.si + 1)); traceDraw(); }
+    }, 260);
+  };
+  step();
+}
+
+function traceHint(msg) {
+  const el = document.getElementById('trace-hint');
+  if (el) el.textContent = msg;
+}
+
+function traceComplete() {
+  TRACE.done = true;
+  const clean = TRACE.tries === 0;
+  const [emoji, word] = TRACE.prize;
+  traceHint(`${TRACE.letter}  is for  ${word}!`);
+  document.getElementById('trace-prize').textContent = emoji;
+  document.getElementById('trace-prize').classList.add('trace-pop');
+  const b = TRACE.box;
+  traceBurst(b.x + b.s / 2, b.y + b.s / 2, [emoji, '✨', '⭐'], 26);
+  TRACE.celebrating = 70;
+  traceAnimate();
+  sfx('correct');
+  speak(`${TRACE.letter}. ${word}`);
+  earnFor(recordItem(`trace:${TRACE.letter}`, clean, roundElapsed()), clean);
+  if (clean) S.traceScore++;
+  setAdvanceTimer(() => {
+    S.traceIdx++;
+    if (S.traceIdx >= S.traceRounds.length) showTraceResult();
+    else renderTraceRound();
+  }, 1900);
+}
+
+// ── game flow ───────────────────────────────────────────────────────────────
+function traceDeck(lv) {
+  if (lv >= 3) {
+    const name = (S.heroName || 'Juliana').replace(/[^a-zA-Z]/g, '');
+    const pool = (name + 'catdogsunmoon').split('').filter(c => LETTERS[c] || LETTERS[c.toUpperCase()]);
+    return shuf(pool).slice(0, 8).map(c => LETTERS[c] ? c : c.toUpperCase());
+  }
+  const pool = (TRACE_LEVELS[lv] || TRACE_LEVELS[1]).filter(c => LETTERS[c]);
+  return deckWithReview(pool, 8, 'trace', c => 'trace:' + c);
+}
+
+function startTraceGameChoose() { chooseDifficulty(S.traceLevel, startTraceGame); }
+
+function startTraceGame() {
+  resetEarn();
+  S.traceRounds = traceDeck(sessionLevel(S.traceLevel, 3));
+  S.traceIdx = 0; S.traceScore = 0;
+  showScreen('screen-trace');
+  mascotSay('Trace the letter with your finger!');
+  setTimeout(renderTraceRound, 60);        // let the screen lay out before sizing
+}
+
+function traceResize() {
+  const c = document.getElementById('trace-canvas');
+  if (!c) return;
+  const wrap = c.parentElement;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);   // cap: Fire GPUs are small
+  const w = wrap.clientWidth, h = Math.max(220, wrap.clientHeight);
+  c.width = w * dpr; c.height = h * dpr;
+  c.style.width = w + 'px'; c.style.height = h + 'px';
+  TRACE.canvas = c; TRACE.dpr = dpr;
+  TRACE.ctx = c.getContext('2d');
+  TRACE.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  TRACE.box = traceBox();
+  if (!c._traceBound) {
+    c._traceBound = true;
+    c.addEventListener('pointerdown', traceStart);
+    c.addEventListener('pointermove', traceMove);
+    c.addEventListener('pointerup', traceEnd);
+    c.addEventListener('pointercancel', traceEnd);
+    c.addEventListener('pointerleave', traceEnd);
+  }
+  traceDraw();
+}
+
+function renderTraceRound() {
+  const ch = S.traceRounds[S.traceIdx];
+  Object.assign(TRACE, {
+    letter: ch, strokes: LETTERS[ch], si: 0, drawn: [], cur: null,
+    parts: [], tries: 0, done: false, maxProg: 0, strayed: false,
+    prize: LETTER_PRIZE[ch] || LETTER_PRIZE[ch.toUpperCase()] || ['✨','magic'],
+    celebrating: 0,
+  });
+  document.getElementById('trace-prog').textContent = `${S.traceIdx + 1} of ${S.traceRounds.length}`;
+  document.getElementById('trace-score-pill').textContent = `${S.traceScore} ✓`;
+  document.getElementById('trace-progress-fill').style.width =
+    `${(S.traceIdx / S.traceRounds.length) * 100}%`;
+  document.getElementById('trace-letter').textContent = ch;
+  const prize = document.getElementById('trace-prize');
+  prize.textContent = ''; prize.classList.remove('trace-pop');
+  traceHint('Start on the green dot and follow the line');
+  traceResize();
+  markRoundStart();
+  setTimeout(() => speak(`Trace the letter ${ch}`), 250);
+}
+
+function showTraceResult() {
+  S.tracegames++; S.totalGames++;
+  S.readingToday++; S.mathSinceRead = 0;
+  const total = S.traceRounds.length || 8;
+  if (S.traceScore === total) S.traceperfect++;
+  const pct = S.traceScore / total;
+  const prev = advanceLevel('traceLevel', 'traceLevelProg', pct, 3, 0.8, 0.4);
+  S.sessions.unshift({ topic:'Magic Ink', score:`${S.traceScore}/${total}`,
+                       date:new Date().toLocaleDateString(), level:S.traceLevel });
+  if (S.sessions.length > 100) S.sessions.pop();
+  awardCoins(sessionPayout());
+  persist();
+  document.getElementById('trace-result-stars').textContent =
+    pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
+  document.getElementById('trace-result-score').textContent = `${S.traceScore} / ${total}`;
+  document.getElementById('trace-result-msg').textContent =
+    pct === 1 ? 'Beautiful writing! ✍️' : pct >= 0.6 ? 'Lovely letters!' : 'Keep practising!';
+  document.getElementById('trace-level-msg').innerHTML =
+    levelChangeMsg('traceLevel', 'traceLevelProg', prev);
+  sfx('win');
+  showScreen('screen-traceresult');
+  if (pct === 1) setTimeout(spawnConfetti, 250);
+}
+
 // ─── FIX THE SENTENCE (writing conventions) ──────────────────────────────────
 // The 1st-grade writing standards ask for capitalizing dates and names of
 // people and using end punctuation; 2nd grade extends that to using
@@ -8436,6 +8933,7 @@ const QUEST_POOL = [
   { id:'rhyme', icon:'🎵', label:'Find rhymes in Rhyme Time',     check: () => questPlays('Rhyming') >= 1 },
   { id:'sci',   icon:'🔬', label:'Discover in Science Fun',       check: () => questPlays('Science') >= 1 },
   { id:'meas',  icon:'📏', label:'Measure something in Measure Up', check: () => questPlays('Measure Up') >= 1 },
+  { id:'trace', icon:'✍️', label:'Trace letters in Magic Ink', check: () => questPlays('Magic Ink') >= 1 },
   { id:'fix',   icon:'✏️', label:'Fix a sentence',                check: () => questPlays('Fix the Sentence') >= 1 },
   { id:'star',  icon:'⭐', label:'Get a super score in any game', check: questSuperScore },
 ];
@@ -8501,6 +8999,11 @@ function concertTune() {
   [[523,0],[659,.14],[784,.28],[1047,.42],[784,.60],[1047,.74],[1319,.90]]
     .forEach(([f, dt]) => tone(f, t + dt, 0.3, 'triangle', 0.14));
 }
+
+window.addEventListener('resize', () => {
+  const t = document.getElementById('screen-trace');
+  if (t && t.classList.contains('active')) traceResize();
+});
 
 refreshHome();
 maybeCheckin();

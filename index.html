@@ -1658,7 +1658,7 @@
     <div class="quiz-topic-banner" id="quiz-topic-banner"></div>
     <div class="quiz-header-title" style="font-size:20px;font-weight:700;margin-bottom:12px;text-align:center">Quiz time!</div>
     <div class="quiz-meta">
-      <span class="quiz-prog" id="quiz-prog">1 / 3</span>
+      <span class="quiz-prog" id="quiz-prog">1 / 5</span>
     </div>
     <div class="quiz-q" id="quiz-question"></div>
     <div style="text-align:center;margin-bottom:10px"><button class="btn btn-secondary btn-sm" onclick="speakQuizQ()">🔊 Hear the question</button></div>
@@ -2394,20 +2394,90 @@ const SB_WORDS = [
 
 // Phonemes children commonly confuse (similar sound/shape) — used to give a
 // more specific "so close!" hint instead of a generic wrong-answer message.
+// ─── LEVEL 6: R-CONTROLLED VOWELS ("bossy r") ──────────────────────────────
+// The next rung after short vowels, blends, digraphs and silent-e, and the one
+// that unlocks Guided Reading G. Taught in the standard order: ar and or first
+// because their sounds are the most distinct, then er, ir and ur — which all say
+// the same thing and are therefore the hard part.
+const SB_R_WORDS = [
+  { lv:6, word:'car',   phonemes:['c','ar'],       emoji:'🚗' },
+  { lv:6, word:'star',  phonemes:['st','ar'],      emoji:'⭐' },
+  { lv:6, word:'barn',  phonemes:['b','ar','n'],   emoji:'🏚️' },
+  { lv:6, word:'yarn',  phonemes:['y','ar','n'],   emoji:'🧶' },
+  { lv:6, word:'shark', phonemes:['sh','ar','k'],  emoji:'🦈' },
+  { lv:6, word:'corn',  phonemes:['c','or','n'],   emoji:'🌽' },
+  { lv:6, word:'fork',  phonemes:['f','or','k'],   emoji:'🍴' },
+  { lv:6, word:'horn',  phonemes:['h','or','n'],   emoji:'📯' },
+  { lv:6, word:'storm', phonemes:['st','or','m'],  emoji:'⛈️' },
+  { lv:6, word:'her',   phonemes:['h','er'],       emoji:'👧' },
+  { lv:6, word:'fern',  phonemes:['f','er','n'],   emoji:'🌿' },
+  { lv:6, word:'bird',  phonemes:['b','ir','d'],   emoji:'🐦' },
+  { lv:6, word:'girl',  phonemes:['g','ir','l'],   emoji:'👧' },
+  { lv:6, word:'shirt', phonemes:['sh','ir','t'],  emoji:'👕' },
+  { lv:6, word:'turn',  phonemes:['t','ur','n'],   emoji:'🔄' },
+  { lv:6, word:'curl',  phonemes:['c','ur','l'],   emoji:'➰' },
+  { lv:6, word:'surf',  phonemes:['s','ur','f'],   emoji:'🏄' },
+  { lv:6, word:'nurse', phonemes:['n','ur','se'],  emoji:'👩‍⚕️' },
+];
+SB_WORDS.push(...SB_R_WORDS);
+
 const SB_CONFUSE_GROUPS = [
+  // er, ir and ur all say the same sound, so mixing them up is the expected
+  // error at this level rather than a careless one.
+  ['er','ir','ur'], ['ar','or'],
   ['sh','ch','th','wh'], ['a','e','i','o','u'],
   ['b','d'], ['p','q'], ['m','n'], ['f','v'],
   ['ai','ay'], ['ee','ea'], ['oa','oo'],
 ];
 
-const LEVEL_DESC = [
-  '',
-  'age 4-5, very simple 2-3 letter words, 3-4 short sentences total',
-  'age 5-6, simple common words, 4-6 short sentences',
-  'age 6-7, grade 1-2 vocabulary, 6-8 sentences',
-  'age 7-8, grade 2-3 vocabulary, 8-10 sentences',
-  'age 8-9, grade 3-4 vocabulary, 10-12 sentences',
+// ─── GUIDED READING LADDER (E → K) ───────────────────────────────────────────
+// Her school measures her in Guided Reading / DRA levels, so the app should speak
+// that language instead of vague age bands. She flies through E; the goal is K.
+//
+// Lexile is the useful handle because it is driven by just two measurable things —
+// sentence length and word rarity — both of which can be stated as constraints to
+// a generator. The phonics column follows the standard order: r-controlled vowels
+// come after short vowels, blends, digraphs and silent-e, and multisyllabic words
+// and affixes come after that.
+const GR_LEVELS = [ null,
+  { letter:'E', dra:'6/8', lex:[150,174], words:[60,90],   sent:[4,6],
+    phonics:'short vowels, consonant blends, and the common digraphs sh, ch, th, wh',
+    style:'heavy repetition — repeat the same sentence pattern, one simple idea per sentence' },
+  { letter:'F', dra:'10',  lex:[175,199], words:[80,120],  sent:[5,7],
+    phonics:'short vowels, blends, digraphs, and simple silent-e words like cake and ride',
+    style:'some repetition, mostly simple sentences, a clear beginning and ending' },
+  { letter:'G', dra:'12',  lex:[200,274], words:[120,180], sent:[6,8],
+    phonics:'all of the above plus r-controlled vowels (ar, or, er, ir, ur) and simple compound words',
+    style:'less repetition, a few sentences joined with and or but, a little new vocabulary' },
+  { letter:'H', dra:'14',  lex:[275,299], words:[150,220], sent:[6,9],
+    phonics:'all of the above, using r-controlled vowels freely',
+    style:'little repetition, some dialogue, several events in order' },
+  { letter:'I', dra:'16',  lex:[300,349], words:[200,280], sent:[7,10],
+    phonics:'all of the above plus straightforward two-syllable words',
+    style:'no repeated pattern to lean on, varied sentence openings, a character who changes' },
+  { letter:'J', dra:'18',  lex:[350,429], words:[250,350], sent:[8,11],
+    phonics:'all of the above plus multisyllabic words and common prefixes and suffixes (-ing, -ed, -ly, re-, un-)',
+    style:'a short-chapter feel, several linked events, richer vocabulary' },
+  { letter:'K', dra:'20',  lex:[430,449], words:[300,420], sent:[9,12],
+    phonics:'unrestricted within grade 2 vocabulary; multisyllabic words and affixes throughout',
+    style:'a complete short story with a problem and a resolution, varied sentence structure' },
 ];
+const GR_MAX = GR_LEVELS.length - 1;
+function grOf(lv) { return GR_LEVELS[Math.min(Math.max(lv, 1), GR_MAX)]; }
+function grLetter(lv) { return grOf(lv).letter; }
+
+// The constraint block handed to the model. Stating the Lexile number alone does
+// nothing; the word count and sentence ceiling are what actually hold the band.
+function grPrompt(lv) {
+  const g = grOf(lv);
+  return `Guided Reading level ${g.letter} (DRA ${g.dra}), Lexile ${g.lex[0]}-${g.lex[1]}.
+Follow these limits exactly:
+- Total length: ${g.words[0]}-${g.words[1]} words.
+- Keep the average sentence to about ${g.sent[0]} words and never exceed ${g.sent[1]}.
+- Spelling patterns allowed: ${g.phonics}. Avoid words needing patterns beyond this.
+- Style: ${g.style}.
+Lexile rises with longer sentences and rarer words, so prefer short sentences and common, concrete words to stay in band.`;
+}
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 
@@ -2445,6 +2515,7 @@ const DEFAULT_REAL_REWARDS = [
 const S = {
   level:    parseInt(lsGet('rl_level','1')),
   levelProgress: parseInt(lsGet('rl_levelprog','0')),
+  readWeak: parseInt(lsGet('rl_readweak','0')),
   swLevel:  parseInt(lsGet('rl_swlevel','1')),
   swLevelProg: parseInt(lsGet('rl_swlevelprog','0')),
   dnLevel:  parseInt(lsGet('rl_dnlevel','1')),
@@ -2549,6 +2620,14 @@ const S = {
   pinBuf: '',
 };
 
+// One-time: start reading at F. E is her easy level, so beginning below it would
+// just be time spent proving something already known. Guarded so it cannot
+// re-apply and undo a later demotion the app decided on for good reason.
+if (lsGet('rl_grfloor_v1', '') !== '1') {
+  if (S.level < 2) { S.level = 2; lsSet('rl_level', '2'); }
+  lsSet('rl_grfloor_v1', '1');
+}
+
 // Bump math to minimum level 3 (parent-requested baseline)
 if (S.mathLevel < 3) { S.mathLevel = 3; lsSet('rl_mathlevel', '3'); }
 
@@ -2576,6 +2655,7 @@ if (lsGet('rl_unlockreq_v2', '') !== '1') {
 function persist() {
   lsSet('rl_level',    S.level);
   lsSet('rl_levelprog',S.levelProgress);
+  lsSet('rl_readweak', S.readWeak);
   lsSet('rl_swlevel',  S.swLevel);
   lsSet('rl_swlevelprog', S.swLevelProg);
   lsSet('rl_dnlevel',  S.dnLevel);
@@ -2723,9 +2803,9 @@ function progDots(progKey) {
   return `<span class="hc-dots">${dots}</span>`;
 }
 
-function homeSub(lv, topic, progKey) {
+function homeSub(lv, topic, progKey, label) {
   const n = playedToday(topic);
-  return `Lv. ${lv}` + (n ? ` · ${n} today` : '') + progDots(progKey);
+  return `Lv. ${label || lv}` + (n ? ` · ${n} today` : '') + progDots(progKey);
 }
 
 // ─── HOME VISUAL FX: animated sky + 3D tilt cards ───────────────────────────
@@ -3184,7 +3264,7 @@ function refreshHome() {
   // A notable streak gets celebrated in the greeting line, not just the corner pill.
   _greetingHTML = S.streak >= 3 ? `🔥 <b>${S.streak}-day streak!</b> Keep it going, Juliana!` : greet;
   document.getElementById('home-greeting').innerHTML = _greetingHTML;
-  document.getElementById('home-reading-level').innerHTML = homeSub(S.level,      'Stories',      'levelProgress');
+  document.getElementById('home-reading-level').innerHTML = homeSub(S.level,      'Stories',      'levelProgress', grLetter(S.level));
   document.getElementById('home-sw-level').innerHTML      = homeSub(S.swLevel,    'Sight Words',  'swLevelProg');
   document.getElementById('home-dn-level').innerHTML      = homeSub(S.dnLevel,    'Daily News',   'dnLevelProg');
   document.getElementById('home-math-level').innerHTML    = homeSub(S.mathLevel,  'Math Time',    'mathLevelProg');
@@ -3267,19 +3347,27 @@ function retryStory() {
   else showScreen('screen-home');
 }
 
+// One card per rung of the Guided Reading ladder. The letter is named on each so
+// it matches what her school sends home.
 const READING_LEVEL_INTROS = {
-  2: { emoji:'📘', headline:'A Bit Longer!',
-       visual:'4-6 sentences',
-       body:"Stories now have a few more sentences. Take your time — you've got this!" },
-  3: { emoji:'📗', headline:'Bigger Words!',
-       visual:'6-8 sentences',
-       body:"Stories use grade 1-2 words now. Tap any word you're not sure of to hear it!" },
-  4: { emoji:'📙', headline:'Longer Stories!',
-       visual:'8-10 sentences',
-       body:"You're reading longer stories with richer vocabulary now. Great progress!" },
-  5: { emoji:'📕', headline:'Chapter-Book Level!',
-       visual:'10-12 sentences',
-       body:"These are your longest, most advanced stories yet. You're a super reader!" },
+  2: { emoji:'📘', headline:'Level F!',
+       visual:'F',
+       body:"A bit longer than E, with some silent-e words like cake and ride. Take your time." },
+  3: { emoji:'📗', headline:'Level G — Bossy R!',
+       visual:'G',
+       body:"Now you'll meet words like car, bird and corn, where r changes the vowel sound." },
+  4: { emoji:'📙', headline:'Level H!',
+       visual:'H',
+       body:"Longer stories with more happening, and characters who talk to each other." },
+  5: { emoji:'📒', headline:'Level I!',
+       visual:'I',
+       body:"No repeated patterns to lean on now — and two-syllable words start showing up." },
+  6: { emoji:'📕', headline:'Level J!',
+       visual:'J',
+       body:"These feel like little chapters. Watch for word endings like -ing and -ed." },
+  7: { emoji:'🏆', headline:'Level K — 2nd Grade!',
+       visual:'K',
+       body:"This is second-grade reading. Full stories with a problem and an ending. Amazing!" },
 };
 
 function showReadingIntro(lv) {
@@ -3367,18 +3455,25 @@ async function fetchStory(topic, level) {
   // Question mix is pinned to the school's comprehension standards: 1st grade
   // retells character/setting/events and finds details in nonfiction; 2nd grade
   // summarizes with key details and uses text features.
-  const askFiction = `The 3 questions MUST be one of each, in this order:
+  const askFiction = `The 5 questions MUST be one of each, in this order:
 1. A CHARACTER question (who the story is about, or how a character feels).
-2. A SETTING or EVENTS question (where it happens, or what happened first/next/last).
-3. A "what is this story mainly about?" main-idea question.`;
-  const askNonfiction = `The 3 questions MUST be one of each, in this order:
+2. A SETTING question (where or when it happens).
+3. An EVENTS question (what happened first, next or last).
+4. A WORD question (what a particular word in the story means).
+5. A "what is this story mainly about?" main-idea question.`;
+  const askNonfiction = `The 5 questions MUST be one of each, in this order:
 1. A KEY DETAIL question (a specific true fact stated in the text).
 2. A second KEY DETAIL question about a different fact.
-3. A "what is this mostly about?" main-idea question.`;
+3. A third KEY DETAIL question about a different fact again.
+4. A WORD question (what a particular word in the passage means).
+5. A "what is this mostly about?" main-idea question.`;
 
   const askBody = topic.nonfiction
-    ? `Write a short TRUE nonfiction passage for children about "${topic.name}" (${topic.sub}) for a child at reading level: ${LEVEL_DESC[level]}. Use only real, accurate facts — no made-up characters or story plot. Write it like a page from a kids' nonfiction book: start by naming the topic, then give several clear facts about it.`
-    : `Write a short children's reading story about "${topic.name}" (${topic.sub}) for a child at reading level: ${LEVEL_DESC[level]}.${heroLine}`;
+    ? `Write a short TRUE nonfiction passage for children about "${topic.name}" (${topic.sub}) at this reading level:
+${grPrompt(level)}
+Use only real, accurate facts — no made-up characters or story plot. Write it like a page from a kids' nonfiction book: start by naming the topic, then give several clear facts about it.`
+    : `Write a short children's reading story about "${topic.name}" (${topic.sub}) at this reading level:
+${grPrompt(level)}${heroLine}`;
 
   const prompt = `${askBody}
 
@@ -3389,11 +3484,13 @@ Return ONLY valid JSON, no markdown, no code fences:
   "questions": [
     {"q": "Question?", "choices": ["A","B","C","D"], "answer": 0},
     {"q": "Question?", "choices": ["A","B","C","D"], "answer": 2},
-    {"q": "Question?", "choices": ["A","B","C","D"], "answer": 1}
+    {"q": "Question?", "choices": ["A","B","C","D"], "answer": 1},
+    {"q": "Question?", "choices": ["A","B","C","D"], "answer": 3},
+    {"q": "Question?", "choices": ["A","B","C","D"], "answer": 0}
   ]
 }
 ${topic.nonfiction ? askNonfiction : askFiction}
-Rules: must be engaging and age-appropriate. All 3 questions must be answerable from the text alone. "answer" is the 0-based index of the correct choice. Keep choices short (2-5 words). Return raw JSON only.`;
+Rules: must be engaging and age-appropriate. All 5 questions must be answerable from the text alone. "answer" is the 0-based index of the correct choice. Keep choices short (2-5 words). Return raw JSON only.`;
 
   const h = window.location.hostname;
   const hasLocalProxy = h.endsWith('.vercel.app') || h.endsWith('.pages.dev');
@@ -3410,7 +3507,7 @@ Rules: must be engaging and age-appropriate. All 3 questions must be answerable 
     headers,
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
+      max_tokens: 1600,
       messages: [{ role: 'user', content: prompt }],
     }),
   });
@@ -3433,8 +3530,8 @@ function renderReading() {
     return `<span class="word" data-i="${i}" data-w="${clean}" onclick="tapWord(this)">${esc(w)} </span>`;
   }).join('');
   const st = document.getElementById('story-text');
-  st.style.fontSize   = S.level <= 2 ? '26px' : '23px';
-  st.style.lineHeight = S.level <= 2 ? '2.5'  : '2.3';
+  st.style.fontSize   = S.level <= 2 ? '26px' : S.level <= 4 ? '24px' : '22px';
+  st.style.lineHeight = S.level <= 2 ? '2.5'  : S.level <= 4 ? '2.35' : '2.2';
   document.getElementById('quiz-btn-wrap').style.display = '';
   document.getElementById('quiz-section').style.display = 'none';
   document.getElementById('quiz-section').classList.remove('quiz-sticky');
@@ -3739,6 +3836,23 @@ function flashBest(el) {
 // is kept only where something is actually being explained.
 const DELAY = { correct: 700, wrong: 1400, teach: 2100 };
 
+// Reading gets its own wrapper because its instrument is the weakest in the app:
+// a five-question comprehension quiz standing in for what is really a decoding
+// and fluency construct. Going up is normal, but one weak session is far more
+// likely a distracted morning than a level genuinely too hard, so a demotion
+// needs two in a row. Without this, a score of 1/5 — which is exactly the
+// expected result of guessing at four choices — would cost her a rung every time.
+function advanceReadingLevel(pct) {
+  if (pct >= 0.4) {
+    S.readWeak = 0;
+    return advanceLevel('level', 'levelProgress', pct, GR_MAX, 0.8, 0.4);
+  }
+  S.readWeak = (S.readWeak || 0) + 1;
+  if (S.readWeak < 2) return S.level;          // first strike: hold the level
+  S.readWeak = 0;
+  return advanceLevel('level', 'levelProgress', pct, GR_MAX, 0.8, 0.4);
+}
+
 function advanceLevel(levelKey, progKey, pct, maxLv, upThresh, downThresh) {
   maxLv     = maxLv     || 5;
   upThresh  = upThresh  || 0.9;
@@ -3867,7 +3981,7 @@ function showResult() {
   if (!S.topics.includes(tid)) S.topics.push(tid);
   if (pct === 1) S.perfect++;
 
-  const prevLevel = advanceLevel('level', 'levelProgress', pct);
+  const prevLevel = advanceReadingLevel(pct);
 
   S.sessions.unshift({ topic: S.topic.name, score:`${score}/${total}`, date: new Date().toLocaleDateString(), level: S.level });
   if (S.sessions.length > 100) S.sessions.pop();
@@ -4098,7 +4212,8 @@ function renderParentCorner() {
   document.getElementById('pc-streak').textContent    = `${S.streak} day${S.streak !== 1 ? 's' : ''}`;
   Object.keys(LEVEL_EL_IDS).forEach(k => {
     const el = document.getElementById(LEVEL_EL_IDS[k]);
-    if (el) el.innerHTML = `Lv. ${S[k]}${gradeTag(k, S[k])}`;
+    const shown = k === 'level' ? grLetter(S[k]) : S[k];
+    if (el) el.innerHTML = `Lv. ${shown}${gradeTag(k, S[k])}`;
   });
   document.getElementById('pc-watch-status').textContent = S.watchEarned ? `Earned ${S.watchEarned}` : `${S.watchPieces.length}/5 pieces`;
   const mb = document.getElementById('pc-music-btn');
@@ -4135,13 +4250,13 @@ function renderParentCorner() {
 // so the Parent Corner can answer "where is she relative to school?" directly.
 // `bands` entries are [highestLevelInBand, label], checked in order.
 const GRADE_BANDS = {
-  level:        { name:'📖 Reading Stories',  bands:[[1,'Pre-K–K'],[2,'Grade 1'],[3,'Grade 1–2'],[4,'Grade 2–3'],[5,'Grade 3–4']] },
+  level:        { name:'📖 Reading Stories',  bands:[[6,'Grade 1'],[7,'Grade 2']] },
   swLevel:      { name:'🎮 Sight Words',      bands:[[2,'Grade 1'],[3,'Grade 1–2'],[5,'Grade 2']] },
   dnLevel:      { name:'📰 Daily News',       bands:[[2,'Grade 1'],[3,'Grade 1–2'],[5,'Grade 2']] },
   mathLevel:    { name:'🔢 Math Time',        bands:[[2,'Kindergarten'],[6,'Grade 1'],[15,'Grade 2'],[16,'Grade 3 ready']] },
-  sbLevel:      { name:'📦 Sound Boxes',      bands:[[2,'Grade 1'],[5,'Grade 1–2'],[6,'Grade 2']] },
+  sbLevel:      { name:'📦 Sound Boxes',      bands:[[2,'Grade 1'],[5,'Grade 1–2'],[7,'Grade 2']] },
   clockLevel:   { name:'🕐 Clock Time',       bands:[[2,'Grade 1'],[4,'Grade 2']] },
-  spellLevel:   { name:'🔤 Build a Word',     bands:[[1,'Grade 1'],[2,'Grade 1–2'],[4,'Grade 2']] },
+  spellLevel:   { name:'🔤 Build a Word',     bands:[[1,'Grade 1'],[3,'Grade 1–2'],[6,'Grade 2']] },
   measureLevel: { name:'📏 Measure Up',       bands:[[2,'Grade 1'],[4,'Grade 2']] },
   fixLevel:     { name:'✏️ Fix the Sentence', bands:[[1,'Grade 1'],[3,'Grade 1–2']] },
   traceLevel:   { name:'✍️ Magic Ink',       bands:[[1,'Pre-K–K'],[2,'Grade 1'],[3,'Grade 1–2']] },
@@ -4172,11 +4287,13 @@ function gradeTag(levelKey, lv) {
 function renderGradeMap() {
   document.getElementById('pc-grade-map').innerHTML = Object.keys(GRADE_BANDS).map(k => {
     const lv = S[k], cap = LEVEL_CAPS[k] || 5;
+    // Reading is reported as its Guided Reading letter so it lines up with school.
+    const shown = k === 'level' ? `${grLetter(lv)} (${lv}/${cap})` : `Lv. ${lv}/${cap}`;
     const label = gradeBandFor(k, lv);
     const [bg, fg] = GRADE_COLORS[label] || ['#f1f5f9','#475569'];
     return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
       <span style="flex:1;font-size:13px;font-weight:800;color:var(--text)">${GRADE_BANDS[k].name}</span>
-      <span style="font-size:12px;font-weight:800;color:var(--muted)">Lv. ${lv}/${cap}</span>
+      <span style="font-size:12px;font-weight:800;color:var(--muted)">${shown}</span>
       <span style="background:${bg};color:${fg};font-size:11px;font-weight:900;padding:3px 8px;border-radius:8px;white-space:nowrap">${label}</span>
     </div>`;
   }).join('');
@@ -4276,7 +4393,7 @@ function renderStandards() {
      </div>` + html;
 }
 
-const LEVEL_CAPS = { mathLevel:16, clockLevel:4, sbLevel:6, spellLevel:4, measureLevel:4, fixLevel:3, traceLevel:3 };
+const LEVEL_CAPS = { level:7, mathLevel:16, clockLevel:4, sbLevel:7, spellLevel:6, measureLevel:4, fixLevel:3, traceLevel:3 };
 const LEVEL_EL_IDS = {
   level:'pc-level', swLevel:'pc-sw-level', dnLevel:'pc-dn-level', mathLevel:'pc-math-level',
   sbLevel:'pc-sb-level', clockLevel:'pc-clock-level', spellLevel:'pc-spell-level',
@@ -4293,7 +4410,8 @@ function setGameLevel(levelKey, progKey, delta) {
   persist();
   refreshHome();
   const el = document.getElementById(LEVEL_EL_IDS[levelKey]);
-  if (el) el.innerHTML = `Lv. ${next}${gradeTag(levelKey, next)}`;
+  const shown = levelKey === 'level' ? grLetter(next) : next;
+  if (el) el.innerHTML = `Lv. ${shown}${gradeTag(levelKey, next)}`;
 }
 
 function setDailyGoal(delta) {
@@ -4583,11 +4701,11 @@ const DN_TOPIC_NAMES = {
 
 async function fetchDnArticles(topic) {
   const levelDesc = [
-    '', 'beginner (very simple words, very short sentences)',
-    'early reader (simple words, short sentences)',
-    'developing reader (common words, 2 short sentences)',
-    'confident reader (varied vocabulary, 2 clear sentences)',
-    'advanced reader (rich vocabulary, 2-3 sentences)',
+    '', 'Guided Reading E (very simple words, sentences of 4-6 words)',
+    'Guided Reading F-G (simple words, sentences of 5-7 words)',
+    'Guided Reading H (common words, 2 sentences of about 7 words)',
+    'Guided Reading I-J (varied vocabulary, 2 sentences of about 9 words)',
+    'Guided Reading K (richer vocabulary, 2-3 sentences of about 10 words)',
   ][Math.min(S.dnLevel, 5)];
   const topicName = DN_TOPIC_NAMES[topic];
   const topicLine = topicName
@@ -4597,7 +4715,7 @@ async function fetchDnArticles(topic) {
   const comprehensionFields = wantsComprehension
     ? `\n- "q": a simple question about what happened in the story (e.g. "What did the fox find?")\n- "choices": an array of exactly 3 short answer options (strings), only one correct\n- "correctIndex": the 0-based index of the correct option in "choices"`
     : '';
-  const prompt = `Create 3 short fictional fun news stories for a ${levelDesc} child aged 6. ${topicLine}
+  const prompt = `Create 3 short fictional fun news stories for a child reading at ${levelDesc}. ${topicLine}
 Return ONLY a JSON array with exactly 3 objects. Each object must have:
 - "text": 2-3 fun sentences in normal sentence case (capitalize only the first word of each sentence and proper nouns, no all-caps words)
 - "l1": a single lowercase letter appearing 2-5 times in text
@@ -6833,8 +6951,11 @@ const SB_LEVEL_INTROS = {
   5: { emoji:'✨', headline:'Tricky Teams!',
        visual:'night = n-igh-t',
        body:'Some sound teams use THREE letters for one sound, like igh in "night" — it says /ī/!' },
-  6: { emoji:'🕵️', headline:'Spelling Detective!',
-       visual:'c-a-t  + 2 tricky tiles',
+  6: { emoji:'🚗', headline:'Bossy R!',
+       visual:'car = c-ar',
+       body:'When r follows a vowel it bosses it around — ar, or, er, ir, ur. In "car", a and r share ONE box!' },
+  7: { emoji:'🕵️', headline:'Spelling Detective!',
+       visual:'c-ar  + 2 tricky tiles',
        body:"Now a few extra tiles sneak in that don't belong. Listen carefully and pick only the sounds you need!" },
 };
 
@@ -6868,8 +6989,17 @@ function startSbGame() {
 function startSbGameNow() {
   resetEarn();
   // L6 reuses the full word pool but adds distractor tiles in renderSbRound.
-  const lv = Math.min(sessionLevel(S.sbLevel, 6), 5);
-  const pool = SB_WORDS.filter(w => w.lv <= lv);
+  const lv = Math.min(sessionLevel(S.sbLevel, 7), 6);   // 7 reuses 6's pool with distractor tiles
+  // A level has to mostly practise its OWN skill. With a purely cumulative pool
+  // the new rung drowns: level 6's eighteen r-controlled words are 14% of 129,
+  // so she would meet "bossy r" about once a session and never actually learn it.
+  // Weighted roughly 60/40 in favour of the current level, with earlier levels
+  // still present as review on top of what deckWithReview already schedules.
+  const atLevel = SB_WORDS.filter(w => w.lv === lv);
+  const below   = SB_WORDS.filter(w => w.lv <  lv);
+  const pool = atLevel.length
+    ? [...atLevel, ...shuf(below).slice(0, Math.round(atLevel.length * 0.6))]
+    : SB_WORDS.filter(w => w.lv <= lv);
   S.sbWords    = deckWithReview(pool, 8, 'sb', w => `sb:${w.word}`);
   S.sbIdx      = 0;
   S.sbScore    = 0;
@@ -6889,7 +7019,7 @@ function renderSbRound() {
   S.sbBlendIdx    = 0;
   S.sbBoxes       = new Array(w.phonemes.length).fill(null);
   let tiles = [...w.phonemes];
-  if (S.sbLevel >= 6) {
+  if (S.sbLevel >= 7) {
     // Spelling mode: mix in sounds that don't belong so she has to pick,
     // not just arrange.
     const inventory = ['s','t','p','n','m','d','b','f','l','r','g','w','k',
@@ -6915,7 +7045,7 @@ function renderSbRound() {
     `<button class="sb-tile" id="sb-tile-${i}" onclick="selectSbTile(${i})">${p}</button>`
   ).join('');
 
-  document.getElementById('sb-hint').textContent = S.sbLevel >= 6
+  document.getElementById('sb-hint').textContent = S.sbLevel >= 7
     ? "Careful — some tiles don't belong! Tap a tile, then a box ↑"
     : 'Tap a sound tile, then tap a box ↑';
 
@@ -7053,7 +7183,7 @@ function showSbResult() {
   const total = S.sbWords.length;
   if (S.sbScore === total) S.sbperfect++;
   const pct       = S.sbScore / total;
-  const prevLevel = advanceLevel('sbLevel', 'sbLevelProg', pct, 6);
+  const prevLevel = advanceLevel('sbLevel', 'sbLevelProg', pct, 7);
   const newB      = awardAll();
   S.sessions.unshift({ topic: 'Sound Boxes', score: `${S.sbScore}/${total}`, date: new Date().toLocaleDateString(), level: S.sbLevel });
   if (S.sessions.length > 100) S.sessions.pop();
@@ -7426,6 +7556,36 @@ const SPELL_WORDS = {
   // Level 4 — long vowels (magic e). Spelling these puts the silent e to work.
   4: [['cake','🎂'],['bike','🚲'],['rose','🌹'],['kite','🪁'],['cube','🧊'],['note','🎵'],['game','🎮'],['home','🏠'],['five','5️⃣'],['mule','🐴'],['bone','🦴'],['nose','👃']],
 };
+
+// ─── LEVEL 5: COMPOUND WORDS ─────────────────────────────────────────────────
+// Two words she can already read, joined. This is the first step into
+// multisyllabic reading and it needs no new decoding — which is the point.
+const COMPOUND_WORDS = [
+  { a:'sun',  b:'set',   emoji:'🌅' }, { a:'cup',  b:'cake',  emoji:'🧁' },
+  { a:'rain', b:'bow',   emoji:'🌈' }, { a:'snow', b:'man',   emoji:'⛄' },
+  { a:'pop',  b:'corn',  emoji:'🍿' }, { a:'back', b:'pack',  emoji:'🎒' },
+  { a:'bed',  b:'room',  emoji:'🛏️' }, { a:'foot', b:'ball',  emoji:'⚽' },
+  { a:'tooth',b:'brush', emoji:'🪥' }, { a:'star', b:'fish',  emoji:'⭐' },
+  { a:'rain', b:'coat',  emoji:'🧥' }, { a:'butter',b:'fly',  emoji:'🦋' },
+];
+
+// ─── LEVEL 6: PREFIXES AND SUFFIXES ──────────────────────────────────────────
+// The last rung before Guided Reading K. She picks the ending or beginning that
+// makes the word the picture shows.
+const AFFIX_WORDS = [
+  { base:'jump', affix:'ing', word:'jumping', pos:'end',   emoji:'🦘', hint:'doing it right now' },
+  { base:'play', affix:'ed',  word:'played',  pos:'end',   emoji:'🎲', hint:'it already happened' },
+  { base:'help', affix:'ing', word:'helping', pos:'end',   emoji:'🤝', hint:'doing it right now' },
+  { base:'slow', affix:'ly',  word:'slowly',  pos:'end',   emoji:'🐌', hint:'how it is done' },
+  { base:'quick',affix:'ly',  word:'quickly', pos:'end',   emoji:'⚡', hint:'how it is done' },
+  { base:'paint',affix:'ed',  word:'painted', pos:'end',   emoji:'🎨', hint:'it already happened' },
+  { base:'kind', affix:'un',  word:'unkind',  pos:'start', emoji:'😠', hint:'the opposite' },
+  { base:'happy',affix:'un',  word:'unhappy', pos:'start', emoji:'😢', hint:'the opposite' },
+  { base:'lock', affix:'un',  word:'unlock',  pos:'start', emoji:'🔓', hint:'the opposite' },
+  { base:'read', affix:'re',  word:'reread',  pos:'start', emoji:'📖', hint:'do it again' },
+  { base:'fill', affix:'re',  word:'refill',  pos:'start', emoji:'🥤', hint:'do it again' },
+  { base:'help', affix:'ful', word:'helpful', pos:'end',   emoji:'😇', hint:'full of it' },
+];
 // "Change short and long vowel sounds to make new words" — swap one vowel and
 // the whole word changes.
 const VOWEL_SWAPS = [
@@ -7458,7 +7618,13 @@ const VOWEL_SORT = [
 function startSpellGameChoose() { chooseDifficulty(S.spellLevel, startSpellGame); }
 function startSpellGame() {
   resetEarn();
-  if (sessionLevel(S.spellLevel, 4) >= 4) {
+  const slv = sessionLevel(S.spellLevel, 6);
+  if (slv >= 6) {
+    // Affixes: the rung that unlocks Guided Reading J-K.
+    S.spellRounds = shuf([...AFFIX_WORDS]).slice(0, 8).map(o => ({ kind:'affix', ...o }));
+  } else if (slv === 5) {
+    S.spellRounds = shuf([...COMPOUND_WORDS]).slice(0, 8).map(o => ({ kind:'compound', ...o }));
+  } else if (slv >= 4) {
     // Vowel Power: spelling long-vowel words, swapping vowels to make new
     // words, and telling short from long — the three 1st-grade vowel skills.
     S.spellRounds = shuf([
@@ -7467,15 +7633,17 @@ function startSpellGame() {
       ...shuf([...VOWEL_SORT]).slice(0, 2).map(o => ({ kind:'sortv', ...o })),
     ]);
   } else {
-    const pool = SPELL_WORDS[sessionLevel(S.spellLevel, 4)] || SPELL_WORDS[1];
+    const pool = SPELL_WORDS[slv] || SPELL_WORDS[1];
     const picks = deckWithReview(pool, 8, 'spell', ([w]) => `spell:${w}`);
     while (picks.length < 8) picks.push(pool[randInt(0, pool.length - 1)]);
     S.spellRounds = picks.map(([word, emoji]) => ({ kind:'spell', word, emoji }));
   }
   S.spellIdx = 0; S.spellScore = 0;
   showScreen('screen-spell');
-  mascotSay(S.spellLevel >= 4 ? 'Vowel power! Listen closely to the middle sound.'
-                              : 'Spell the word! Listen and tap the letters.');
+  mascotSay(slv >= 6 ? 'Add the beginning or ending that fits!'
+           : slv === 5 ? 'Join two words to make one big word!'
+           : slv >= 4  ? 'Vowel power! Listen closely to the middle sound.'
+                       : 'Spell the word! Listen and tap the letters.');
   renderSpellRound();
 }
 function renderSpellRound() {
@@ -7514,6 +7682,42 @@ function renderSpellRound() {
     slotsEl.innerHTML = '';
     tilesEl.innerHTML = [['SHORT', 0], ['LONG', 1]].map(([label, v]) =>
       `<button class="sb-tile" style="width:auto;padding:0 18px;font-size:18px" onclick="answerVowelSort(${v})">${label}</button>`).join('');
+    setTimeout(() => speak(r.word), 350);
+    return;
+  }
+
+  if (r.kind === 'compound') {
+    S.spellTarget = r.a + r.b;
+    document.getElementById('spell-emoji').textContent = r.emoji;
+    promptEl.style.display = '';
+    promptEl.innerHTML = `Which two words make <b>${(r.a + r.b).toUpperCase()}</b>?`;
+    clearRow.style.display = 'none';
+    slotsEl.innerHTML = [r.a, r.b].map((w, i) =>
+      `<div class="sb-box" id="cw-slot-${i}" style="width:auto;min-width:72px;padding:0 10px;font-size:19px"></div>`).join('');
+    // Two real parts plus four decoys drawn from other compounds.
+    const decoys = shuf(COMPOUND_WORDS.filter(c => c.a !== r.a && c.b !== r.b))
+                     .slice(0, 2).flatMap(c => [c.a, c.b]);
+    tilesEl.innerHTML = shuf([r.a, r.b, ...decoys]).map(w =>
+      `<button class="sb-tile" style="width:auto;padding:0 12px;font-size:16px" onclick="answerCompound('${w}')">${w}</button>`).join('');
+    setTimeout(() => speak(`${r.a} ${r.b}. ${r.a}${r.b}`), 350);
+    return;
+  }
+  if (r.kind === 'affix') {
+    S.spellTarget = r.word;
+    document.getElementById('spell-emoji').textContent = r.emoji;
+    promptEl.style.display = '';
+    promptEl.innerHTML = r.pos === 'end'
+      ? `Add an ending to <b>${r.base.toUpperCase()}</b> — ${r.hint}.`
+      : `Add a beginning to <b>${r.base.toUpperCase()}</b> — ${r.hint}.`;
+    clearRow.style.display = 'none';
+    slotsEl.innerHTML = r.pos === 'end'
+      ? `<div class="sb-box sb-filled" style="width:auto;padding:0 10px;font-size:19px">${r.base}</div>
+         <div class="sb-box" id="af-slot" style="width:auto;min-width:60px;padding:0 10px;font-size:19px"></div>`
+      : `<div class="sb-box" id="af-slot" style="width:auto;min-width:60px;padding:0 10px;font-size:19px"></div>
+         <div class="sb-box sb-filled" style="width:auto;padding:0 10px;font-size:19px">${r.base}</div>`;
+    const all = ['ing','ed','ly','ful','un','re'];
+    tilesEl.innerHTML = shuf([r.affix, ...shuf(all.filter(a => a !== r.affix)).slice(0, 3)]).map(a =>
+      `<button class="sb-tile" style="width:auto;padding:0 14px;font-size:17px" onclick="answerAffix('${a}')">${a}</button>`).join('');
     setTimeout(() => speak(r.word), 350);
     return;
   }
@@ -7566,6 +7770,56 @@ function answerVowelSwap(ch) {
     speak(r.to);
   }
 }
+function answerCompound(w) {
+  const r = S.spellRounds[S.spellIdx];
+  if (S.spellBuilt.length >= 2) return;
+  const want = S.spellBuilt.length === 0 ? r.a : r.b;
+  const fb = document.getElementById('spell-feedback');
+  if (w !== want) {
+    S.spellRetried = true;
+    fb.textContent = S.spellBuilt.length === 0 ? 'Which word comes first?' : 'Which word comes second?';
+    fb.className = 'dn-feedback wrong';
+    sfx('wrong');
+    return;
+  }
+  const slot = document.getElementById(`cw-slot-${S.spellBuilt.length}`);
+  if (slot) { slot.textContent = w; slot.classList.add('sb-filled'); }
+  S.spellBuilt.push(w);
+  sfx('tap');
+  if (S.spellBuilt.length < 2) return;
+  document.querySelectorAll('#spell-tiles .sb-tile').forEach(b => b.disabled = true);
+  document.querySelectorAll('#spell-slots .sb-box').forEach(b => b.classList.add('sb-correct'));
+  fb.innerHTML = `Yes! <strong style="font-size:1.3em">${(r.a + r.b).toUpperCase()}</strong> 🌟`;
+  fb.className = 'dn-feedback correct';
+  setTimeout(() => speak(r.a + r.b), 250);
+  scoreSpellItem(`compound:${r.a}${r.b}`, document.getElementById('spell-emoji'));
+  nextSpellRound();
+}
+
+function answerAffix(a) {
+  const r = S.spellRounds[S.spellIdx];
+  if (S.spellBuilt.length) return;
+  const fb = document.getElementById('spell-feedback');
+  if (a !== r.affix) {
+    S.spellRetried = true;
+    fb.textContent = 'Not that one — listen to the word again!';
+    fb.className = 'dn-feedback wrong';
+    sfx('wrong');
+    speak(r.word);
+    return;
+  }
+  S.spellBuilt = [a];
+  const slot = document.getElementById('af-slot');
+  if (slot) { slot.textContent = a; slot.classList.add('sb-filled'); }
+  document.querySelectorAll('#spell-tiles .sb-tile').forEach(b => b.disabled = true);
+  document.querySelectorAll('#spell-slots .sb-box').forEach(b => b.classList.add('sb-correct'));
+  fb.innerHTML = `Yes! <strong style="font-size:1.3em">${r.word.toUpperCase()}</strong> 🌟`;
+  fb.className = 'dn-feedback correct';
+  setTimeout(() => speak(r.word), 250);
+  scoreSpellItem(`affix:${r.word}`, document.getElementById('spell-emoji'));
+  nextSpellRound();
+}
+
 function answerVowelSort(v) {
   const r = S.spellRounds[S.spellIdx];
   if (S.spellBuilt.length) return;
@@ -7633,7 +7887,7 @@ function showSpellResult() {
   const total = S.spellRounds.length || 8;
   if (S.spellScore === total) S.spellperfect++;
   const pct = S.spellScore / total;
-  const prev = advanceLevel('spellLevel', 'spellLevelProg', pct, 4);
+  const prev = advanceLevel('spellLevel', 'spellLevelProg', pct, 6);
   S.sessions.unshift({ topic: 'Spelling', score: `${S.spellScore}/${total}`, date: new Date().toLocaleDateString(), level: S.spellLevel });
   if (S.sessions.length > 100) S.sessions.pop();
   awardCoins(sessionPayout());
